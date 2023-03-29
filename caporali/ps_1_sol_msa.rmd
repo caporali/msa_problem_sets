@@ -1,0 +1,190 @@
+---
+title: "Problem Set 1"
+author: "Basilico Eleonora, Caporali Francesco, Malgieri Luigi Maria"
+date: '`r Sys.setlocale("LC_TIME", "English"); format(Sys.time(), "%d %B %Y")`'
+output:
+    pdf_document:
+        latex_engine: pdflatex
+        includes:
+            in_header: files/preamble.tex
+        extra_dependencies:
+            inputenc: ["utf8"]
+            fontenc: ["T1"]
+            dsfont: null
+            cancel: null
+            mathtools: null
+            amsmath: null
+            amsfonts: null
+            amsthm: null
+            lipsum: null
+            setspace: null
+    documentclass: article
+    fontsize: 11pt
+    geometry: margin = 2cm
+    header-includes:
+    - \newcommand{\indicator}{\mathds{1}}
+    - \newcommand{\mean}[1]{\mathbb{E}\left[#1\right]}
+    - \newcommand{\var}[1]{\operatorname{Var}\left(#1\right)}
+    - \newcommand{\cov}[2]{\operatorname{Cov}\left(#1,#2\right)}
+    - \newcommand{\corr}[2]{\operatorname{Corr}\left(#1,#2\right)}
+    - \renewcommand{\det}[1]{\operatorname{det}\left(#1\right)}
+    - \newcommand{\real}{\mathbb{R}}
+    - \newcommand{\prob}[1]{\mathbb{P}\left(#1\right)}
+    - \newcommand{\deq}{\stackrel{\text{def}}{=}}
+    - \newcommand{\convp}{\xrightarrow{\prob}}
+    - \renewcommand{\epsilon}{\varepsilon}
+    - \renewcommand{\labelitemi}{\normalfont\bfseries\textendash}
+    - \newcommand{\smallskipm}{\vspace{-12pt}}
+    - \newcommand{\spectrum}[1]{\operatorname{Sp}\left(#1\right)}
+    - \newcommand{\rank}[1]{\operatorname{rank}\left(#1\right)}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(message = F, warning = F)
+
+# pretty print data frames
+library(lemon)
+```
+
+<!-- 
+```{r, render = lemon_print}
+st = as.data.frame(state.x77)
+head(st)
+``` 
+-->
+
+# Exercise 2
+
+## 2.1
+
+Let first note that $\Sigma$ is invertible since $\det{\Sigma} = -2\rho^3 - 3\rho^2 + 1$ which is greater than $0$, $\forall p \in \left[-1, \frac{1}{2}\right]$. \newline
+We compute the inverse of $\Sigma$ by exploiting the identity 
+	\[
+		\Sigma = (1 + \rho)I - \rho aa^T \text{ with } a = (1, 1, -1)
+	\]
+and applying the following theorem, known as the Neumann Series Theorem:
+\begin{thm}[Neumann Series]
+	Let $T$ be a linear mapping $T: \real^n \to \real^n$. If the series $\sum_{i = 0}^{\infty} T^i$ converges, then $I - T$ is invertible and it holds
+		\[
+			(I - T)^{-1} = \sum_{i = 0}^{\infty} T^i.
+		\]
+\end{thm}
+First we rewrite 
+	\[
+		\Sigma = (1 + \rho)(I - c aa^T) \text{ with } a = (1, 1, -1) \text{ and } c = \frac{\rho}{1 + \rho}.
+	\]
+Let $A \deq I - c aa^T$, it holds
+	\begin{align*}
+		A^{-1} & = (I - c aa^T)^{-1} = \sum_{i = 0}^{\infty} (c aa^T)^i = \\
+			& = \sum_{i = 0}^{\infty} c^i (aa^T)^i = I + \sum_{i = i}^{\infty} c^i (\|a\|^2)^{i - 1} aa^T = \\
+			& = I + c aa^T \sum_{i = 0}^{\infty} (c \|a\|^2)^{i - 1} = I + c aa^T \sum_{i = i}^{\infty} (c \|a\|^2)^i = \\
+			& = I + c aa^T \frac{1}{1 - c \|a\|^2} = I + \frac{p}{1 + p} \frac{1}{1 - 3\frac{p}{1 + p}} aa^T = \\
+			& = I + \frac{p}{1 - 2p} aa^T.
+	\end{align*}
+Thus 
+	\[
+		\Sigma^{-1} = (1 + \rho)^{-1} A^{-1} = \frac{1}{1 + \rho}(I + \frac{p}{1 - 2p} aa^T).
+	\]
+We can compute $\Sigma^{-1}$ also in many other ways, for example we can suppose that $\Sigma^{-1}$ is of the same form $\Sigma$, i.e. 
+	\[
+		\Sigma^{-1} = y I + k aa^t
+	\]
+and than find the values for $y$ and $k$.
+<!-- todo: Eleonora's notes -->
+
+## 2.2
+
+<!-- todo: Eleonora's notes -->
+A faster way to find the spectrum (set of eigenvalues, meant with multiplicity) is reported below. We exploit some basic properties of the spectrum. \newline
+We denote $\spectrum{\Sigma}$ the spectrum of the matrix $\Sigma$ (as a linear operator).
+	\begin{align*}
+		\spectrum{\Sigma} &= \spectrum{(1 + \rho)(I - \frac{\rho}{1 + \rho} aa^t)} = \\
+			& = (1 + \rho) \spectrum{I - \frac{\rho}{1 + \rho} aa^t} = \\
+			& = (1 + \rho) \left(1 - \frac{\rho}{1 + \rho}\spectrum{aa^t}\right).
+	\end{align*}
+Observing $(aa^T)a = \|a\|^2 a$ and $\rank{aa^T} = 1$ it holds
+	\[
+		\spectrum{aa^T} = \left\{0, 0, \|a\|^2\right\}.
+	\]
+Hence
+	\begin{align*}
+		\spectrum{\Sigma} & = (1 + \rho) \left(1 - \frac{\rho}{1 + \rho}\{0, 0, \|a\|^2\}\right) = \\
+			& = (1 + \rho)\left\{1, 1 ,1 - 3\frac{\rho}{1 + \rho}\right\} = \\
+			& = \left\{1 + \rho, 1 + \rho, 1 + \rho - 3\rho\right\} = \\
+			& = \left\{1 + \rho, 1 + \rho, 1 - 2\rho\right\}.
+	\end{align*}
+where the multiplications and translations of sets are mean component wise.
+
+## 2.3
+
+We first write the eigenvalues of $\Sigma$ in ascending order. \newline
+We distinguish the following two cases:
+\begin{enumerate}
+	\item 
+		if $\rho \in \big[0, \frac{1}{2}\big)$ then $1 + \rho \geq 1 - 2\rho$. This leads to
+			\[
+				\begin{cases}
+					\lambda_1 = 1 + \rho \\
+					\lambda_2 = 1 + \rho \\
+					\lambda_3 = 1 - 2\rho
+				\end{cases}
+				\text{ , with } \lambda_1 \geq \lambda_2 \geq \lambda_3.
+			\]
+		Now we find $\rho$ such that the first two principal components (PCs) account for more than $80\%$ of the total variation of $Z$. \newline
+		Since $\lambda_i$ corresponds to the variance of the $i$-th PC $\forall i \in \{1, 2, 3\}$ and the variation up to the $k$-th PC corresponds to the sum of the first $k$ eigenvalues, we just need to find $\rho$ such that 
+			\[
+				\lambda_1 + \lambda_2 > 0.8(\lambda_1 + \lambda_2 + \lambda_3).	
+			\]
+		By solving the inequality we get
+			\[
+				2(1 + \rho) > \frac{4}{5} 3 \iff 1 + \rho > \frac{6}{5} \iff \rho > \frac{1}{5}.	
+			\]
+	\item
+		if $\rho \in (-1, 0)$ then $1 + \rho \leq 1 - 2\rho$. This leads to
+			\[
+				\begin{cases}
+					\lambda_1 = 1 - 2\rho \\
+					\lambda_2 = 1 + \rho \\
+					\lambda_3 = 1 + \rho
+				\end{cases}
+				\text{ , with } \lambda_1 \geq \lambda_2 \geq \lambda_3.
+			\]
+		By using the same argument we used in the previous poin we obtain that $\rho$ have to satisfy the following condition:
+			\[
+				(1 - 2\rho) + (1 + \rho) > \frac{4}{5} 3 \iff 2 - \rho > \frac{12}{5} \iff \rho < -\frac{2}{5}.	
+			\]
+\end{enumerate}
+Hence for $\rho \in \big[0, \frac{1}{2}\big)$ it must be $\rho > \frac{1}{2}$ and for $\rho \in (-1, 0)$ it must be $\rho < -\frac{2}{5}$. \newline
+So $\forall \rho \in \left(-1, -\frac{2}{5}\right) \cup \left(\frac{1}{2}, 1\right)$ PC1 and PC2 account for more than $80\%$ of the total variation of $Z$.
+
+## 2.4
+
+## 2.5
+
+```{r}
+c = sqrt(qchisq(0.95, df = 2))
+```
+
+```{r}
+rho = 0.2
+mu_y = 1 / 5 * c(1, 9)
+sigma_y = 6 / 25 * matrix(c(4, 1, 1, 4), nrow = 2)
+eig = eigen(sigma_y, symmetric = T)
+```
+
+```{r contourplot, echo = F, out.width = "90%", fig.align = "center", fig.asp = .75}
+library(ellipse)
+par(family = "serif")
+plot(ellipse(x = sigma_y, centre = mu_y, level = 0.95), type = "l", lwd = 1.5,
+	xlab = expression("y"[1]), ylab = expression("y"[2]),
+	main = expression(paste("contour plot of the density of Y (", rho, " = 0.2)")),
+	cex.main = 1,
+	asp = 1, xlim = c(-4, 4), ylim = c(-2, 6))
+b = -eig$vectors[1, 2] / eig$vectors[2, 2]
+a = -b * mu_y[1] + mu_y[2]
+abline(a, b, lwd = 1.5, lty = 2)
+d = -eig$vectors[1, 1] / eig$vectors[2, 1]
+c = -d * mu_y[1] + mu_y[2]
+abline(c, d, lwd = 1.5, lty = 2)
+points(mu_y[1], mu_y[2], col = "red", pch = 16)
+```
