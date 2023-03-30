@@ -210,22 +210,145 @@ points(mu_y[1], mu_y[2], col = "red", pch = 16)
 # 	nutritional.txt data
 
 nutritional = read.table("data/nutritional.txt")
-head(nutritional)
+nutritional_start = nutritional
 
 # 3.1
-nt = nutritional[, -6] / nutritional[, 6]
-head(round(nt, 3))
+nutritional = nutritional[, -6] / nutritional[, 6]
+head(round(nutritional, 3))
 
-nt = scale(nt)
+nt = scale(nutritional)
 nt_pca = prcomp(nt)
-nt_pca
+nt_pca$rotation
 
 # 3.2
 summary(nt_pca)
-screeplot(nt_pca, type = "l", main = "screeplot", pch = 16)
-abline(v = 2, col = "darkgoldenrod2", lty = 2)
-abline(v = 5, col = "lightblue", lty = 2)
+nt_sum = as.data.frame(summary(nt_pca)$importance)[-1, ]
+nt_sum
 
-library(ggplot2)
-library(factoextra)
-fviz_eig(nt_pca, addlabels = T)
+par(mfrow = c(1, 2), mar = c(1, 1, 1, 1))
+x = as.matrix(nt_sum[1, ])
+colnames(x) = 1:6
+bp = barplot(x, ylim = c(0, 0.5), xlab = "Dimensions", ylab = "Percentage of explained variances", col = lookup[3])
+lines(bp, as.matrix(nt_sum[1, ]), type = "b", pch = 16, lwd = 2)
+text(bp, as.matrix(nt_sum[1, ]), labels = paste0(round(as.matrix(nt_sum[1, ]) * 100, 1), "%"), pos = 3, cex = 1, offset = 1)
+plot(cumsum(nt_pca$sdev^2)/sum(nt_pca$sdev^2), type = "b", xlab = "Dimensions", ylab = "Cumulative Proportion", pch = 16)
+abline(h = 0.8, col = "blue", lty = 2)
+
+screeplot(nt_pca, type = "l", main = "screeplot", pch = 16)
+abline(h = 1, col = "red", lty = 2)
+
+# 3.3
+corrplot(t(round(nt_pca$rotation[, 1:2], 2)), method = "circle", tl.col = "black", addCoef.col = "black")
+
+par(mfrow = c(1, 1))
+plot(nt_pca$x[, 1], nt_pca$x[, 2], xlim = c(-9, 9), ylim = c(-11, 11), pch = 16, cex = 0.75,
+     xlab = "PC1", ylab = "PC2")
+abline(h = 0, col = "black", lty = 2)
+abline(v = 0, col = "black", lty = 2)
+j = 958
+points(nt_pca$x[j, 1], nt_pca$x[j, 2], col = "red", pch = 16, cex = 0.75)
+
+# 3.4
+par(mfrow = c(1, 3))
+for (j in 1:3) {
+    boxplot(nt_pca$x[, j], main = paste0("PC", j), outpch = 16, outcex = 1.25)
+    if (j == 1){
+        points(rep(1, 3), nt_pca$x[c(32, 286, 411), j], col = "red", cex = 1.25, pch = 16)
+        text(1, nt_pca$x[c(32), j], label = c("32-33"), pos = 4, cex = 1, offset = 1, col = "red")
+        text(1, nt_pca$x[c(286), j], label = c("286-287"), pos = 2, cex = 1, offset = 1, col = "red")
+        text(1, nt_pca$x[c(411), j], label = c("411-412"), pos = 1, cex = 1, offset = 1, col = "red")
+    }
+    if (j == 2){
+        points(rep(1, 2), nt_pca$x[c(49, 866), j], col = "red", cex = 1.25, pch = 16)
+        text(rep(1, 2), nt_pca$x[c(49, 866), j], label = c("49", "866"), pos = 4, cex = 1, offset = 1, col = "red")
+    }
+    if (j == 3){
+        points(rep(1, 2), nt_pca$x[c(84, 866), j], col = "red", cex = 1.25, pch = 16)
+        text(rep(1, 2), nt_pca$x[c(84, 866), j], label = c("84", "866"), pos = 4, cex = 1, offset = 1, col = "red")
+    }
+}
+
+# not to insert
+a = 0.999998
+scale_pc1 = scale(nt_pca$x[, 1])
+univ_out_1 = which(abs(scale_pc1) > qnorm(a), arr.ind = T)
+univ_out_1
+a = 0.9999
+scale_pc23 = scale(nt_pca$x[, 1:3])
+univ_out_23 = which(abs(scale_pc23) > qnorm(a), arr.ind = T)
+univ_out_23
+
+nt = as.data.frame(nt)
+min_mean_max = as.data.frame(round(matrix(c(sapply(nt, min), 
+                                            sapply(nt, mean), 
+                                            sapply(nt, max)),
+                                          byrow = T, nrow = 3), 3))
+colnames(min_mean_max) = colnames(nt)
+rownames(min_mean_max) = c("min", "mean", "max")
+out_all = c(32, 33, 286, 287, 411, 412, 49, 866, 84)
+univ_out = round(nt[out_all, ], 3)
+min_mean_max
+univ_out
+
+# 3.5
+library(scatterplot3d)
+par(mfrow = c(1, 1))
+color_out = rep("gray35", dim(nt)[1])
+color_out[out_all] = "red"
+scatterplot3d(nt_pca$x[, 1], nt_pca$x[, 2], nt_pca$x[, 3], angle = 55,
+       pch = 16, color = color_out, xlab = "PC1", ylab = "PC2", zlab = "PC3")
+
+library(rgl)
+par(mfrow = c(1, 1))
+color_out = rep("gray35", dim(nt)[1])
+color_out[out_all] = "red"
+plot3d(nt_pca$x[, 1], nt_pca$x[, 2], nt_pca$x[, 3], angle = 55,
+              pch = 16, size = 8, col = color_out, xlab = "PC1", ylab = "PC2", zlab = "PC3")
+
+# 3.6
+pc1_3 = nt_pca$x[, 1:3]
+d = mahalanobis(pc1_3, center = colMeans(pc1_3), cov = var(pc1_3))
+plot(qchisq(ppoints(d), df = ncol(pc1_3)), sort(d), main = "chisquared Q-Q plot of mahalanobis distance",
+     xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16)
+abline(0, 1, col = "blue")
+for (i in out_all){
+    current_x = qchisq(ppoints(d)[match(i, order(d))], df = ncol(pc1_3))
+    current_y = d[i]
+    text(current_x, current_y, labels = as.character(i), pos = 3, cex = 0.75, offset = 0.3, col = color_out[i])
+    points(current_x, current_y, col = color_out[i], pch = 16, cex = 1.25)
+}
+
+pc1_3_out = pc1_3[-out_all, ]
+d_out = mahalanobis(pc1_3_out, center = colMeans(pc1_3_out), cov = var(pc1_3_out))
+plot(qchisq(ppoints(d_out), df = ncol(pc1_3_out)), sort(d_out), main = "chisquared Q-Q plot of mahalanobis distance",
+     xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16, ylim = c(0, 10))
+abline(0, 1, col = "blue")
+
+# 3.7
+color_out = rep("black", dim(nt)[1])
+label_out = rep("", dim(nt)[1])
+color_out[out_all] = "red"
+label_out[c(32, 286, 411, 49, 866, 84)] = c("32-33", "286-287", "411-412", "49", "866", "84")
+plot(d, pch = 16, xlab = "index", ylab = "squared mahalanobis distance",
+    main = "multivariate outliers", col = color_out, ylim = c(0, 140))
+text(seq_len(nrow(pc1_3)), d, labels = label_out, pos = 3, cex = 0.75, offset = 0.3, col = color_out)
+abline(h = qchisq(0.95, df = ncol(pc1_3)), lty = 2, col = "red")
+alpha_data = (nrow(pc1_3) - 0.5) / nrow(pc1_3)
+abline(h = qchisq(alpha_data, df = ncol(pc1_3)), lty = 2, col = "blue")
+legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
+       col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
+
+
+par(family = "serif")
+out_all = c(49, 84, 866)
+color_out = rep("black", dim(nt)[1])
+label_out = rep("", dim(nt)[1])
+color_out[out_all] = "red"
+label_out[out_all] = c("49", "84", "866")
+d = mahalanobis(nt, center = colMeans(nt), cov = var(nt))
+plot(d, pch = 16, xlab = "index", ylab = "squared mahalanobis distance",
+     col = color_out, ylim = c(0, 410))
+text(seq_len(nrow(nt)), d, labels = label_out, pos = 3, cex = 0.75, offset = 0.3, col = color_out)
+abline(h = qchisq(0.95, df = ncol(nt)), lty = 2, col = "red")
+alpha_data = (nrow(nt) - 0.5) / nrow(nt)
+abline(h = qchisq(alpha_data, df = ncol(nt)), lty = 2, col = "blue")
