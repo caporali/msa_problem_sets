@@ -6,7 +6,7 @@ output:
     pdf_document:
         latex_engine: pdflatex
         includes:
-            in_header: Files/preamble.tex
+            in_header: files/preamble.tex
         extra_dependencies:
             inputenc: ["utf8"]
             fontenc: ["T1"]
@@ -93,14 +93,14 @@ Moreover, we can note that the variables which are correlated the most with the 
 
 ## 1.2
 
-In order to detect potential univariate outliars we first scale our dataset and then identify them as the values $x$ such that
+In order to detect potential univariate outliers we first scale our dataset and then identify them as the values $x$ such that
 \smallskip
 \begin{equation*}
   |{x}| > \Phi^{-1}(0.99),
 \end{equation*}
 
 where $\Phi$ is the cdf of a $\mathcal{N}(0,1)$.
-We used the $99th$ percentile since by taking lower values the potential outliars would have been too many. However, we noticed the presence of another potential outliar for the variable \textit{Area} by taking the $98.75th$ percentile.
+We used the $99th$ percentile since by taking lower values the potential outliers would have been too many. However, we noticed the presence of another potential outlier for the variable \textit{Area} by taking the $98.75th$ percentile.
 \smallskip
 
 ```{r, render = lemon_print}
@@ -116,7 +116,7 @@ mat_2 = as.data.frame(mat_2)
 rownames(mat_1)[c(2,3,5,7,8)] = c("New_York", "Alaska_2", "Alaska_8","New_Jersey", "Rhode_Island")
 ```
 
-In the following dataframes the first column refers to the index of the corresponding observation, while the second one refers to the variable with respect to this observation is a potential univariate outliar. 
+In the following dataframes the first column refers to the index of the corresponding observation, while the second one refers to the variable with respect to this observation is a potential univariate outlier. 
 \smallskip
 \smallskip
 
@@ -132,11 +132,11 @@ rownames(mat_2)[c(2,3,5,8,9)] = c("New_York", "Alaska_2", "Alaska_8", "New_Jerse
 mat_2
 ```
 
-Note: In the tables above the names Alaska\_2 and Alaska_8 both refer to the observation 2. We just had to change the rownames since in a dataframe we cannot have two rows with the same name. We choose the numbers $2$ and $8$ to hiligth the index of the variable with respect to they are potential univariate outliars.
+Note: In the tables above the names Alaska\_2 and Alaska_8 both refer to the observation 2. We just had to change the rownames since in a dataframe we cannot have two rows with the same name. We choose the numbers $2$ and $8$ to highlight the index of the variable with respect to they are potential univariate outliers.
 
 ## 1.3
 
-We report below the boxplots corresponding to each variable. We hiligthed in red the potential univariate outliars found in point $1.2$.
+We report below the boxplots corresponding to each variable. We highlighted in red the potential univariate outliers found in point $1.2$.
 
 ```{r, echo = F}
 n = nrow(st)
@@ -169,13 +169,13 @@ out_all = out_all[-match(18, out_all)]
 
 We can make the following considerations:
 \begin{itemize}
-    \item According to what we found in point 1.2, the variables \textit{Life\_Exp}, \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} seems not to have any potential univariate outliar;
-    \item The potential outliar we identified for the variable \textit{Illiteracy} (observation $18$) does not show up in the corresponding boxplot. This is plausible, since the variable's distribution seems to have very fat tails. For this reason we choose to do not consider this observation as an outliar;
-    \item The variable \textit{Income} seems to have only the observation $2$ as potential outliar, which is consistent with what we obtained in the previous point. Note also that the observation $2$ is a potential outliar both for the variable \textit{Income} and the variable \textit{Area};
-    \item As for the remaning variables, the boxplots generated many other potential univariate outliars, but the ones that we did not detect in the previous point are not in the outer tails (at least $98.75$th percentile) of the distribution. Hence, we will not think of them as outliars.
+    \item According to what we found in point 1.2, the variables \textit{Life\_Exp}, \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} seems not to have any potential univariate outlier;
+    \item The potential outlier we identified for the variable \textit{Illiteracy} (observation $18$) does not show up in the corresponding boxplot. This is plausible, since the variable's distribution seems to have very fat tails. For this reason we choose to do not consider this observation as an outlier;
+    \item The variable \textit{Income} seems to have only the observation $2$ as potential outlier, which is consistent with what we obtained in the previous point. Note also that the observation $2$ is a potential outlier both for the variable \textit{Income} and the variable \textit{Area};
+    \item As for the remaning variables, the boxplots generated many other potential univariate outliers, but the ones that we did not detect in the previous point are not in the outer tails (at least $98.75$th percentile) of the distribution. Hence, we will not think of them as outliers.
 \end{itemize}
 \smallskip
-In conclusion, by looking at the boxplots we infer that observations $2,5,21,30,32,39$ and $43$ are potential univariate outliars.
+In conclusion, by looking at the boxplots we infer that observations $2,5,21,30,32,39$ and $43$ are potential univariate outliers.
 
 ## 1.4
 In order to check whether each variable is normally distributed or not, we first examine the relationship between the theoretical and the sample quantiles through the corresponding Q-Q plots.
@@ -202,10 +202,10 @@ for (j in 1:n){
 \smallskip
 From the Q-Q plots we can observe that:
 \begin{itemize}
- \item All the values corresponding to the variables \textit{Income} lie very close to the Q-Q line, except for the observation $2$, which was previously identified as an univariate outliar;
+ \item All the values corresponding to the variables \textit{Income} lie very close to the Q-Q line, except for the observation $2$, which was previously identified as an univariate outlier;
  \item Also the variable \textit{Life\_Exp} seems to be quite normal: the values are more spread out with respect to the ones corresponding to the variable \textit{Income}, but they still are very close to the blue line (which represents the linear relationship between the sample and the theoretical quantiles);
- \item The variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similiar beheaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliars;
- \item Also the variables \textit{Population}, \textit{Area} and \textit{Density} have very similar shapes, which are pretty far from being linear. All of them have heavy tails, which is also caused by the presence of more then one outliar;
+ \item The variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similiar beheaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliers;
+ \item Also the variables \textit{Population}, \textit{Area} and \textit{Density} have very similar shapes, which are pretty far from being linear. All of them have heavy tails, which is also caused by the presence of more then one outlier;
  \item The trajectory of the variable \textit{Illiteracy} is very atypical, indeed on the left side of the plot we can observe that a consistent percentage of the points share the same values.
 \end{itemize}
 
@@ -244,7 +244,7 @@ shap_test
 \vspace{-0.2cm}
 As we can see, the variables \textit{Income} and \textit{Life\_Exp} can be considered normally distributed, since their p-value is grater than $0.05$. Moreover, the p-values of the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} are really close to $0.05$, but the only one for which the null hypothesis is not rejected is \textit{Frost}. However, its p-value is $\approx 0.0527$, thus it is reasonable to doubt its normality, taking also in account the corresponding Q-Q plot and histogram presented above.
 
-Now, it may be interesting to see how the previous tests change if we remove from each variable the observations we identified as their outliars. Let's take a look at the Q-Q plots and at the results of the Shapiro-Wilk test.
+Now, it may be interesting to see how the previous tests change if we remove from each variable the observations we identified as their outliers. Let's take a look at the Q-Q plots and at the results of the Shapiro-Wilk test.
 \smallskip
 
 ```{r, echo = F, fig.show = "hide"}
@@ -335,12 +335,12 @@ We can note that:
 \begin{itemize}
  \item The variables \textit{Population} and \textit{Density} follows the same non-gaussian beheaviour that we observed before; in fact, their p-values are almost negligible;
  \item As for the variable \textit{Income}, we can still say that its distribution is gaussian. However, from the Q-Q plot we can observe the presence of more pronounced tails. Its p-value is still grater than $0.05$ but a bit lower than the previous one;
- \item Finally, by removing its outliars, the variable \textit{Area} seems to become gaussian: its p-value is very close to $0.05$ but there is a huge difference between this value and the previous p-value.
+ \item Finally, by removing its outliers, the variable \textit{Area} seems to become gaussian: its p-value is very close to $0.05$ but there is a huge difference between this value and the previous p-value.
 \end{itemize}
 
 ## 1.5
 
-We report the scatterplot of the variables \textit{Area} \textit{vs} \textit{Population}, where have colored all the potential outliars.
+We report the scatterplot of the variables \textit{Area} \textit{vs} \textit{Population}, where have colored all the potential outliers.
 
 ```{r, echo = F, fig.align="center", fig.asp = 0.48}
 par(family = "serif", mar = c(4,4,1,1))
@@ -355,7 +355,7 @@ for (j in out_all){
 }
 ```
 
-From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15\times 10^4]\times [0, 15\times 10^3]$. Also, unlike the other univariate outliars, the points corresponding to the observations $2,5,32$ and $43$ seems to be really far from the other points. Hence, we can identify them as bivariate outliars.
+From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15\times 10^4]\times [0, 15\times 10^3]$. Also, unlike the other univariate outliers, the points corresponding to the observations $2,5,32$ and $43$ seems to be really far from the other points. Hence, we can identify them as bivariate outliers.
 
 # 1.6
 
@@ -382,11 +382,11 @@ for (i in out_all){
 }
 ```
 
-The Chi-sqared Q-Q plot of Mahalanobis distance shows that the majority of the points are close to the Q-Q line. The most evident exceptions are the point corresponding to the observation $2$, which was previously detected as an univariate outliar, and the second to last point, which corresponds to the observation $11$. Nevertheless, we can consider $d$ $\chi_9^2$-distributed, and, hence, say that our variables are jointly distributed as a multivariate gaussian.
+The Chi-sqared Q-Q plot of Mahalanobis distance shows that the majority of the points are close to the Q-Q line. The most evident exceptions are the point corresponding to the observation $2$, which was previously detected as an univariate outlier, and the second to last point, which corresponds to the observation $11$. Nevertheless, we can consider $d$ $\chi_9^2$-distributed, and, hence, say that our variables are jointly distributed as a multivariate gaussian.
 
 # 1.7
 
-In order to identify the multivariate outliars we can plot the squared Mahalanobis distances' vector and then add some threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_9^2$ (in particular, we used $\alpha_1 = 0.95$ and $\alpha_2 = {{(n-0.5)}\over{n}}$ with $n = \texttt{nrow(st)}$).
+In order to identify the multivariate outliers we can plot the squared Mahalanobis distances' vector and then add some threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_9^2$ (in particular, we used $\alpha_1 = 0.95$ and $\alpha_2 = {{(n-0.5)}\over{n}}$ with $n = \texttt{nrow(st)}$).
 \vspace{-1.5cm}
 
 ```{r, fig.align="center", echo = F}
@@ -405,9 +405,9 @@ abline(h=qchisq(0.99,df=9),lty=2, col = "blue")
 ```
 
 \smallskipm
-The observations $2$ and $11$ are above the higher line (which corresponds to $\chi_9^2(\alpha_2)$), hence they can be considered as multivariate outliars. This confirms what we previously noticed in the Chi-squared Q-Q plot. \newline
-Note also that some observations lie in the srip delimited by the two lines, however we choose to do not consider them as multivariate outliars, taking also in account what we observed in the previous point. \newline
-Finally, we can notice that the majority of the observations identified as univariate outliars cannot be considered as multivariate outliars with the only exception of the observation $2$.
+The observations $2$ and $11$ are above the higher line (which corresponds to $\chi_9^2(\alpha_2)$), hence they can be considered as multivariate outliers. This confirms what we previously noticed in the Chi-squared Q-Q plot. \newline
+Note also that some observations lie in the srip delimited by the two lines, however we choose to do not consider them as multivariate outliers, taking also in account what we observed in the previous point. \newline
+Finally, we can notice that the majority of the observations identified as univariate outliers cannot be considered as multivariate outliers with the only exception of the observation $2$.
 
 
 

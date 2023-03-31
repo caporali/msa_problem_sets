@@ -11,7 +11,7 @@ st = as.data.frame(state.x77)
 st[, 9] = st$Population * 1000 / st$Area
 names(st)[c(4, 6, 9)] = c("Life_Exp", "HS_Grad", "Density")
 lookup <- c("darkgreen",  "brown", "lightblue",  "magenta", "purple",
-			"blue", "red", "lightgreen", "orange", "cyan")
+	"blue", "red", "lightgreen", "orange", "cyan")
 
 
 # 1.1
@@ -19,6 +19,7 @@ cor_mat = round(cor(st), 2)
 library(corrplot)
 corrplot(cor_mat, type = "upper", method = "circle", tl.col = "black", addCoef.col = "black")
 
+# not to insert
 index_mat = function(x, n) {
 	return(c((x - 1) %% n + 1, (x - 1) %/% n + 1))
 }
@@ -74,8 +75,7 @@ for (j in 1:n){
 }
 mat_2 = mat_2[-match(18, out_all), ]
 out_all = out_all[-match(18, out_all)]
-col_index = rep("black", nrow(st))
-col_index[out_all] = lookup[seq_along(out_all)]
+
 
 # 1.4
 par(mfrow = c(3, 3))
@@ -107,6 +107,7 @@ x = rep(0, 9)
 for (j in 1:n){
 	x[j] = shapiro.test(st[, j])$p.value
 }
+x = t(x)
 shap_test = data.frame(round(x, 10))
 rownames(shap_test) = names(st)
 colnames(shap_test) = c("p.value")
@@ -145,12 +146,16 @@ rownames(shap_test_out) = names(st)[index_out]
 colnames(shap_test_out) = c("p.value")
 shap_test_out
 
+
 # 1.5
 par(mfrow = c(1, 1))
+col_index = rep("black", nrow(st))
+col_index[out_all] = lookup[seq_along(out_all)]
 plot(st[, 8], st[, 1], pch = 16, xlab = names(st)[8], ylab = names(st)[1], main = "scatterplot", col = col_index)
 for (j in out_all){
 	text(st[j, 8], st[j, 1], as.character(j), pos = 4, col = col_index[j])
 }
+
 
 # 1.6
 d = mahalanobis(st, center = colMeans(st), cov = var(st))
@@ -163,7 +168,7 @@ for (i in out_all){
 	text(current_x, current_y, labels = as.character(i), pos = 3, cex = 0.75, offset = 0.3, col = col_index[i])
 	points(current_x, current_y, col = col_index[i], pch = 16, cex = 1.25)
 }
-multi_out = c(2, 11)
+
 
 # 1.7
 label_out = rep("", nrow(st))
@@ -181,6 +186,7 @@ legend(x = "topright", legend = c("0.95", round(alpha_data, 3)),
 
 
 # exercise 2
+
 
 # 2.5
 c = sqrt(qchisq(0.95, df = 2))
@@ -212,6 +218,7 @@ points(mu_y[1], mu_y[2], col = "red", pch = 16)
 nutritional = read.table("data/nutritional.txt")
 nutritional_start = nutritional
 
+
 # 3.1
 nutritional = nutritional[, -6] / nutritional[, 6]
 head(round(nutritional, 3))
@@ -220,52 +227,59 @@ nt = scale(nutritional)
 nt_pca = prcomp(nt)
 nt_pca$rotation
 
+
 # 3.2
 summary(nt_pca)
 nt_sum = as.data.frame(summary(nt_pca)$importance)[-1, ]
 nt_sum
 
-par(mfrow = c(1, 2), mar = c(1, 1, 1, 1))
+par(mfrow = c(1, 2), cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
 x = as.matrix(nt_sum[1, ])
 colnames(x) = 1:6
-bp = barplot(x, ylim = c(0, 0.5), xlab = "Dimensions", ylab = "Percentage of explained variances", col = lookup[3])
-lines(bp, as.matrix(nt_sum[1, ]), type = "b", pch = 16, lwd = 2)
-text(bp, as.matrix(nt_sum[1, ]), labels = paste0(round(as.matrix(nt_sum[1, ]) * 100, 1), "%"), pos = 3, cex = 1, offset = 1)
-plot(cumsum(nt_pca$sdev^2)/sum(nt_pca$sdev^2), type = "b", xlab = "Dimensions", ylab = "Cumulative Proportion", pch = 16)
+bp = barplot(x, ylim = c(0, 0.55),
+	xlab = "Dimensions", ylab = "Percentage of explained variances",
+	col = "lightblue")
+lines(bp, as.matrix(nt_sum[1, ]), type = "b", pch = 16, lwd = 1.5, cex = 0.75)
+text(bp, as.matrix(nt_sum[1, ]),
+	labels = paste0(round(as.matrix(nt_sum[1, ]) * 100, 1), "%"), pos = 3, cex = 0.75, offset = 0.5)
+plot(cumsum(nt_pca$sdev^2) / sum(nt_pca$sdev^2), type = "b",
+	xlab = "Dimensions", ylab = "Cumulative Proportion", pch = 16, cex = 0.75)
 abline(h = 0.8, col = "blue", lty = 2)
 
 screeplot(nt_pca, type = "l", main = "screeplot", pch = 16)
 abline(h = 1, col = "red", lty = 2)
+
 
 # 3.3
 corrplot(t(round(nt_pca$rotation[, 1:2], 2)), method = "circle", tl.col = "black", addCoef.col = "black")
 
 par(mfrow = c(1, 1))
 plot(nt_pca$x[, 1], nt_pca$x[, 2], xlim = c(-9, 9), ylim = c(-11, 11), pch = 16, cex = 0.75,
-     xlab = "PC1", ylab = "PC2")
+	xlab = "PC1", ylab = "PC2")
 abline(h = 0, col = "black", lty = 2)
 abline(v = 0, col = "black", lty = 2)
-j = 958
-points(nt_pca$x[j, 1], nt_pca$x[j, 2], col = "red", pch = 16, cex = 0.75)
 
 # 3.4
 par(mfrow = c(1, 3))
 for (j in 1:3) {
-    boxplot(nt_pca$x[, j], main = paste0("PC", j), outpch = 16, outcex = 1.25)
-    if (j == 1){
-        points(rep(1, 3), nt_pca$x[c(32, 286, 411), j], col = "red", cex = 1.25, pch = 16)
-        text(1, nt_pca$x[c(32), j], label = c("32-33"), pos = 4, cex = 1, offset = 1, col = "red")
-        text(1, nt_pca$x[c(286), j], label = c("286-287"), pos = 2, cex = 1, offset = 1, col = "red")
-        text(1, nt_pca$x[c(411), j], label = c("411-412"), pos = 1, cex = 1, offset = 1, col = "red")
-    }
-    if (j == 2){
-        points(rep(1, 2), nt_pca$x[c(49, 866), j], col = "red", cex = 1.25, pch = 16)
-        text(rep(1, 2), nt_pca$x[c(49, 866), j], label = c("49", "866"), pos = 4, cex = 1, offset = 1, col = "red")
-    }
-    if (j == 3){
-        points(rep(1, 2), nt_pca$x[c(84, 866), j], col = "red", cex = 1.25, pch = 16)
-        text(rep(1, 2), nt_pca$x[c(84, 866), j], label = c("84", "866"), pos = 4, cex = 1, offset = 1, col = "red")
-    }
+	if (j == 1)
+		boxplot(nt_pca$x[, j], main = paste0("PC", j), outpch = 16, outcex = 1.25, ylim = c(-8.5, 1.5))
+	else
+		boxplot(nt_pca$x[, j], main = paste0("PC", j), outpch = 16, outcex = 1.25)
+	if (j == 1) {
+		points(rep(1, 3), nt_pca$x[c(32, 286, 411), j], col = "red", cex = 1.25, pch = 16)
+		text(1, nt_pca$x[c(32), j], label = c("32-33"), pos = 4, cex = 1, offset = 1, col = "red")
+		text(1, nt_pca$x[c(286), j], label = c("286-287"), pos = 2, cex = 1, offset = 1, col = "red")
+		text(1, nt_pca$x[c(411), j], label = c("411-412"), pos = 1, cex = 1, offset = 1, col = "red")
+	}
+	if (j == 2) {
+		points(rep(1, 2), nt_pca$x[c(49, 866), j], col = "red", cex = 1.25, pch = 16)
+		text(rep(1, 2), nt_pca$x[c(49, 866), j], label = c("49", "866"), pos = 4, cex = 1, offset = 1, col = "red")
+	}
+	if (j == 3) {
+		points(rep(1, 2), nt_pca$x[c(84, 866), j], col = "red", cex = 1.25, pch = 16)
+		text(rep(1, 2), nt_pca$x[c(84, 866), j], label = c("84", "866"), pos = 4, cex = 1, offset = 1, col = "red")
+	}
 }
 
 # not to insert
@@ -279,50 +293,65 @@ univ_out_23 = which(abs(scale_pc23) > qnorm(a), arr.ind = T)
 univ_out_23
 
 nt = as.data.frame(nt)
-min_mean_max = as.data.frame(round(matrix(c(sapply(nt, min), 
-                                            sapply(nt, mean), 
-                                            sapply(nt, max)),
-                                          byrow = T, nrow = 3), 3))
+min_mean_max = as.data.frame(round(matrix(c(sapply(nt, min),
+	sapply(nt, mean), sapply(nt, max)),
+	byrow = T, nrow = 3), 3))
 colnames(min_mean_max) = colnames(nt)
 rownames(min_mean_max) = c("min", "mean", "max")
+min_mean_max
+
 out_all = c(32, 33, 286, 287, 411, 412, 49, 866, 84)
 univ_out = round(nt[out_all, ], 3)
-min_mean_max
 univ_out
+
 
 # 3.5
 library(scatterplot3d)
 par(mfrow = c(1, 1))
 color_out = rep("gray35", dim(nt)[1])
+label_out = rep("", dim(nt)[1])
 color_out[out_all] = "red"
-scatterplot3d(nt_pca$x[, 1], nt_pca$x[, 2], nt_pca$x[, 3], angle = 55,
-       pch = 16, color = color_out, xlab = "PC1", ylab = "PC2", zlab = "PC3")
+label_out[c(32, 286, 411, 49, 866, 84)] = c("32-33", "286-287", "411-412", "49", "866", "84")
+plot3d = scatterplot3d(nt_pca$x[, 1], nt_pca$x[, 2], nt_pca$x[, 3], angle = 50,
+	pch = 16, color = color_out, xlab = "PC1", ylab = "PC2", zlab = "PC3")
+plot3d_coords = plot3d$xyz.convert(nt_pca$x[, 1], nt_pca$x[, 2], nt_pca$x[, 3])
+text(plot3d_coords$x[-c(286, 411)],	plot3d_coords$y[-c(286, 411)],
+	labels = label_out[-c(286, 411)], cex = .5, pos = 4, col = "red")
+text(plot3d_coords$x[286],	plot3d_coords$y[286],
+	labels = label_out[286], cex = .5, pos = 3, col = "red")
+text(plot3d_coords$x[411],	plot3d_coords$y[411],
+	labels = label_out[411], cex = .5, pos = 2, col = "red")
 
-library(rgl)
-par(mfrow = c(1, 1))
-color_out = rep("gray35", dim(nt)[1])
-color_out[out_all] = "red"
-plot3d(nt_pca$x[, 1], nt_pca$x[, 2], nt_pca$x[, 3], angle = 55,
-              pch = 16, size = 8, col = color_out, xlab = "PC1", ylab = "PC2", zlab = "PC3")
+# not to insert
+# library(rgl)
+# par(mfrow = c(1, 1))
+# color_out = rep("gray35", dim(nt)[1])
+# color_out[out_all] = "red"
+# plot3d(nt_pca$x[, 1], nt_pca$x[, 2], nt_pca$x[, 3], angle = 55,
+#	pch = 16, size = 8, col = color_out, xlab = "PC1", ylab = "PC2", zlab = "PC3")
+
 
 # 3.6
 pc1_3 = nt_pca$x[, 1:3]
 d = mahalanobis(pc1_3, center = colMeans(pc1_3), cov = var(pc1_3))
-plot(qchisq(ppoints(d), df = ncol(pc1_3)), sort(d), main = "chisquared Q-Q plot of mahalanobis distance",
-     xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16)
+plot(qchisq(ppoints(d), df = ncol(pc1_3)), sort(d),
+	 xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16, ylim = c(0, 140))
 abline(0, 1, col = "blue")
+pos_out_all = c(2, 1, 3, 1, 3, 1, 3, 3, 3)
 for (i in out_all){
-    current_x = qchisq(ppoints(d)[match(i, order(d))], df = ncol(pc1_3))
-    current_y = d[i]
-    text(current_x, current_y, labels = as.character(i), pos = 3, cex = 0.75, offset = 0.3, col = color_out[i])
-    points(current_x, current_y, col = color_out[i], pch = 16, cex = 1.25)
+	current_x = qchisq(ppoints(d)[match(i, order(d))], df = ncol(pc1_3))
+	current_y = d[i]
+	text(current_x, current_y, labels = as.character(i),
+		pos = pos_out_all[match(i, out_all)], cex = 0.6, offset = 0.3, col = color_out[i])
+	points(current_x, current_y, col = color_out[i], pch = 16, cex = 1.25)
 }
 
 pc1_3_out = pc1_3[-out_all, ]
 d_out = mahalanobis(pc1_3_out, center = colMeans(pc1_3_out), cov = var(pc1_3_out))
-plot(qchisq(ppoints(d_out), df = ncol(pc1_3_out)), sort(d_out), main = "chisquared Q-Q plot of mahalanobis distance",
-     xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16, ylim = c(0, 10))
+plot(qchisq(ppoints(d_out), df = ncol(pc1_3_out)), sort(d_out),
+	 xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16, ylim = c(0, 10), xlim = c(0, 12))
 abline(0, 1, col = "blue")
+
 
 # 3.7
 color_out = rep("black", dim(nt)[1])
@@ -330,25 +359,27 @@ label_out = rep("", dim(nt)[1])
 color_out[out_all] = "red"
 label_out[c(32, 286, 411, 49, 866, 84)] = c("32-33", "286-287", "411-412", "49", "866", "84")
 plot(d, pch = 16, xlab = "index", ylab = "squared mahalanobis distance",
-    main = "multivariate outliers", col = color_out, ylim = c(0, 140))
+	col = color_out, ylim = c(0, 140))
 text(seq_len(nrow(pc1_3)), d, labels = label_out, pos = 3, cex = 0.75, offset = 0.3, col = color_out)
 abline(h = qchisq(0.95, df = ncol(pc1_3)), lty = 2, col = "red")
 alpha_data = (nrow(pc1_3) - 0.5) / nrow(pc1_3)
 abline(h = qchisq(alpha_data, df = ncol(pc1_3)), lty = 2, col = "blue")
 legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
-       col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
+	col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
 
-
-par(family = "serif")
 out_all = c(49, 84, 866)
 color_out = rep("black", dim(nt)[1])
 label_out = rep("", dim(nt)[1])
 color_out[out_all] = "red"
 label_out[out_all] = c("49", "84", "866")
+out_2 = c(439, 429, 440, 438)
+color_out[out_2] = rgb(171 / 255, 248 / 255, 228 / 255)
 d = mahalanobis(nt, center = colMeans(nt), cov = var(nt))
 plot(d, pch = 16, xlab = "index", ylab = "squared mahalanobis distance",
-     col = color_out, ylim = c(0, 410))
+	col = color_out, ylim = c(0, 410))
 text(seq_len(nrow(nt)), d, labels = label_out, pos = 3, cex = 0.75, offset = 0.3, col = color_out)
 abline(h = qchisq(0.95, df = ncol(nt)), lty = 2, col = "red")
 alpha_data = (nrow(nt) - 0.5) / nrow(nt)
 abline(h = qchisq(alpha_data, df = ncol(nt)), lty = 2, col = "blue")
+legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
+	col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
