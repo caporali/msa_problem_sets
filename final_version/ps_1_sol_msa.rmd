@@ -369,7 +369,7 @@ for (j in out_all){
 
 From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15 \times 10^4]\times [0, 15 \times 10^3]$. Also, unlike the other univariate outliers, the points corresponding to the observations $2, 5, 32$ and $43$ seems to be really far from the other points. Hence, we can identify them as bivariate outliers.
 
-# 1.6
+## 1.6
 
 The squared Mahalanobis distance is a distance function that quantifies the gap between an observation and the sample mean, weighted by the inverse of the covariance matrix. If our variables are distributed as a $9$-dimensional multivariate normal, then we will have
 \begin{equation*}
@@ -397,9 +397,9 @@ for (i in out_all){
 
 The Chi-sqared Q-Q plot of Mahalanobis distance shows that the majority of the points are close to the Q-Q line. The most evident exceptions are the point corresponding to the observation $2$, which was previously detected as an univariate outlier, and the second to last point, which corresponds to the observation $11$. Nevertheless, we can consider $d$ $\chi_9^2$-distributed, and, hence, say that our variables are jointly distributed as a multivariate gaussian.
 
-# 1.7
+## 1.7
 
-In order to identify the multivariate outliers we can plot the squared Mahalanobis distances' vector and then add some threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_9^2$ (in particular, we used $\alpha_1 = 0.95$ and $\alpha_2 = {{(n - 0.5)}\over{n}}$ with $n = \texttt{nrow(st)}$).
+In order to identify the multivariate outliers we can plot the squared Mahalanobis distances' vector and then add some threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_9^2$ (in particular, we used $\alpha_1 = 0.95$ and $\alpha_2 = \frac{(n - 0.5)}{n}$ with $n = \texttt{nrow(st)}$).
 \vspace{-1.5cm}
 
 ```{r, fig.align = "center", echo = F, out.width = "95%"}
