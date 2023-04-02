@@ -44,8 +44,8 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # setwd (change it with your own)
-setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/malgieri")
-# setwd("c:/Users/franc/Drive/francesco_caporali/university/multivariate_statistical_analysis/problem_sets/problem_set_1")
+# setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/malgieri")
+setwd("c:/Users/franc/Drive/francesco_caporali/university/multivariate_statistical_analysis/problem_sets/problem_set_1")
 
 # libraries
 library(ellipse)
@@ -366,7 +366,8 @@ for (j in out_all){
 }
 ```
 
-From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15 \times 10^6]\times [0, 15 \times 10^3]$. Furthermore, unlike the other univariate outliers, the points corresponding to the observations $2, 5, 32$ and $43$ seems to be really far from the other points. Hence, we can identify them as bivariate outliers.
+From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15 \times 10^6]\times [0, 15 \times 10^3]$. 
+Furthermore, unlike the other univariate outliers, only the points corresponding to the observations $2, 5, 32$ and $43$ seems to be really far from the others. Hence, we can identify them as bivariate outliers.
 
 ## 1.6
 
@@ -421,7 +422,8 @@ The observations $2$ and $11$ are above the blue line (which corresponds to $\ch
 Note also that some observations lie in the strip delimited by the two lines. Nonetheless, we choose not to consider them as multivariate outliers, taking also in account what we observed in the previous point. \newline
 Finally, we can notice that the majority of the observations identified as univariate outliers cannot be considered as multivariate outliers with the only exception of the observation $2$.
 
-<!-- One remark from Fra Capo: these two states were the last ones to join the federation. Of course we don't claim this to be causal. Nonetheless, the absense of contiguity with the other states definitely reduces the net flow with other states therefore reducing homogenizing factors. -->
+<!-- todo (maybe): final remark from. -->
+<!-- These two states were the last ones to join the federation. Of course we don't claim this to be causal. Nonetheless, the absense of contiguity with the other states definitely reduces the net flow with other states therefore reducing homogenizing factors. -->
 
 \newpage
 
@@ -445,7 +447,7 @@ We first rewrite
     \[
         \Sigma = (1 + \rho)(I - c aa^T) \text{ with } a = (1, 1, -1) \text{ and } c = \frac{\rho}{1 + \rho}.
     \]
-Let $A \deq I - c aa^T$, it holds
+Let $A \deq I - c aa^T$; it holds
     \begin{align*}
         A^{-1} & = (I - c aa^T)^{-1} = \sum_{i = 0}^{\infty} (c aa^T)^i = \\
             & = \sum_{i = 0}^{\infty} c^i (aa^T)^i = I + \sum_{i = 1}^{\infty} c^i (\|a\|^2)^{i - 1} aa^T = \\
@@ -458,11 +460,16 @@ Thus
         \Sigma^{-1} = (1 + \rho)^{-1} A^{-1} = \frac{1}{1 + \rho}\left(I + \frac{\rho}{1 - 2\rho} aa^T\right).
     \]
 We can compute $\Sigma^{-1}$ in many other ways; for example we can suppose that $\Sigma^{-1}$ is of the same form $\Sigma$, i.e. 
-    \[
+<!-- todo: fix it -->
+<!-- \[
         \Sigma^{-1} = y I + k aa^T.
     \]
 Observe that $P \deq aa^T$ is a projection matrix. Therefore, while in principle $\Sigma \Sigma^{-1} = I$ may yield no solution as we have a second degree polynomial in $P$ on l.h.s., as $P$ is idempotent, we have that l.h.s. is actually of first degree in $P$. \newline
-We now find the values for $y$ and $k$.
+We now find the values for $y$ and $k$. -->
+	\[
+        \Sigma^{-1} = y I + k aa^T.
+    \]
+and than find the values for $y$ and $k$. We obtain: 
     \begin{align*}
         \Sigma\Sigma^{-1} & = ((1 + \rho)I - \rho aa^T)(yI + kaa^T) = \\
             & = (1 + \rho)yI + (1 + \rho)kaa^T - \rho yaa^T - k\rho aa^Taa^T = \\
@@ -539,7 +546,7 @@ Hence, recalling that the spectrum of a polynomial of an operator (here $aa^T$) 
         \spectrum{\Sigma} & = (1 + \rho) \left(1 - \frac{\rho}{1 + \rho}\{0, 0, \|a\|^2\}\right) = \\
             & = (1 + \rho)\left\{1, 1 ,1 - 3\frac{\rho}{1 + \rho}\right\} = \\
             & = \left\{1 + \rho, 1 + \rho, 1 + \rho - 3\rho\right\} = \\
-            & = \left\{1 + \rho, 1 + \rho, 1 - 2\rho\right\}.
+            & = \left\{1 + \rho, 1 + \rho, 1 - 2\rho\right\},
     \end{align*}
 where the multiplications and translations of sets are meant componentwise.
 
@@ -548,7 +555,7 @@ where the multiplications and translations of sets are meant componentwise.
 First we need to write the eigenvalues of $\Sigma$ in ascending order. We can distinguish the following two cases:
 \begin{enumerate}
     \item 
-        if $\rho \in \big[0, \frac{1}{2}\big)$ then $1 + \rho \geq 1 - 2\rho$. This leads to
+        if $\rho \in \big[0, \frac{1}{2}\big)$, then $1 + \rho \geq 1 - 2\rho$. This leads to
             \[
                 \begin{cases}
                     \lambda_1 = 1 + \rho \\
@@ -581,7 +588,7 @@ First we need to write the eigenvalues of $\Sigma$ in ascending order. We can di
                 (1 - 2\rho) + (1 + \rho) > \frac{4}{5} 3 \iff 2 - \rho > \frac{12}{5} \iff \rho < -\frac{2}{5}.	
             \]
 \end{enumerate}
-Hence if $\rho \in \big[0, \frac{1}{2}\big)$ it must be $\rho > \frac{1}{5}$, while if $\rho \in (-1, 0)$ it must be $\rho < -\frac{2}{5}$. \newline
+Hence, if $\rho \in \big[0, \frac{1}{2}\big)$, it must be $\rho > \frac{1}{5}$, while, if $\rho \in (-1, 0)$, it must be $\rho < -\frac{2}{5}$. \newline
 Finally, $\forall \rho \in \left(-1, -\frac{2}{5}\right) \cup \left(\frac{1}{5}, \frac{1}{2}\right)$ PC1 and PC2 account for more than $80\%$ of the total variation of $Z$.
 
 ## 2.4
@@ -603,7 +610,7 @@ In order to find the conditional distribution of $Y = (Y_1, Y_2)$ given $X = x$ 
                 \right)
         \]
     where the dimension of $X_1$ is $q < p$.
-    Then the conditional distribution of $X_2 | X_1 = x$ is $\mathcal{N}_{p - q}\left(\tilde{\mu}, \tilde{\Sigma}\right)$ with
+    Then, the conditional distribution of $X_2 | X_1 = x$ is $\mathcal{N}_{p - q}\left(\tilde{\mu}, \tilde{\Sigma}\right)$ with
         \[
             \begin{cases}
                 \tilde{\mu} = \mu_2 + \Sigma_{1, 2}^T \Sigma_{1, 1}^{-1}(X_1 - \mu_1), \\
@@ -674,7 +681,7 @@ Let $\rho = \frac{1}{5}$. Then according to what we found in the previous point 
             \Sigma_Y = \frac{6}{25} \begin{pmatrix} 4 & 1 \\ 1 & 4 \end{pmatrix}
         \end{cases}.
     \]
-Since $\Sigma_Y$ is invertible ($\det{\Sigma_Y} = \frac{6}{25} 15 > 0$) the random variable $(Y - \mu_Y)^T \Sigma_Y^{-1} (Y - \mu_Y)$ is well defined. Moreover since $Y \sim \mathcal{N}_{2}\left(\mu_Y, \Sigma_Y\right)$ then
+Since $\Sigma_Y$ is invertible ($\det{\Sigma_Y} = \frac{6}{25} 15 > 0$) the random variable $(Y - \mu_Y)^T \Sigma_Y^{-1} (Y - \mu_Y)$ is well defined. Moreover, since $Y \sim \mathcal{N}_{2}\left(\mu_Y, \Sigma_Y\right)$, then
     \[
         (Y - \mu_Y)^T \Sigma_Y^{-1} (Y - \mu_Y) \sim \chi^2_2.
     \]
@@ -773,11 +780,11 @@ abline(h = 0.8, col = "blue", lty = 2)
 ```
 \vspace{-0.5cm}
 
-The first three principal components explain the $83.3\%$ of the variability of the data, and if we add a fourth components we arrive near to the $95\%$, which exceeds our requirements.
+The first three principal components explain the $83.3\%$ of the variability of the data, and if we add a fourth component we arrive near to the $95\%$, which exceeds our requirements.
 Hence, it seems reasonable to retain only the first three PCs.
 
 A robustness check for this proposed number of PCs can be performed by looking at the eigenvalues associated to each component.
-In order to identify the ones which capture most of the variance of the original variables, we want to identify the ones that are sized above average. As the original data was previously standardized,  this means to look for eigenvalues greater than $1$. 
+In order to identify the ones which capture most of the variance of the original variables, we want to identify those that are sized above average. As the original data was previously standardized,  this means to look for eigenvalues greater than $1$. 
 
 \vspace{-1.5cm}
 ```{r, echo = F, fig.width = 5, fig.align = "center", fig.asp = 0.7}
@@ -802,12 +809,11 @@ corrplot(t(round(nt_pca$rotation[, 1:2], 2)),
 
 \begin{enumerate}
     \item[\textbf{PC1.}] 
-        Except for the loading associated to the variable \textit{carbohydrates}, which is almost negligible, the other loadings are all negative and lie in the interval $[-0.24, -1]$. The most influencial variables are \textit{fat}, \textit{satured.fat} and \textit{food.energy}, which are related to how much a food is dietetic (or not). Since these loadings are negative, we choose to interpret the first PC as a measure of its dietary power. 
+        Except for the loading associated to the variable \textit{carbohydrates}, which is almost negligible, the other loadings are all negative and lie in the interval $[-0.24, -1]$. The most influencial variables are \textit{fat}, \textit{satured.fat} and \textit{food.energy}, which are related to how much a food is dietetic (or not). Since these loadings are negative, we choose to interpret the first PC as a measure of the dietary power of a certain food item.
     \item[\textbf{PC2.}] 
         The loadings of the second PC are more complicated to analyse. The most influencing in a positive sense are the ones corresponding to the variables \textit{carbohydrates} and \textit{food.energy}, while the negative ones are \textit{protein} and \textit{colhesterol}.
         Hence, PC2 identifies how intense in carbohydrates a serving is, and at the same time low in cholesterol. A possible interpretation could be that the component is an indicator of how intensly a food is made of cereals.
 \end{enumerate}
-<!-- todo: gigi, please change me! -->
 
 Here we report the scatterplot of our dataset projected on the plane PC1 \textit{vs} PC2.
 
@@ -854,7 +860,7 @@ for (j in 1:3) {
 In the figure above we can spot a consistent amount of outliers for each principal component. 
 We identified the most extreme (which are displayed in red) by scaling our PCs and then comparing them with some quantiles (with levels over $0.9999$) of a $\mathcal{N}\left(0, 1\right)$. It is remarkable that some outliers have multiplicity equal to $2$: note that in the first boxplot the outliers are actually six.
 
-We now want measure how these outliers score in the original variables. We build a dataframe with \textit{min}, \textit{mean} and \textit{max} of each variable. 
+We now want to measure how these outliers score in the original variables. We build a dataframe with \textit{min}, \textit{mean} and \textit{max} of each variable. 
 
 ```{r, render = lemon_print, echo = F}
 nt = as.data.frame(nt)
@@ -913,7 +919,7 @@ The outliers found in the previous point are labeled and highlighted in red. The
 
 ## 3.6
 
-We investigate multivariate normality through the first three principal components by computing the Mahalanobis distances, and comparing them with the quantiles of a $\chi^2_3$ with a Q-Q plot. 
+We investigate multivariate normality through the first three principal components by computing the Mahalanobis distances, and then comparing them with the quantiles of a $\chi^2_3$ with a Q-Q plot. 
 
 ```{r, out.width = "80%", fig.align = "center", echo = F}
 par(family = "serif")
@@ -932,7 +938,7 @@ for (i in out_all){
 }
 ```
 
-The approximation is rather good for the observations that have a low score in the mahalanobis sense. These points also account for a large part of the overall mass. However, the empirical distribution appears to have a heavy right tail. Hence, the normality assumption is not plausible. \newline
+The approximation is rather good for the observations that have a low score in the Mahalanobis sense. These points also account for a large part of the overall mass. However, the empirical distribution appears to have a heavy right tail. Hence, the normality assumption is not plausible. \newline
 To corroborate this thesis, we display the same plot after removing the outliers and zooming in on the part that seems to fit best.   
 
 \vspace{-1cm}
@@ -945,13 +951,13 @@ plot(qchisq(ppoints(d_out), df = ncol(pc1_3_out)), sort(d_out),
 abline(0, 1, col = "blue")
 ```
 
-This further advocates against normality. Indeed, what at first sight seems an alignment to the Q-Q line, from a closer perspective reveals a mismatch also for smaller values of mahalanobis distance.
+This further advocates against normality. Indeed, what at first sight seems an alignment to the Q-Q line, from a closer perspective reveals a mismatch also for smaller values of the Mahalanobis distance.
 
 ## 3.7
 
 The Mahalanobis distance is not only of great use to asses the normality of the sample. It can also be employed to detect multivariate outliers. The following plot shows the squared Mahalanobis distances. We also displayed the quantiles of a $\chi^2_3$ for the levels $\alpha = 0.95$ and $\alpha = 0.99$.
 
-\vspace{-1.25cm}
+\vspace{-1.3cm}
 ```{r, out.width = "85%", fig.align = "center", echo = F}
 par(family = "serif")
 color_out = rep("black", dim(nt)[1])
@@ -967,12 +973,12 @@ abline(h = qchisq(alpha_data, df = ncol(pc1_3)), lty = 2, col = "blue")
 legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
     col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
 ```
-\vspace{-0.5cm}
+\vspace{-0.6cm}
 
 We observe that all the extreme univariate outliers we previously identified turned out to be also multivariate outliers indeed (despite not being the only ones). If we were to select only a handful of them, we would choose the most extreme ones, namely being observations $866$, $49$ and $84$. \newline 
-It can be of interest to asses weather these outliers were also multivariate outliers with respect to the original variables. Therefore, we also plot the corresponding squared Mahalanobis distance, with the quantiles of a $\chi^2_6$ of levels $\alpha = 0.95$ and $\alpha = 0.99$.
+It can be of interest to asses whether these outliers were also multivariate outliers with respect to the original variables. Therefore, we also plot the corresponding squared Mahalanobis distances, with the quantiles of a $\chi^2_6$ of levels $\alpha = 0.95$ and $\alpha = 0.99$.
 
-\vspace{-1.25cm}
+\vspace{-1.3cm}
 ```{r, out.width = "85%", fig.align = "center", echo = F}
 par(family = "serif")
 out_all = c(49, 84, 866)
@@ -992,6 +998,6 @@ abline(h = qchisq(alpha_data, df = ncol(nt)), lty = 2, col = "blue")
 legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
     col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
 ```
-\vspace{-0.5cm}
+\vspace{-0.6cm}
 
-Not surprisingly, these three outliers are indeed multivariate outliers also for the joint distribution of the original variables. It is worth to remark that also observations $429$, $438$, $439$, $440$ (marked with \textcolor{paleacquamarine}{$\bullet$}) turn out to be multivariate outliers for the original variables. However, they are not so in the principal components.
+Not surprisingly, these three outliers are indeed multivariate outliers also for the joint distribution of the original variables. It is worth to remark that also observations $429$, $438$, $439$, $440$ (marked with \textcolor{paleacquamarine}{$\bullet$}) turn out to be multivariate outliers for the original variables. However, they are not so with respect to the three principal components.
