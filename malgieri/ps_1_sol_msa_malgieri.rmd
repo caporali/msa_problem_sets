@@ -63,7 +63,7 @@ head(st)
 ```
 \smallskipm
 
-Before starting our analysis, we change a couple of variable names in order to avoid spaces, and add the variable \textit{Density} representing the population density.
+Preliminary to our analysis, we rename some variables to avoid spaces, and add the variable \textit{Density} representing the population density.
 \smallskip
 \smallskip
 
@@ -90,7 +90,7 @@ By analyzing the correlation matrix, we can observe that:
     \item 
         there are high negative correlations also between the variable \textit{Illiteracy} and the variables \textit{Frost}, \textit{HS\_Grad} and \textit{Life\_Exp} ($-0.67$, $-0.66$ and $-0.59$ respectively). The first one is unexpected: there are no natural considerations to justify this value. The second one is reasonable, since more graduates imply less illiterate citizens; however, it is quite odd that this correlation is lower, though only slightely, than the previous one. As for the third one, it makes sense too, since if a major percentage of citizens is educated, then the overall life expectancy should increase;
     \item 
-        the variables with the higher positive correlation ($0.7$) are \textit{Murder} and \textit{Illiteracy}, which is credible since the two variables are intuitively bind;
+        the variables with the higher positive correlation ($0.7$) are \textit{Murder} and \textit{Illiteracy}, which is indeed a plausible relation;
 \end{itemize}
 
 ```{r, echo = F, fig.align = "center", 1, out.width = "90%"}
@@ -144,7 +144,7 @@ rownames(mat_2)[c(2, 3, 5, 8, 9)] = c("NewYork", "Alaska2", "Alaska8",
     "NewJersey", "RhodeIsland")
 ```
 ```{r, render = lemon_print}
-mat_1
+mat_2
 ```
 
 \textit{Note}: In the tables above the names Alaska2 and Alaska8 both refer to the observation 2. We just had to change the rownames since in a dataframe we cannot have two rows with the same name. We choose the numbers $2$ and $8$ to highlight the index of the variable with respect to they are potential univariate outliers.

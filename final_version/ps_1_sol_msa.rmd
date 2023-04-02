@@ -28,7 +28,7 @@ output:
     - \renewcommand{\det}[1]{\operatorname{det}\left(#1\right)}
     - \newcommand{\real}{\mathbb{R}}
     - \newcommand{\prob}[1]{\mathbb{P}\left(#1\right)}
-    - \newcommand{\deq}{\stackrel{\text{def}}{=}}
+    - \newcommand{\deq}{\coloneqq}
     - \newcommand{\convp}{\xrightarrow{\prob}}
     - \renewcommand{\epsilon}{\varepsilon}
     - \renewcommand{\labelitemi}{\normalfont\bfseries\textendash}
@@ -44,7 +44,8 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # setwd (change it with your own)
-setwd("c:/Users/franc/Drive/francesco_caporali/university/multivariate_statistical_analysis/problem_sets/problem_set_1")
+setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/malgieri")
+# setwd("c:/Users/franc/Drive/francesco_caporali/university/multivariate_statistical_analysis/problem_sets/problem_set_1")
 
 # libraries
 library(ellipse)
@@ -63,7 +64,7 @@ head(st)
 ```
 \smallskipm
 
-Before starting our analysis, we change a couple of variable names in order to avoid spaces, and add the variable \textit{Density} representing the population density.
+Preliminary to our analysis, we rename some variables to avoid spaces, and add the variable \textit{Density} representing the population density.
 \smallskip
 \smallskip
 
@@ -88,9 +89,9 @@ By analyzing the correlation matrix, we can observe that:
     \item 
         the variables with the higher negative correlation ($-0.78$) are \textit{Murder} and \textit{Life\_Exp}, which is reasonable since more murders imply an overall reduction of life expectancy;
     \item 
-        there are high negative correlations also between the variable \textit{Illiteracy} and the variables \textit{Frost}, \textit{HS\_Grad} and \textit{Life\_Exp} ($-0.67$, $-0.66$ and $-0.59$ respectively). The first one is unexpected: there are no natural considerations to justify this value. The second one is reasonable, since more graduates imply less illiterate citizens; however, it is quite odd that this correlation is lower, though only slightely, than the previous one. As for the third one, it makes sense too, since if a major percentage of citizens is educated, then the overall life expectancy should increase;
+        there are high negative correlations also between the variable \textit{Illiteracy} and the variables \textit{Frost}, \textit{HS\_Grad} and \textit{Life\_Exp} ($-0.67$, $-0.66$ and $-0.59$ respectively). The first one is unexpected: there are no natural considerations to justify this value. The second one is reasonable, since more graduates imply less illiterate citizens; however, it is quite odd that this correlation is lower, though only slightly, than the previous one. As for the third one, it makes sense too, since if a major percentage of citizens is educated, then the overall life expectancy should increase;
     \item 
-        the variables with the higher positive correlation ($0.7$) are \textit{Murder} and \textit{Illiteracy}, which is credible since the two variables are intuitively bind;
+        the variables with the higher positive correlation ($0.7$) are \textit{Murder} and \textit{Illiteracy}, which is indeed a plausible relation;
 \end{itemize}
 
 ```{r, echo = F, fig.align = "center", 1, out.width = "90%"}
@@ -132,22 +133,20 @@ mat_2 = as.data.frame(mat_2)
 In the following dataframes (respectively \texttt{mat\_1} and \texttt{mat\_2}) the first column refers to the index of the corresponding observation, while the second one refers to the variable with respect to this observation is a potential univariate outlier.
 
 ```{r, echo = F}
-rownames(mat_1)[c(2, 3, 5, 7, 8)] = c("NewYork", "Alaska2", "Alaska8",
-    "NewJersey", "RhodeIsland")
+rownames(mat_1)[c(2, 3, 5, 7, 8)] = c("NewYork", "Alaska_Income", "Alaska_Area", "NewJersey", "RhodeIsland")
 ```
 ```{r, render = lemon_print}
 mat_1
 ```
 
 ```{r, echo = F, render = lemon_print}
-rownames(mat_2)[c(2, 3, 5, 8, 9)] = c("NewYork", "Alaska2", "Alaska8",
-    "NewJersey", "RhodeIsland")
+rownames(mat_2)[c(2, 3, 5, 8, 9)] = c("NewYork", "Alaska_Income", "Alaska_Area", "NewJersey", "RhodeIsland")
 ```
 ```{r, render = lemon_print}
-mat_1
+mat_2
 ```
 
-\textit{Note}: In the tables above the names Alaska2 and Alaska8 both refer to the observation 2. We just had to change the rownames since in a dataframe we cannot have two rows with the same name. We choose the numbers $2$ and $8$ to highlight the index of the variable with respect to they are potential univariate outliers.
+\textit{Note}: In the tables above the names Alaska\_Income and Alaska\_Area both refer to observation 2 (i.e. Alaska). As it constitutes a potential univariate outlier for both variables, we opted for a relabelling to display them separately. 
 
 ## 1.3
 
@@ -197,7 +196,7 @@ In conclusion, by looking at the boxplots we infer that observations $2, 5, 21, 
 
 ## 1.4
 
-In order to check whether each variable is normally distributed or not, we first examine the relationship between the theoretical and the sample quantiles through the corresponding Q-Q plots.
+In order to investigate the normality of the data, we first compare the theoretical and the sample quantiles with the aid of the corresponding Q-Q plots.
 \smallskip
 
 ```{r, echo = F, fig.asp = 0.9}
@@ -223,20 +222,20 @@ for (j in 1:n){
 From the Q-Q plots we can observe that:
 \begin{itemize}
 	\item 
-		all the values corresponding to the variables \textit{Income} lie very close to the Q-Q line, except for the observation $2$, which was previously identified as an univariate outlier;
+		all the values corresponding to the variable \textit{Income} lie very close to the Q-Q line, except for the observation $2$, which was previously identified as an univariate outlier;
 	\item 
-		also the variable \textit{Life\_Exp} seems to be quite normal: the values are more spread out with respect to the ones corresponding to the variable \textit{Income}, but they still are very close to the blue line (which represents the linear relationship between the sample and the theoretical quantiles);
+		also the variable \textit{Life\_Exp} seems to have a distribution close to normal: the values are more spread out with respect to the ones corresponding to the variable \textit{Income}, but they still are very close to the blue line (which represents the linear relationship between the sample and the theoretical quantiles);
 	\item 
-		the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similiar beheaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliers;
+		the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similiar behaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliers;
 	\item 
-		also the variables \textit{Population}, \textit{Area} and \textit{Density} have very similar shapes, which are pretty far from being linear. All of them have heavy tails, which is also caused by the presence of more then one outlier;
+		also the variables \textit{Population}, \textit{Area} and \textit{Density} have very similar shapes, which are pretty far from being linear. All of them have heavy tails, which is also caused by the presence of more than one outlier;
 	\item 
 		the trajectory of the variable \textit{Illiteracy} is very atypical, indeed on the left side of the plot we can observe that a consistent percentage of the points share the same values.
 \end{itemize}
 
-In conclusion, we can infer a gaussian beheaviour only for the variables \textit{Income} and \textit{Life\_Exp}.
+In conclusion, we can infer a gaussian behaviour only for the variables \textit{Income} and \textit{Life\_Exp}.
 
-We can draw the same conclusions by observing the histograms of the single variables. In the following plots the blue line represents the empirical density, while the red line the theoretical density.
+We can draw the same conclusions by observing the histograms of the single variables. In the following plots the blue line represents the empirical density, while the red line the theoretical gaussian density (under sample mean and variance).
 
 ```{r, echo = F, fig.align = "center", fig.asp = 0.9}
 par(mfrow = c(3, 3), family = "serif", mar = c(2, 2, 4, 1))
@@ -250,7 +249,7 @@ for (j in 1:n){
 
 \smallskip
 \smallskip
-Another possible way to check normality is by taking the Shapiro-Wilk test: if the returned p-value is less than the chosen significannce level, i.e $0.05$, we can reject the null hypothesis that the data are normally distributed. If the p-value is grater than the chosen significance level, we fail to reject the null hypothesis.
+Another possible way to assess normality is by taking the Shapiro-Wilk test: if the returned p-value is less than the chosen significance level, i.e $0.05$, we can reject the null hypothesis that the data are normally distributed. If the p-value is grater than the chosen significance level, we fail to reject the null hypothesis.
 By performing the Shapiro-Wilk test, we obtain the following results:
 \smallskip
 
@@ -269,7 +268,7 @@ shap_test
 \vspace{-0.2cm}
 As we can see, the variables \textit{Income} and \textit{Life\_Exp} can be considered normally distributed, since their p-value is grater than $0.05$. Moreover, the p-values of the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} are really close to $0.05$, but the only one for which the null hypothesis is not rejected is \textit{Frost}. However, its p-value is $\approx 0.0527$, thus it is reasonable to doubt its normality, taking also in account the corresponding Q-Q plot and histogram presented above.
 
-Now, it may be interesting to see how the previous tests change if we remove from each variable the observations we identified as their outliers. Let's take a look at the Q-Q plots and at the results of the Shapiro-Wilk test.
+Now, it may be of interest to see how the previous tests change if for each variable we remove the observations we identified as their respective outliers (where any). We report the adjusted Q-Q plots and the results of the Shapiro-Wilk test.
 \smallskip
 
 ```{r, echo = F, fig.show = "hide"}
@@ -340,19 +339,19 @@ colnames(shap_test_out) = c("p.value")
 ```
 
 \smallskip
-We can note that:
+We can observe that:
 \begin{itemize}
 	\item 
-		the variables \textit{Population} and \textit{Density} follows the same non-gaussian beheaviour that we observed before; in fact, their p-values are almost negligible;
+		the variables \textit{Population} and \textit{Density} follow the same non-gaussian behaviour that we observed before; as a matter of fact, their p-values are almost negligible;
 	\item 
-		as for the variable \textit{Income}, we can still say that its distribution is gaussian. However, from the Q-Q plot we can observe the presence of more pronounced tails. Its p-value is still grater than $0.05$ but a bit lower than the previous one;
+		as for the variable \textit{Income}, we can still argue that its distribution is gaussian. However, from the Q-Q plot we can observe the presence of more pronounced tails. Its p-value is still greater than $0.05$ yet a slightly lower than the previous one;
 	\item 
-		finally, by removing its outliers, the variable \textit{Area} seems to become gaussian: its p-value is very close to $0.05$ but there is a huge difference between this value and the previous p-value.
+		finally, by removing its outliers, the variable \textit{Area} seems to become gaussian: its p-value is very close to $0.05$ but there is a huge difference between the current and the previous p-value.
 \end{itemize}
 
 ## 1.5
 
-We report the scatterplot of the variables \textit{Area} \textit{vs} \textit{Population}, where have colored all the potential outliers.
+We report the scatterplot of the variables \textit{Area} \textit{vs} \textit{Population}, where have colored all the potential univariate outliers.
 
 ```{r, echo = F, fig.align = "center", fig.asp = 0.48, out.width = "95%"}
 par(family = "serif", mar = c(4, 4, 1, 1))
@@ -367,7 +366,7 @@ for (j in out_all){
 }
 ```
 
-From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15 \times 10^4]\times [0, 15 \times 10^3]$. Also, unlike the other univariate outliers, the points corresponding to the observations $2, 5, 32$ and $43$ seems to be really far from the other points. Hence, we can identify them as bivariate outliers.
+From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15 \times 10^6]\times [0, 15 \times 10^3]$. Furthermore, unlike the other univariate outliers, the points corresponding to the observations $2, 5, 32$ and $43$ seems to be really far from the other points. Hence, we can identify them as bivariate outliers.
 
 ## 1.6
 
@@ -399,7 +398,7 @@ The Chi-sqared Q-Q plot of Mahalanobis distance shows that the majority of the p
 
 ## 1.7
 
-In order to identify the multivariate outliers we can plot the squared Mahalanobis distances' vector and then add some threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_9^2$ (in particular, we used $\alpha_1 = 0.95$ and $\alpha_2 = \frac{(n - 0.5)}{n}$ with $n = \texttt{nrow(st)}$).
+In order to identify the multivariate outliers, we can plot the vector of the squared Mahalanobis distances and then add some threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_9^2$ (in particular, we used $\alpha_1 = 0.95$ and $\alpha_2 = \frac{(n - 0.5)}{n} = 0.99$ with $n = \texttt{nrow(st)}$).
 \vspace{-1.5cm}
 
 ```{r, fig.align = "center", echo = F, out.width = "95%"}
@@ -418,9 +417,11 @@ legend(x = "topright", legend = c("0.95", round(alpha_data, 3)),
 ```
 
 \smallskipm
-The observations $2$ and $11$ are above the higher line (which corresponds to $\chi_9^2(\alpha_2)$), hence they can be considered as multivariate outliers. This confirms what we previously noticed in the Chi-squared Q-Q plot. \newline
-Note also that some observations lie in the srip delimited by the two lines, however we choose to do not consider them as multivariate outliers, taking also in account what we observed in the previous point. \newline
+The observations $2$ and $11$ are above the blue line (which corresponds to $\chi_9^2(\alpha_2)$), hence they can be confidently considered as multivariate outliers. This confirms what we previously noticed in the Chi-squared Q-Q plot. \newline
+Note also that some observations lie in the strip delimited by the two lines. Nonetheless, we choose not to consider them as multivariate outliers, taking also in account what we observed in the previous point. \newline
 Finally, we can notice that the majority of the observations identified as univariate outliers cannot be considered as multivariate outliers with the only exception of the observation $2$.
+
+<!-- One remark from Fra Capo: these two states were the last ones to join the federation. Of course we don't claim this to be causal. Nonetheless, the absense of contiguity with the other states definitely reduces the net flow with other states therefore reducing homogenizing factors. -->
 
 \newpage
 
@@ -428,27 +429,27 @@ Finally, we can notice that the majority of the observations identified as univa
 
 ## 2.1
 
-Let first note that $\Sigma$ is invertible since $\det{\Sigma} = -2\rho^3 - 3\rho^2 + 1$ which is greater than $0$, $\forall p \in \left[-1, \frac{1}{2}\right]$. \newline
+First observe that $\Sigma$ is invertible since $\det{\Sigma} = -2\rho^3 - 3\rho^2 + 1$ which is greater than $0$, $\forall \rho \in \left(-1, \frac{1}{2}\right)$. \newline
 We compute the inverse of $\Sigma$ by exploiting the identity 
     \[
         \Sigma = (1 + \rho)I - \rho aa^T \text{ with } a = (1, 1, -1)
     \]
-and applying the following theorem, known as the Neumann Series Theorem:
+and applying the following theorem, which is known as the Neumann Series Theorem:
 \begin{thm}[Neumann Series]
     Let $T$ be a linear mapping $T: \real^n \to \real^n$. If the series $\sum_{i = 0}^{\infty} T^i$ converges, then $I - T$ is invertible and it holds
         \[
             (I - T)^{-1} = \sum_{i = 0}^{\infty} T^i.
         \]
 \end{thm}
-First we rewrite 
+We first rewrite 
     \[
         \Sigma = (1 + \rho)(I - c aa^T) \text{ with } a = (1, 1, -1) \text{ and } c = \frac{\rho}{1 + \rho}.
     \]
 Let $A \deq I - c aa^T$, it holds
     \begin{align*}
         A^{-1} & = (I - c aa^T)^{-1} = \sum_{i = 0}^{\infty} (c aa^T)^i = \\
-            & = \sum_{i = 0}^{\infty} c^i (aa^T)^i = I + \sum_{i = i}^{\infty} c^i (\|a\|^2)^{i - 1} aa^T = \\
-            & = I + c aa^T \sum_{i = 0}^{\infty} (c \|a\|^2)^{i - 1} = I + c aa^T \sum_{i = i}^{\infty} (c \|a\|^2)^i = \\
+            & = \sum_{i = 0}^{\infty} c^i (aa^T)^i = I + \sum_{i = 1}^{\infty} c^i (\|a\|^2)^{i - 1} aa^T = \\
+            & = I + c aa^T \sum_{i = 1}^{\infty} (c \|a\|^2)^{i - 1} = I + c aa^T \sum_{i = 0}^{\infty} (c \|a\|^2)^i = \\
             & = I + c aa^T \frac{1}{1 - c \|a\|^2} = I + \frac{\rho}{1 + \rho} \frac{1}{1 - 3\frac{\rho}{1 + \rho}} aa^T = \\
             & = I + \frac{\rho}{1 - 2\rho} aa^T.
     \end{align*}
@@ -456,15 +457,16 @@ Thus
     \[
         \Sigma^{-1} = (1 + \rho)^{-1} A^{-1} = \frac{1}{1 + \rho}\left(I + \frac{\rho}{1 - 2\rho} aa^T\right).
     \]
-We can compute $\Sigma^{-1}$ also in many other ways, for example we can suppose that $\Sigma^{-1}$ is of the same form $\Sigma$, i.e. 
+We can compute $\Sigma^{-1}$ in many other ways; for example we can suppose that $\Sigma^{-1}$ is of the same form $\Sigma$, i.e. 
     \[
-        \Sigma^{-1} = y I + k aa^t
+        \Sigma^{-1} = y I + k aa^T.
     \]
-and than find the values for $y$ and $k$.
+Observe that $P \deq aa^T$ is a projection matrix. Therefore, while in principle $\Sigma \Sigma^{-1} = I$ may yield no solution as we have a second degree polynomial in $P$ on l.h.s., as $P$ is idempotent, we have that l.h.s. is actually of first degree in $P$. \newline
+We now find the values for $y$ and $k$.
     \begin{align*}
         \Sigma\Sigma^{-1} & = ((1 + \rho)I - \rho aa^T)(yI + kaa^T) = \\
             & = (1 + \rho)yI + (1 + \rho)kaa^T - \rho yaa^T - k\rho aa^Taa^T = \\
-            & = (1 + \rho)yI + ((1 + \rho)k - \rho y - 3 k\rho).
+            & = (1 + \rho)yI + ((1 + \rho)k - \rho y - 3 k\rho)aa^T.
     \end{align*}
 This leads to the following system:
     \[
@@ -505,8 +507,8 @@ We find the eigenvalues of $\Sigma$ by computing the roots of the characteristic
                 \rho \left(-\rho^2 - \rho(1 -\lambda)\right) = \\
             & = (1 - \lambda)(1 - \lambda + \rho)(1 - \lambda - \rho) - 2\rho^2(1 - \lambda + \rho) = \\
             & = (1 - \lambda + \rho)\left((1 - \lambda)(1 - \lambda - \rho) - 2\rho^2\right) = \\
-            & = (1 - \lambda + \rho)(1 - \lambda)(1 - \lambda - \rho - \lambda + \lambda^2 + \lambda \rho - 2\rho^2) = \\
-            & = (1 - \lambda + \rho)(1 - \lambda)\left(\lambda^2 + \lambda(\rho - 2)- 2\rho^2 - \rho + 1\right)
+            & = (1 - \lambda + \rho)(1 - \lambda - \rho - \lambda + \lambda^2 + \lambda \rho - 2\rho^2) = \\
+            & = (1 - \lambda + \rho)\left(\lambda^2 + \lambda(\rho - 2)- 2\rho^2 - \rho + 1\right)
     \end{align*}
 Hence
     \begin{align*}
@@ -520,31 +522,30 @@ with $\lambda_{1, 2}$ roots of $p(\lambda) = \lambda^2 + \lambda(\rho - 2)- 2\rh
             & = \frac{-\rho + 2 \pm 3|\rho|}{2} = \\
             & = (1 + \rho, 1 - 2\rho).
     \end{align*}
-Hence the eigenvalues with multiplicity are $\left\{1 + \rho, 1 + \rho, 1 - 2\rho\right\}$. \newline
+Hence the eigenvalues (with multiplicity) are $\left\{1 + \rho, 1 + \rho, 1 - 2\rho\right\}$. \newline
 A faster way to find the spectrum (set of eigenvalues, meant with multiplicity) is reported below. We exploit some basic properties of the spectrum. \newline
-We denote $\spectrum{\Sigma}$ the spectrum of the matrix $\Sigma$ (as a linear operator).
+We denote with $\spectrum{\Sigma}$ the spectrum of the matrix $\Sigma$ (as a linear operator).
     \begin{align*}
         \spectrum{\Sigma} &= \spectrum{(1 + \rho)\left(I - \frac{\rho}{1 + \rho} aa^t\right)} = \\
             & = (1 + \rho) \spectrum{I - \frac{\rho}{1 + \rho} aa^t} = \\
             & = (1 + \rho) \left(1 - \frac{\rho}{1 + \rho}\spectrum{aa^t}\right).
     \end{align*}
-Observing $(aa^T)a = \|a\|^2 a$ and $\rank{aa^T} = 1$ it holds
+Since $(aa^T)a = \|a\|^2 a$ and $\rank{aa^T} = 1$, it holds that
     \[
         \spectrum{aa^T} = \left\{0, 0, \|a\|^2\right\}.
     \]
-Hence
+Hence, recalling that the spectrum of a polynomial of an operator (here $aa^T$) is the polynomial of the spectrum
     \begin{align*}
         \spectrum{\Sigma} & = (1 + \rho) \left(1 - \frac{\rho}{1 + \rho}\{0, 0, \|a\|^2\}\right) = \\
             & = (1 + \rho)\left\{1, 1 ,1 - 3\frac{\rho}{1 + \rho}\right\} = \\
             & = \left\{1 + \rho, 1 + \rho, 1 + \rho - 3\rho\right\} = \\
             & = \left\{1 + \rho, 1 + \rho, 1 - 2\rho\right\}.
     \end{align*}
-where the multiplications and translations of sets are mean component wise.
+where the multiplications and translations of sets are meant componentwise.
 
 ## 2.3
 
-We first write the eigenvalues of $\Sigma$ in ascending order. \newline
-We distinguish the following two cases:
+First we need to write the eigenvalues of $\Sigma$ in ascending order. We can distinguish the following two cases:
 \begin{enumerate}
     \item 
         if $\rho \in \big[0, \frac{1}{2}\big)$ then $1 + \rho \geq 1 - 2\rho$. This leads to
@@ -575,13 +576,13 @@ We distinguish the following two cases:
                 \end{cases}
                 \text{ , with } \lambda_1 \geq \lambda_2 \geq \lambda_3.
             \]
-        By using the same argument we used in the previous poin we obtain that $\rho$ have to satisfy the following condition:
+        By using the same argument we used in the previous point we obtain that $\rho$ has to satisfy the following condition:
             \[
                 (1 - 2\rho) + (1 + \rho) > \frac{4}{5} 3 \iff 2 - \rho > \frac{12}{5} \iff \rho < -\frac{2}{5}.	
             \]
 \end{enumerate}
-Hence for $\rho \in \big[0, \frac{1}{2}\big)$ it must be $\rho > \frac{1}{5}$ and for $\rho \in (-1, 0)$ it must be $\rho < -\frac{2}{5}$. \newline
-So $\forall \rho \in \left(-1, -\frac{2}{5}\right) \cup \left(\frac{1}{5}, \frac{1}{2}\right)$ PC1 and PC2 account for more than $80\%$ of the total variation of $Z$.
+Hence if $\rho \in \big[0, \frac{1}{2}\big)$ it must be $\rho > \frac{1}{5}$, while if $\rho \in (-1, 0)$ it must be $\rho < -\frac{2}{5}$. \newline
+Finally, $\forall \rho \in \left(-1, -\frac{2}{5}\right) \cup \left(\frac{1}{5}, \frac{1}{2}\right)$ PC1 and PC2 account for more than $80\%$ of the total variation of $Z$.
 
 ## 2.4
 
@@ -601,7 +602,7 @@ In order to find the conditional distribution of $Y = (Y_1, Y_2)$ given $X = x$ 
                     \end{array}
                 \right)
         \]
-    where the dimension of $X_1$ is $q < p$. \newline
+    where the dimension of $X_1$ is $q < p$.
     Then the conditional distribution of $X_2 | X_1 = x$ is $\mathcal{N}_{p - q}\left(\tilde{\mu}, \tilde{\Sigma}\right)$ with
         \[
             \begin{cases}
@@ -610,18 +611,18 @@ In order to find the conditional distribution of $Y = (Y_1, Y_2)$ given $X = x$ 
             \end{cases}.
         \]
 \end{prop}
-By applying the proportion to
+By applying the proposition to
     \begin{gather*}
         Z = (X, Y_1, Y_2) \sim \mathcal{N}_3\left(\mu, \Sigma\right) \text{ with} \\
         \mu = \mean{Z} = \begin{pmatrix} \mean{X} \\ \mean{\begin{matrix} Y_1 \\ Y_2 \end{matrix}} \end{pmatrix} \deq \left(\begin{array}{@{}c@{}} \mu_1 \\ \hline \begin{array}{@{}c@{}} \mu_{2, 1} \\ \mu_{2, 2} \end{array} \end{array}\right) = \begin{pmatrix} \mu_1 \\ \mu_2 \end{pmatrix} \text{ and} \\
         \Sigma = 
             \left(
                 \begin{array}{@{}c|c@{}}
-                    \var{X} & \begin{matrix} \cov{X}{Y_1} & \cov{X}{Y_1} \end{matrix} \\
+                    \var{X} & \begin{matrix} \cov{X}{Y_1} & \cov{X}{Y_2} \end{matrix} \\
                     \vspace{-0.3cm} \\
                     \hline
                     \vspace{-0.3cm} \\
-                    \begin{matrix} \cov{X}{Y_1} \\ \cov{X}{Y_1} \end{matrix} & \var{Y}
+                    \begin{matrix} \cov{X}{Y_1} \\ \cov{X}{Y_2} \end{matrix} & \var{Y}
                 \end{array}
             \right) \deq
             \left(
@@ -641,27 +642,27 @@ we obtain $(Y_1, Y_2) | X = x \sim \mathcal{N}_{2}\left(\tilde{\mu}, \tilde{\Sig
             \tilde{\Sigma} = \Sigma_{2, 2} - \Sigma_{1, 2}^T \Sigma_{1, 1}^{-1} \Sigma_{1, 2}
         \end{cases}.
     \]
-By sobtituting what we found we get
+By substituting what we found we get
     \begin{align*}
-        \tilde{\mu} & = \mean{\begin{matrix} Y_1 \\ Y_2 \end{matrix}} + \begin{pmatrix} \cov{X}{Y_1} \\ \cov{X}{Y_1} \end{pmatrix} \frac{x - \mean{X}}{\var{X}} = \\
-            & = \begin{pmatrix} 0 \\ 2 \end{pmatrix} + \begin{pmatrix} \rho \\ -\rho \end{pmatrix} \frac{x - 1}{1} = \begin{pmatrix} 0 - \rho (x - 1) \\ 2 + \rho (x - 1) \end{pmatrix} = \\
+        \tilde{\mu} & = \mean{\begin{matrix} Y_1 \\ Y_2 \end{matrix}} + \begin{pmatrix} \cov{X}{Y_1} \\ \cov{X}{Y_2} \end{pmatrix} \frac{x - \mean{X}}{\var{X}} = \\
+            & = \begin{pmatrix} 0 \\ 2 \end{pmatrix} + \begin{pmatrix} -\rho \\ \rho \end{pmatrix} \frac{x - 1}{1} = \begin{pmatrix} 0 - \rho (x - 1) \\ 2 + \rho (x - 1) \end{pmatrix} = \\
             & = \begin{pmatrix} - \rho (x - 1) \\ 2 + \rho (x - 1) \end{pmatrix}
     \end{align*}
 and
     \begin{align*}
-        \tilde{\Sigma} & = \var{Y} - \frac{1}{\var{X}} \begin{pmatrix} \cov{X}{Y_1} \\ \cov{X}{Y_1} \end{pmatrix} \begin{matrix} \big( \cov{X}{Y_1} & \cov{X}{Y_1} \big) \\ & \end{matrix} = \\
+        \tilde{\Sigma} & = \var{Y} - \frac{1}{\var{X}} \begin{pmatrix} \cov{X}{Y_1} \\ \cov{X}{Y_2} \end{pmatrix} \begin{matrix} \big(\cov{X}{Y_1} & \cov{X}{Y_2} \big) \\ & \end{matrix} = \\
             & = \begin{pmatrix} 1 & \rho \\ \rho & 1 \end{pmatrix} - \begin{pmatrix} -\rho \\ \rho \end{pmatrix} \begin{matrix} \big( -\rho & \rho \big) \\ & \end{matrix} = \\
             & = \begin{pmatrix} 1 & \rho \\ \rho & 1 \end{pmatrix} - \rho^2 \begin{pmatrix} 1 & -1 \\ -1 & 1 \end{pmatrix} = \\
             & = \begin{pmatrix} 1 - \rho^2 & \rho + \rho^2 \\ \rho + \rho^2 & 1 - \rho^2 \end{pmatrix}.
     \end{align*}
-Hence it holds
+Hence, it holds
     \[
         (Y_1, Y_2) | X = x \sim \mathcal{N}_{2}\left(\begin{pmatrix} - \rho (x - 1) \\ 2 + \rho (x - 1) \end{pmatrix}, \begin{pmatrix} 1 - \rho^2 & \rho + \rho^2 \\ \rho + \rho^2 & 1 - \rho^2 \end{pmatrix}\right).
     \]
  
 ## 2.5
 
-Let $\rho = \frac{1}{5}$, then according to what we found in the previous point we obtain
+Let $\rho = \frac{1}{5}$. Then according to what we found in the previous point we obtain
     \[
         \begin{cases}
             \mu_Y \deq \begin{pmatrix} - \rho (x - 1) \\ 2 + \rho (x - 1) \end{pmatrix}\Biggl|_{x = 0, \rho = 1/5} \\
@@ -694,11 +695,11 @@ By imposing this probability to $0.95$, since $(Y - \mu_Y)^T \Sigma_Y^{-1} (Y - 
 c = sqrt(qchisq(0.95, df = 2))
 ```
 
-An ecplicit computation reveals
+An explicit computation reveals
     \[
         c = `r c`. 
     \]
-This ellipse is centered in $\mu_Y$, its axes have length $c\sqrt{\lambda_1}$, $c\sqrt{\lambda_2}$ and directions $e_1$, $e_2$, where $(\lambda_1, e_1)$ and $(\lambda_2, e_2)$ are eigenpairs of the matrix $\Sigma_y$.
+This ellipse is centered in $\mu_Y$, its axes have length $c\sqrt{\lambda_1}$, $c\sqrt{\lambda_2}$ and directions $e_1$, $e_2$, where $(\lambda_1, e_1)$ and $(\lambda_2, e_2)$ are the eigenpairs of the matrix $\Sigma_y$.
 
 ```{r}
 rho = 0.2
@@ -728,7 +729,7 @@ points(mu_y[1], mu_y[2], col = "red", pch = 16)
 
 ## 3.1
 
-First of all we divide each variable by \texttt{weight} in order to equalize out the fifferent types of servings of each food.
+First of all we divide each variable by \texttt{weight} in order to equalize out the different types of servings of each food.
 
 ```{r, render = lemon_print}
 nutritional = read.table("data/nutritional.txt")
@@ -736,7 +737,7 @@ nutritional = nutritional[, -6] / nutritional[, 6]
 head(round(nutritional, 3))
 ```
 
-After the standardization of the dataset, carried out with the command \texttt{scale} we perform the Principal Components Analysis.
+After the standardization of the dataset, carried out with the command \texttt{scale}, we perform the Principal Components Analysis.
 
 ```{r, render = lemon_print}
 nt = scale(nutritional)
@@ -772,11 +773,11 @@ abline(h = 0.8, col = "blue", lty = 2)
 ```
 \vspace{-0.5cm}
 
-We can note that the first three PCs explain the $83.3\%$ of the variability of the data, and if we add a fourth PC we arrive near to the $95\%$ which is way too much for our purpose.
-Hence it seems reasonable to retain only the first three PCs.
+The first three principal components explain the $83.3\%$ of the variability of the data, and if we add a fourth components we arrive near to the $95\%$, which exceeds our requirements.
+Hence, it seems reasonable to retain only the first three PCs.
 
-In order to confirm the previous consideration it also useful to look at the eigenvalues associated to each component.
-We also recall that if the variables are standardized the components whose eigenvalues are greater than $1$ capture most of the original variables' variance. <!-- ' --> 
+A robustness check for this proposed number of PCs can be performed by looking at the eigenvalues associated to each component.
+In order to identify the ones which capture most of the variance of the original variables, we want to identify the ones that are sized above average. As the original data was previously standardized,  this means to look for eigenvalues greater than $1$. 
 
 \vspace{-1.5cm}
 ```{r, echo = F, fig.width = 5, fig.align = "center", fig.asp = 0.7}
@@ -786,7 +787,7 @@ abline(h = 1, col = "red", lty = 2)
 ```
 \vspace{-1.25cm}
 
-The screeplot is not so easy to interpret, due to the absence of an evident \textit{elbow} in the curve. However only the eigenvalues corresponding to the first three PCs are greater than $1$ hence we can keep the choice of retaining only the first three PCs.
+The screeplot is not so easy to interpret. Due to the absence of an evident \textit{elbow} in the curve, it would not be a useful selection criterium. In conclusion, as only the eigenvalues corresponding to the first three PCs are greater than $1$, we can confirm the choice of retaining only the first three PCs.
 
 ## 3.3
 
@@ -801,14 +802,14 @@ corrplot(t(round(nt_pca$rotation[, 1:2], 2)),
 
 \begin{enumerate}
     \item[\textbf{PC1.}] 
-        Except for the loading associated to the variable \textit{carbohydrates} which is almost negligible, the other loadings are all negative and lies in $[-0.24, -1]$. The most influencial variables are \textit{fat}, \textit{satured.fat} and \textit{food.energy} which are related to how much a food is dietetic (or not). Since those loadings are negative, we choose to interpret the first PC of a food item as a measure of its dietary. 
+        Except for the loading associated to the variable \textit{carbohydrates}, which is almost negligible, the other loadings are all negative and lie in the interval $[-0.24, -1]$. The most influencial variables are \textit{fat}, \textit{satured.fat} and \textit{food.energy}, which are related to how much a food is dietetic (or not). Since these loadings are negative, we choose to interpret the first PC as a measure of its dietary power. 
     \item[\textbf{PC2.}] 
         The loadings of the second PC are more complicated to analyse. The most influencing in a positive sense are the ones corresponding to the variables \textit{carbohydrates} and \textit{food.energy}, while the negative ones are \textit{protein} and \textit{colhesterol}.
-        Hence PC2 identifies how intense in carbohydrates the serving was, and at the same time low in cholesterol. A possible interpretation could be that the component is an indicator of how intensly a food is made of cereals.
+        Hence, PC2 identifies how intense in carbohydrates a serving is, and at the same time low in cholesterol. A possible interpretation could be that the component is an indicator of how intensly a food is made of cereals.
 \end{enumerate}
 <!-- todo: gigi, please change me! -->
 
-Here we report a scatterplot of our dataset projected on the plane PC1 \textit{vs.} PC2.
+Here we report the scatterplot of our dataset projected on the plane PC1 \textit{vs} PC2.
 
 \vspace{-1cm}
 ```{r, echo = F, out.width = "75%", fig.align = "center"}

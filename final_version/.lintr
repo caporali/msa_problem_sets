@@ -2,6 +2,6 @@ linters: linters_with_defaults(
     no_tab_linter = NULL,
     assignment_linter = NULL,
     T_and_F_symbol_linter = NULL,
-    line_length_linter(length = 120L),
+    line_length_linter(length = 300L),
     commented_code_linter = NULL
     )
