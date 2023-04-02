@@ -164,17 +164,17 @@ mat_copy = mat_2
 n = ncol(st)
 par(mfrow = c(3, 3), family = "serif", mar = c(1, 2, 2, 1))
 for (j in 1:n){
-	b = boxplot(st[, j], main = names(st)[j], outpch = 16, outcex = 1.25)
-	if (length(b$out > 0)) {
-		for (i in match(b$out, st[, j])) {
-			if (i %in% mat_copy[, 1] && j == mat_copy[match(i, mat_copy[, 1]), 2]) {
-				mat_copy = mat_copy[-1, ]
-				text(1, st[i, j], labels = as.character(i), pos = 4,
-					cex = 0.75, offset = 1, col = "red")
-				points(1, st[i, j], col = "red", pch = 16, cex = 1.25)
-			}
-		}
-	}
+    b = boxplot(st[, j], main = names(st)[j], outpch = 16, outcex = 1.25)
+    if (length(b$out > 0)) {
+        for (i in match(b$out, st[, j])) {
+            if (i %in% mat_copy[, 1] && j == mat_copy[match(i, mat_copy[, 1]), 2]) {
+                mat_copy = mat_copy[-1, ]
+                text(1, st[i, j], labels = as.character(i), pos = 4,
+                    cex = 0.75, offset = 1, col = "red")
+                points(1, st[i, j], col = "red", pch = 16, cex = 1.25)
+            }
+        }
+    }
 }
 mat_2 = mat_2[-match(18, out_all), ]
 out_all = out_all[-match(18, out_all)]
@@ -183,13 +183,13 @@ out_all = out_all[-match(18, out_all)]
 We can make the following considerations:
 \begin{itemize}
     \item 
-		according to what we found in point 1.2, the variables \textit{Life\_Exp}, \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} seems not to have any potential univariate outlier;
+        according to what we found in point 1.2, the variables \textit{Life\_Exp}, \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} seems not to have any potential univariate outlier;
     \item 
-		the potential outlier we identified for the variable \textit{Illiteracy} (observation $18$) does not show up in the corresponding boxplot. This is plausible, since the variable's distribution seems to have very fat tails. For this reason we choose to do not consider this observation as an outlier;
+        the potential outlier we identified for the variable \textit{Illiteracy} (observation $18$) does not show up in the corresponding boxplot. This is plausible, since the variable's distribution seems to have very fat tails. For this reason we choose to do not consider this observation as an outlier;
     \item 
-		the variable \textit{Income} seems to have only the observation $2$ as potential outlier, which is consistent with what we obtained in the previous point. Note also that the observation $2$ is a potential outlier both for the variable \textit{Income} and the variable \textit{Area};
+        the variable \textit{Income} seems to have only the observation $2$ as potential outlier, which is consistent with what we obtained in the previous point. Note also that the observation $2$ is a potential outlier both for the variable \textit{Income} and the variable \textit{Area};
     \item 
-		as for the remaning variables, the boxplots generated many other potential univariate outliers, but the ones that we did not detect in the previous point are not in the outer tails (at least $98.75$th percentile) of the distribution. Hence, we will not think of them as outliers.
+        as for the remaning variables, the boxplots generated many other potential univariate outliers, but the ones that we did not detect in the previous point are not in the outer tails (at least $98.75$th percentile) of the distribution. Hence, we will not think of them as outliers.
 \end{itemize}
 \smallskip
 In conclusion, by looking at the boxplots we infer that observations $2, 5, 21, 30, 32, 39$ and $43$ are potential univariate outliers.
@@ -202,35 +202,35 @@ In order to investigate the normality of the data, we first compare the theoreti
 ```{r, echo = F, fig.asp = 0.9}
 par(mfrow = c(3, 3), family = "serif", mar = c(2, 2, 2, 1))
 for (j in 1:n){
-	x = st[, j]
-	qqnorm(x, main = names(st)[j], pch = 16)
-	qqline(x, col = "blue", lwd = 2)
-	for (i in seq_len(dim(mat_2)[1])) {
-		if (j == mat_2[i, 2]) {
-			current_x = qnorm(ppoints(st[, j]))[match(mat_2[i, 1], order(st[, j]))]
-			current_y = st[mat_2[i, 1], j]
-			text(current_x, current_y,
-				labels = as.character(mat_2[i, 1]),
-				pos = 2, cex = 0.75, offset = 0.5, col = "red")
-			points(current_x, current_y, col = "red", pch = 16, cex = 1.25)
-		}
-	}
+    x = st[, j]
+    qqnorm(x, main = names(st)[j], pch = 16)
+    qqline(x, col = "blue", lwd = 2)
+    for (i in seq_len(dim(mat_2)[1])) {
+        if (j == mat_2[i, 2]) {
+            current_x = qnorm(ppoints(st[, j]))[match(mat_2[i, 1], order(st[, j]))]
+            current_y = st[mat_2[i, 1], j]
+            text(current_x, current_y,
+                labels = as.character(mat_2[i, 1]),
+                pos = 2, cex = 0.75, offset = 0.5, col = "red")
+            points(current_x, current_y, col = "red", pch = 16, cex = 1.25)
+        }
+    }
 }
 ```
 
 \smallskip
 From the Q-Q plots we can observe that:
 \begin{itemize}
-	\item 
-		all the values corresponding to the variable \textit{Income} lie very close to the Q-Q line, except for the observation $2$, which was previously identified as an univariate outlier;
-	\item 
-		also the variable \textit{Life\_Exp} seems to have a distribution close to normal: the values are more spread out with respect to the ones corresponding to the variable \textit{Income}, but they still are very close to the blue line (which represents the linear relationship between the sample and the theoretical quantiles);
-	\item 
-		the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similiar behaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliers;
-	\item 
-		also the variables \textit{Population}, \textit{Area} and \textit{Density} have very similar shapes, which are pretty far from being linear. All of them have heavy tails, which is also caused by the presence of more than one outlier;
-	\item 
-		the trajectory of the variable \textit{Illiteracy} is very atypical, indeed on the left side of the plot we can observe that a consistent percentage of the points share the same values.
+    \item 
+        all the values corresponding to the variable \textit{Income} lie very close to the Q-Q line, except for the observation $2$, which was previously identified as an univariate outlier;
+    \item 
+        also the variable \textit{Life\_Exp} seems to have a distribution close to normal: the values are more spread out with respect to the ones corresponding to the variable \textit{Income}, but they still are very close to the blue line (which represents the linear relationship between the sample and the theoretical quantiles);
+    \item 
+        the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similiar behaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliers;
+    \item 
+        also the variables \textit{Population}, \textit{Area} and \textit{Density} have very similar shapes, which are pretty far from being linear. All of them have heavy tails, which is also caused by the presence of more than one outlier;
+    \item 
+        the trajectory of the variable \textit{Illiteracy} is very atypical, indeed on the left side of the plot we can observe that a consistent percentage of the points share the same values.
 \end{itemize}
 
 In conclusion, we can infer a gaussian behaviour only for the variables \textit{Income} and \textit{Life\_Exp}.
@@ -240,10 +240,10 @@ We can draw the same conclusions by observing the histograms of the single varia
 ```{r, echo = F, fig.align = "center", fig.asp = 0.9}
 par(mfrow = c(3, 3), family = "serif", mar = c(2, 2, 4, 1))
 for (j in 1:n){
-	x = st[, j]
-	hist(x, probability = T, main = names(st)[j], breaks = 10)
-	lines(density(x), col = "blue")
-	lines(sort(x), dnorm(sort(x), mean(x), sd(x)), col = "red")
+    x = st[, j]
+    hist(x, probability = T, main = names(st)[j], breaks = 10)
+    lines(density(x), col = "blue")
+    lines(sort(x), dnorm(sort(x), mean(x), sd(x)), col = "red")
 }
 ```
 
@@ -341,12 +341,12 @@ colnames(shap_test_out) = c("p.value")
 \smallskip
 We can observe that:
 \begin{itemize}
-	\item 
-		the variables \textit{Population} and \textit{Density} follow the same non-gaussian behaviour that we observed before; as a matter of fact, their p-values are almost negligible;
-	\item 
-		as for the variable \textit{Income}, we can still argue that its distribution is gaussian. However, from the Q-Q plot we can observe the presence of more pronounced tails. Its p-value is still greater than $0.05$ yet a slightly lower than the previous one;
-	\item 
-		finally, by removing its outliers, the variable \textit{Area} seems to become gaussian: its p-value is very close to $0.05$ but there is a huge difference between the current and the previous p-value.
+    \item 
+        the variables \textit{Population} and \textit{Density} follow the same non-gaussian behaviour that we observed before; as a matter of fact, their p-values are almost negligible;
+    \item 
+        as for the variable \textit{Income}, we can still argue that its distribution is gaussian. However, from the Q-Q plot we can observe the presence of more pronounced tails. Its p-value is still greater than $0.05$ yet a slightly lower than the previous one;
+    \item 
+        finally, by removing its outliers, the variable \textit{Area} seems to become gaussian: its p-value is very close to $0.05$ but there is a huge difference between the current and the previous p-value.
 \end{itemize}
 
 ## 1.5
@@ -356,13 +356,13 @@ We report the scatterplot of the variables \textit{Area} \textit{vs} \textit{Pop
 ```{r, echo = F, fig.align = "center", fig.asp = 0.48, out.width = "95%"}
 par(family = "serif", mar = c(4, 4, 1, 1))
 lookup <- c("darkgreen",  "brown", "lightblue",  "magenta", "purple",
-	"blue", "red", "lightgreen", "orange", "cyan")
+    "blue", "red", "lightgreen", "orange", "cyan")
 col_index = rep("black", nrow(st))
 col_index[out_all] = lookup[seq_along(out_all)]
 plot(st[, 8], st[, 1], pch = 16, xlab = names(st)[8], ylab = names(st)[1],
-	col = col_index, ylim = c(0, 23000))
+    col = col_index, ylim = c(0, 23000))
 for (j in out_all){
-	text(st[j, 8], st[j, 1], as.character(j), pos = 4, col = col_index[j])
+    text(st[j, 8], st[j, 1], as.character(j), pos = 4, col = col_index[j])
 }
 ```
 
@@ -373,7 +373,7 @@ Furthermore, unlike the other univariate outliers, only the points corresponding
 
 The squared Mahalanobis distance is a distance function that quantifies the gap between an observation and the sample mean, weighted by the inverse of the covariance matrix. If our variables are distributed as a $9$-dimensional multivariate normal, then we will have
 \begin{equation*}
-	d \sim \sum_{i = 1}^9{{\mathcal{N}(0,1)}^2} \sim \chi_9^2.
+    d \sim \sum_{i = 1}^9{{\mathcal{N}(0,1)}^2} \sim \chi_9^2.
 \end{equation*}
 Hence, we can check the multivariate normality by looking at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi_9^2$.
 \smallskip
@@ -385,11 +385,11 @@ plot(qchisq(ppoints(d), df = ncol(st)), sort(d), pch = 16, ylim = c(0, 45),
     xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
 abline(0, 1, col = "blue")
 for (i in out_all){
-	current_x = qchisq(ppoints(d), df = ncol(st))[match(i, order(d))]
-	current_y = d[i]
-	text(current_x, current_y, labels = as.character(i), pos = 3,
-		cex = 0.75, offset = 0.3, col = col_index[i])
-	points(current_x, current_y, col = col_index[i], pch = 16, cex = 1.25)
+    current_x = qchisq(ppoints(d), df = ncol(st))[match(i, order(d))]
+    current_y = d[i]
+    text(current_x, current_y, labels = as.character(i), pos = 3,
+        cex = 0.75, offset = 0.3, col = col_index[i])
+    points(current_x, current_y, col = col_index[i], pch = 16, cex = 1.25)
 }
 ```
 
@@ -407,14 +407,14 @@ par(family = "serif")
 label_out = rep("", nrow(st))
 label_out[out_all] = as.character(out_all)
 plot(d, pch = 16, xlab = "Index", ylab = "Squared Mahalanobis distance",
-	col = col_index, ylim = c(0, 45))
+    col = col_index, ylim = c(0, 45))
 text(seq_len(nrow(st)), d, labels = label_out, pos = 3, cex = 0.75, offset = 0.3, col = col_index)
 text(11, d[11], labels = "11", pos = 3, cex = 0.75, offset = 0.3)
 abline(h = qchisq(0.95, df = ncol(st)), lty = 2, col = "red")
 alpha_data = (nrow(st) - 0.5) / nrow(st)
 abline(h = qchisq(alpha_data, df = ncol(st)), lty = 2, col = "blue")
 legend(x = "topright", legend = c("0.95", round(alpha_data, 3)),
-	col = c("red", "blue"), lty = 2, title = "Chi-squared quantile")
+    col = c("red", "blue"), lty = 2, title = "Chi-squared quantile")
 ```
 
 \smallskipm
@@ -466,7 +466,7 @@ We can compute $\Sigma^{-1}$ in many other ways; for example we can suppose that
     \]
 Observe that $P \deq aa^T$ is a projection matrix. Therefore, while in principle $\Sigma \Sigma^{-1} = I$ may yield no solution as we have a second degree polynomial in $P$ on l.h.s., as $P$ is idempotent, we have that l.h.s. is actually of first degree in $P$. \newline
 We now find the values for $y$ and $k$. -->
-	\[
+    \[
         \Sigma^{-1} = y I + k aa^T.
     \]
 and than find the values for $y$ and $k$. We obtain: 
