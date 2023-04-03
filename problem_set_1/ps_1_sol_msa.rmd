@@ -366,7 +366,7 @@ for (j in out_all){
 }
 ```
 
-From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15 \times 10^6]\times [0, 15 \times 10^3]$. 
+From the plot we can observe that all the mass is roughly concentrated in the rectangle $[0, 15 \times 10^4]\times [0, 15 \times 10^3]$. 
 Furthermore, unlike the other univariate outliers, only the points corresponding to the observations $2, 5, 32$ and $43$ seems to be really far from the others. Hence, we can identify them as bivariate outliers.
 
 ## 1.6
