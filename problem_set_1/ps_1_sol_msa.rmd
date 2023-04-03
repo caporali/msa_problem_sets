@@ -117,9 +117,12 @@ In order to detect potential univariate outliers we first scale our dataset and 
 
 \vspace{-0.2cm} 
 where $\Phi$ is the cumulative distribution function (\textit{CDF}) of a $\mathcal{N}(0,1)$. \newline
-We used the $99$th percentile since by taking lower values the potential outliers would have been too many. However, we noticed the presence of another potential outlier for the variable \textit{Area} by taking the $98.75$th percentile.
+It is important to emphasise that we do not assume in any way that our data after the scaling procedure have assumed a distribution $\mathcal{N}\left(0, 1\right)$.
+Indeed, the use of the quantiles of a Gaussian is motivated by the fact that the particular bell shape of its density makes it a natural tool for identifying the most extreme values in any normalised distribution.
+Clearly this method is not intended to be exact as it does not take into account possible heavy tails in the distributions nor numerous other degenerate behaviours. 
+There are various ways of identifying potential univariate outliers, for example by using built in tools such as box plots, however the procedure we have used allows us to make preliminary assumptions that can then be confirmed through other techniques.
 
-\pagebreak
+We used the $99$th percentile since by taking lower values the potential outliers would have been too many. However, we noticed the presence of another potential outlier for the variable \textit{Area} by taking the $98.75$th percentile.
 
 ```{r, render = lemon_print}
 scale_st = round(scale(st), 3)
@@ -418,12 +421,10 @@ legend(x = "topright", legend = c("0.95", round(alpha_data, 3)),
 ```
 
 \smallskipm
-The observations $2$ and $11$ are above the blue line (which corresponds to $\chi_9^2(\alpha_2)$), hence they can be confidently considered as multivariate outliers. This confirms what we previously noticed in the Chi-squared Q-Q plot. \newline
-Note also that some observations lie in the strip delimited by the two lines. Nonetheless, we choose not to consider them as multivariate outliers, taking also in account what we observed in the previous point. \newline
-Finally, we can notice that the majority of the observations identified as univariate outliers cannot be considered as multivariate outliers with the only exception of the observation $2$.
+The observations $2$ and $11$, corresponding to Alaska and Hawaii, are above the blue line (which corresponds to $\chi_9^2(\alpha_2)$), hence they can be confidently considered as multivariate outliers. This confirms what we previously noticed in the Chi-squared Q-Q plot. \newline
+Note also that some observations lie in the strip delimited by the two lines. Nonetheless, we choose not to consider them as multivariate outliers, taking also in account what we observed in the previous point. Furthermore, we point out that the majority of the observations identified as univariate outliers cannot be considered as multivariate outliers with the only exception of the observation $2$.
 
-<!-- todo (maybe): final remark from. -->
-<!-- These two states were the last ones to join the federation. Of course we don't claim this to be causal. Nonetheless, the absense of contiguity with the other states definitely reduces the net flow with other states therefore reducing homogenizing factors. -->
+Finally, we want to observe that these two states were the last ones to join the federation. Of course we don't claim this to be causal. However, the absense of contiguity with the other states definitely reduces the net flow with the other states, thus reducing the homogenisation factors.
 
 \newpage
 
@@ -463,17 +464,16 @@ Thus
     \[
         \Sigma^{-1} = (1 + \rho)^{-1} A^{-1} = \frac{1}{1 + \rho}\left(I + \frac{\rho}{1 - 2\rho} aa^T\right).
     \]
-We can compute $\Sigma^{-1}$ in many other ways; for example we can suppose that $\Sigma^{-1}$ is of the same form $\Sigma$, i.e. 
-<!-- todo: fix it -->
-<!-- \[
-        \Sigma^{-1} = y I + k aa^T.
+We can compute $\Sigma^{-1}$ in many other ways; for example we can suppose that $\Sigma^{-1}$ is of the same form $\Sigma$, i.e.
+	\[
+        \Sigma^{-1} = y I + k aa^Tm 
     \]
-Observe that $P \deq aa^T$ is a projection matrix. Therefore, while in principle $\Sigma \Sigma^{-1} = I$ may yield no solution as we have a second degree polynomial in $P$ on l.h.s., as $P$ is idempotent, we have that l.h.s. is actually of first degree in $P$. \newline
-We now find the values for $y$ and $k$. -->
-    \[
-        \Sigma^{-1} = y I + k aa^T.
-    \]
-and than find the values for $y$ and $k$. We obtain: 
+and than observe that $P \deq aa^T$ is such that 
+	\[	
+		P^2 = aa^Taa^T = \|a\|^2 aa^T = 3 P.
+	\]
+Therefore, while in principle $\Sigma \Sigma^{-1} = I$ may yield no solution since we have a second degree polynomial in $P$ on l.h.s., as $P$ has this property, we have that the l.h.s. is actually of first degree in $P$ so the chances increase. \newline
+We can then find the values for $y$ and $k$: 
     \begin{align*}
         \Sigma\Sigma^{-1} & = ((1 + \rho)I - \rho aa^T)(yI + kaa^T) = \\
             & = (1 + \rho)yI + (1 + \rho)kaa^T - \rho yaa^T - k\rho aa^Taa^T = \\
@@ -617,7 +617,7 @@ In order to find the conditional distribution of $Y = (Y_1, Y_2)$ given $X = x$ 
     Then, the conditional distribution of $X_2 | X_1 = x$ is $\mathcal{N}_{p - q}\left(\tilde{\mu}, \tilde{\Sigma}\right)$ with
         \[
             \begin{cases}
-                \tilde{\mu} = \mu_2 + \Sigma_{1, 2}^T \Sigma_{1, 1}^{-1}(X_1 - \mu_1), \\
+                \tilde{\mu} = \mu_2 + \Sigma_{1, 2}^T \Sigma_{1, 1}^{-1}(x - \mu_1), \\
                 \tilde{\Sigma} = \Sigma_{2, 2} - \Sigma_{1, 2}^T \Sigma_{1, 1}^{-1} \Sigma_{1, 2}
             \end{cases}.
         \]
@@ -959,7 +959,7 @@ This further advocates against normality. Indeed, what at first sight seems an a
 
 ## 3.7
 
-The Mahalanobis distance is not only of great use to asses the normality of the sample. It can also be employed to detect multivariate outliers. The following plot shows the squared Mahalanobis distances. We also displayed the quantiles of a $\chi^2_3$ for the levels $\alpha = 0.95$ and $\alpha = 0.99$.
+The Mahalanobis distance is not only of great use to asses the normality of the sample. It can also be employed to detect multivariate outliers. The following plot shows the squared Mahalanobis distances. We also displayed the quantiles of a $\chi^2_3$ for the levels $\alpha = 0.95$ and $\alpha = 0.999$.
 
 \vspace{-1.3cm}
 ```{r, out.width = "85%", fig.align = "center", echo = F}
@@ -980,7 +980,7 @@ legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
 \vspace{-0.6cm}
 
 We observe that all the extreme univariate outliers we previously identified turned out to be also multivariate outliers indeed (despite not being the only ones). If we were to select only a handful of them, we would choose the most extreme ones, namely being observations $866$, $49$ and $84$. \newline 
-It can be of interest to asses whether these outliers were also multivariate outliers with respect to the original variables. Therefore, we also plot the corresponding squared Mahalanobis distances, with the quantiles of a $\chi^2_6$ of levels $\alpha = 0.95$ and $\alpha = 0.99$.
+It can be of interest to asses whether these outliers were also multivariate outliers with respect to the original variables. Therefore, we also plot the corresponding squared Mahalanobis distances, with the quantiles of a $\chi^2_6$ of levels $\alpha = 0.95$ and $\alpha = 0.999$.
 
 \vspace{-1.3cm}
 ```{r, out.width = "85%", fig.align = "center", echo = F}
