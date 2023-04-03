@@ -1,5 +1,5 @@
 # problem set 1
-setwd("c:/Users/franc/Drive/francesco_caporali/university/multivariate_statistical_analysis/problem_sets/problem_set_1")
+setwd("c:/Users/franc/franc/Documents/github/msa_problem_sets/problem_set_1")
 # setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/malgieri")
 rm(list = ls())
 
