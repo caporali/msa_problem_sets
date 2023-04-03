@@ -75,7 +75,7 @@ names(st)[c(4, 6, 9)] = c("Life_Exp", "HS_Grad", "Density")
 
 ## 1.1
 
-In order to compute and visualize the correlation matrix we use the function \texttt{corrplot}. The plot is displayed at the biginning of the next page.
+In order to compute and visualize the correlation matrix we use the function \texttt{corrplot}. The plot is displayed at the beginning of the next page.
 \smallskip
 
 ```{r, message = F, fig.show = "hide"}
@@ -84,7 +84,7 @@ corrplot(cor_mat, type = "upper", method = "circle", tl.col = "black",
     addCoef.col = "black", number.cex = 0.65, tl.cex = 0.8, cl.cex = 0.8)
 ```
 
-By analyzing the correlation matrix, we can observe that:
+By analysing the correlation matrix, we can observe that:
 \begin{itemize}
     \item 
         the variables with the higher negative correlation ($-0.78$) are \textit{Murder} and \textit{Life\_Exp}, which is reasonable since more murders imply an overall reduction of life expectancy;
@@ -103,7 +103,7 @@ corrplot(cor_mat, type = "upper", method = "circle", tl.col = "black",
 \smallskip
 \begin{itemize}
     \item 
-        there are two other high positive correlations between the variable \textit{HS\_Grad} and the variables \textit{Income} and \textit{Life\_Exp} ($0.62$ and $0.58$ respectively). As we expect, the graduates percentage is highly correlated with both the variables \textit{Income} and \textit{Life\_Exp}, which are two important indicators of well-being.
+        there are two other high positive correlations between the variable \textit{HS\_Grad} and the variables \textit{Income} and \textit{Life\_Exp} ($0.62$ and $0.58$ respectively). As we expect, the graduates' percentage is highly correlated with both the variables \textit{Income} and \textit{Life\_Exp}, which are two important indicators of well-being.
 \end{itemize}
 Moreover, we can note that the variables which are correlated the most with the others (both in a negative and in a positive sense) are \textit{HS\_Grad}, \textit{Illiteracy} and \textit{Murder}. On the contrary, the ones which are less correlated with the others are \textit{Population}, \textit{Area} and \textit{Density}. Note also that the variable \textit{Density} was derived from \textit{Population} and \textit{Area}, hence it is reasonable that it follows their behaviour in terms of correlations. However, it is quite surprising that the correlation between \textit{Density} and the variables \textit{Population} and \textit{Area} is not so high, since, as we just said, it was derived from them.
 
@@ -130,7 +130,7 @@ mat_2 = which(abs(scale_st[, ]) > quant[2], arr.ind = T)
 mat_2 = as.data.frame(mat_2)
 ```
 
-In the following dataframes (respectively \texttt{mat\_1} and \texttt{mat\_2}) the first column refers to the index of the corresponding observation, while the second one refers to the variable with respect to this observation is a potential univariate outlier.
+In the following data frames (respectively \texttt{mat\_1} and \texttt{mat\_2}) the first column refers to the index of the corresponding observation, while the second one refers to the variable with respect to this observation is a potential univariate outlier.
 
 ```{r, echo = F}
 rownames(mat_1)[c(2, 3, 5, 7, 8)] = c("NewYork", "Alaska_Income", "Alaska_Area", "NewJersey", "RhodeIsland")
@@ -150,7 +150,7 @@ mat_2
 
 ## 1.3
 
-We report below the boxplots corresponding to each variable. We highlighted in red the potential univariate outliers found in point $1.2$.
+We report below the box plots corresponding to each variable. We highlighted in red the potential univariate outliers found in point $1.2$.
 
 ```{r, echo = F}
 n = nrow(st)
@@ -185,14 +185,14 @@ We can make the following considerations:
     \item 
         according to what we found in point 1.2, the variables \textit{Life\_Exp}, \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} seems not to have any potential univariate outlier;
     \item 
-        the potential outlier we identified for the variable \textit{Illiteracy} (observation $18$) does not show up in the corresponding boxplot. This is plausible, since the variable's distribution seems to have very fat tails. For this reason we choose to do not consider this observation as an outlier;
+        the potential outlier we identified for the variable \textit{Illiteracy} (observation $18$) does not show up in the corresponding box plot. This is plausible, since the variable's distribution seems to have very fat tails. For this reason we choose to do not consider this observation as an outlier;
     \item 
         the variable \textit{Income} seems to have only the observation $2$ as potential outlier, which is consistent with what we obtained in the previous point. Note also that the observation $2$ is a potential outlier both for the variable \textit{Income} and the variable \textit{Area};
     \item 
-        as for the remaning variables, the boxplots generated many other potential univariate outliers, but the ones that we did not detect in the previous point are not in the outer tails (at least $98.75$th percentile) of the distribution. Hence, we will not think of them as outliers.
+        as for the remaining variables, the box plots generated many other potential univariate outliers, but the ones that we did not detect in the previous point are not in the outer tails (at least $98.75$th percentile) of the distribution. Hence, we will not think of them as outliers.
 \end{itemize}
 \smallskip
-In conclusion, by looking at the boxplots we infer that observations $2, 5, 21, 30, 32, 39$ and $43$ are potential univariate outliers.
+In conclusion, by looking at the box plots we infer that observations $2, 5, 21, 30, 32, 39$ and $43$ are potential univariate outliers.
 
 ## 1.4
 
@@ -226,7 +226,7 @@ From the Q-Q plots we can observe that:
     \item 
         also the variable \textit{Life\_Exp} seems to have a distribution close to normal: the values are more spread out with respect to the ones corresponding to the variable \textit{Income}, but they still are very close to the blue line (which represents the linear relationship between the sample and the theoretical quantiles);
     \item 
-        the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similiar behaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliers;
+        the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} have a very similar behaviour: most of the points lie near the Q-Q line, but they have a thinner right tail and a heavier left tail. Note the absence of univariate outliers;
     \item 
         also the variables \textit{Population}, \textit{Area} and \textit{Density} have very similar shapes, which are pretty far from being linear. All of them have heavy tails, which is also caused by the presence of more than one outlier;
     \item 
@@ -249,7 +249,7 @@ for (j in 1:n){
 
 \smallskip
 \smallskip
-Another possible way to assess normality is by taking the Shapiro-Wilk test: if the returned p-value is less than the chosen significance level, i.e $0.05$, we can reject the null hypothesis that the data are normally distributed. If the p-value is grater than the chosen significance level, we fail to reject the null hypothesis.
+Another possible way to assess normality is by taking the Shapiro-Wilk test: if the returned p-value is less than the chosen significance level, i.e $0.05$, we can reject the null hypothesis that the data are normally distributed. If the p-value is greater than the chosen significance level, we fail to reject the null hypothesis.
 By performing the Shapiro-Wilk test, we obtain the following results:
 \smallskip
 
@@ -266,7 +266,7 @@ shap_test
 ```
 
 \vspace{-0.2cm}
-As we can see, the variables \textit{Income} and \textit{Life\_Exp} can be considered normally distributed, since their p-value is grater than $0.05$. Moreover, the p-values of the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} are really close to $0.05$, but the only one for which the null hypothesis is not rejected is \textit{Frost}. However, its p-value is $\approx 0.0527$, thus it is reasonable to doubt its normality, taking also in account the corresponding Q-Q plot and histogram presented above.
+As we can see, the variables \textit{Income} and \textit{Life\_Exp} can be considered normally distributed, since their p-value is greater than $0.05$. Moreover, the p-values of the variables \textit{Murder}, \textit{HS\_Grad} and \textit{Frost} are really close to $0.05$, but the only one for which the null hypothesis is not rejected is \textit{Frost}. However, its p-value is $\approx 0.0527$, thus it is reasonable to doubt its normality, taking also in account the corresponding Q-Q plot and histogram presented above.
 
 Now, it may be of interest to see how the previous tests change if for each variable we remove the observations we identified as their respective outliers (where any). We report the adjusted Q-Q plots and the results of the Shapiro-Wilk test.
 \smallskip
@@ -351,7 +351,7 @@ We can observe that:
 
 ## 1.5
 
-We report the scatterplot of the variables \textit{Area} \textit{vs} \textit{Population}, where have colored all the potential univariate outliers.
+We report the scatter plot of the variables \textit{Area} \textit{vs} \textit{Population}, where have coloured all the potential univariate outliers.
 
 ```{r, echo = F, fig.align = "center", fig.asp = 0.48, out.width = "95%"}
 par(family = "serif", mar = c(4, 4, 1, 1))
@@ -395,7 +395,7 @@ for (i in out_all){
 
 \pagebreak
 
-The Chi-sqared Q-Q plot of Mahalanobis distance shows that the majority of the points are close to the Q-Q line. The most evident exceptions are the point corresponding to the observation $2$, which was previously detected as an univariate outlier, and the second to last point, which corresponds to the observation $11$. Nevertheless, we can consider $d$ $\chi_9^2$-distributed, and, hence, say that our variables are jointly distributed as a multivariate gaussian.
+The Chi-squared Q-Q plot of Mahalanobis distance shows that the majority of the points are close to the Q-Q line. The most evident exceptions are the point corresponding to the observation $2$, which was previously detected as an univariate outlier, and the second to last point, which corresponds to the observation $11$. Nevertheless, we can consider $d$ $\chi_9^2$-distributed, and, hence, say that our variables are jointly distributed as a multivariate gaussian.
 
 ## 1.7
 
@@ -685,7 +685,7 @@ Let $\rho = \frac{1}{5}$. Then according to what we found in the previous point 
             \Sigma_Y = \frac{6}{25} \begin{pmatrix} 4 & 1 \\ 1 & 4 \end{pmatrix}
         \end{cases}.
     \]
-Since $\Sigma_Y$ is invertible ($\det{\Sigma_Y} = \frac{6}{25} 15 > 0$) the random variable $(Y - \mu_Y)^T \Sigma_Y^{-1} (Y - \mu_Y)$ is well defined. Moreover, since $Y \sim \mathcal{N}_{2}\left(\mu_Y, \Sigma_Y\right)$, then
+Since $\Sigma_Y$ is invertible ($\det{\Sigma_Y} = \frac{6}{25} 15 > 0$) the random variable $(Y - \mu_Y)^T \Sigma_Y^{-1} (Y - \mu_Y)$ is well-defined. Moreover, since $Y \sim \mathcal{N}_{2}\left(\mu_Y, \Sigma_Y\right)$, then
     \[
         (Y - \mu_Y)^T \Sigma_Y^{-1} (Y - \mu_Y) \sim \chi^2_2.
     \]
@@ -710,7 +710,7 @@ An explicit computation reveals
     \[
         c = `r c`. 
     \]
-This ellipse is centered in $\mu_Y$, its axes have length $c\sqrt{\lambda_1}$, $c\sqrt{\lambda_2}$ and directions $e_1$, $e_2$, where $(\lambda_1, e_1)$ and $(\lambda_2, e_2)$ are the eigenpairs of the matrix $\Sigma_y$.
+This ellipse is centred in $\mu_Y$, its axes have length $c\sqrt{\lambda_1}$, $c\sqrt{\lambda_2}$ and directions $e_1$, $e_2$, where $(\lambda_1, e_1)$ and $(\lambda_2, e_2)$ are the eigenpairs of the matrix $\Sigma_y$.
 
 ```{r}
 rho = 0.2
@@ -798,7 +798,7 @@ abline(h = 1, col = "red", lty = 2)
 ```
 \vspace{-1.25cm}
 
-The screeplot is not so easy to interpret. Due to the absence of an evident \textit{elbow} in the curve, it would not be a useful selection criterium. In conclusion, as only the eigenvalues corresponding to the first three PCs are greater than $1$, we can confirm the choice of retaining only the first three PCs.
+The scree plot is not so easy to interpret. Due to the absence of an evident \textit{elbow} in the curve, it would not be a useful selection criterium. In conclusion, as only the eigenvalues corresponding to the first three PCs are greater than $1$, we can confirm the choice of retaining only the first three PCs.
 
 ## 3.3
 
@@ -813,13 +813,13 @@ corrplot(t(round(nt_pca$rotation[, 1:2], 2)),
 
 \begin{enumerate}
     \item[\textbf{PC1.}] 
-        Except for the loading associated to the variable \textit{carbohydrates}, which is almost negligible, the other loadings are all negative and lie in the interval $[-0.24, -1]$. The most influencial variables are \textit{fat}, \textit{satured.fat} and \textit{food.energy}, which are related to how much a food is dietetic (or not). Since these loadings are negative, we choose to interpret the first PC as a measure of the dietary power of a certain food item.
+        Except for the loading associated to the variable \textit{carbohydrates}, which is almost negligible, the other loadings are all negative and lie in the interval $[-0.24, -1]$. The most influential variables are \textit{fat}, \textit{saturated.fat} and \textit{food.energy}, which are related to how much a food is dietetic (or not). Since these loadings are negative, we choose to interpret the first PC as a measure of the dietary power of a certain food item.
     \item[\textbf{PC2.}] 
-        The loadings of the second PC are more complicated to analyse. The most influencing in a positive sense are the ones corresponding to the variables \textit{carbohydrates} and \textit{food.energy}, while the negative ones are \textit{protein} and \textit{colhesterol}.
-        Hence, PC2 identifies how intense in carbohydrates a serving is, and at the same time low in cholesterol. A possible interpretation could be that the component is an indicator of how intensly a food is made of cereals.
+        The loadings of the second PC are more complicated to analyse. The most influential in a positive sense are the ones corresponding to the variables \textit{carbohydrates} and \textit{food.energy}, while the negative ones are \textit{protein} and \textit{cholesterol}.
+        Hence, PC2 identifies how intense in carbohydrates a serving is, and at the same time low in cholesterol. A possible interpretation could be that the component is an indicator of the extent to which a food is composed of grains.
 \end{enumerate}
 
-Here we report the scatterplot of our dataset projected on the plane PC1 \textit{vs} PC2.
+Here we report the scatter plot of our dataset projected on the plane PC1 \textit{vs} PC2.
 
 \vspace{-1cm}
 ```{r, echo = F, out.width = "75%", fig.align = "center"}
@@ -833,7 +833,7 @@ abline(v = 0, col = "black", lty = 2)
 
 ## 3.4
 
-In order to identify univariate outliers, we display the boxplots with respect to the first three principal components. 
+In order to identify univariate outliers, we display the box plots with respect to the first three principal components. 
 
 ```{r, echo = F, out.width = "100%", fig.align = "center"}
 par(family = "serif")
@@ -862,9 +862,9 @@ for (j in 1:3) {
 \vspace{-1cm}
 
 In the figure above we can spot a consistent amount of outliers for each principal component. 
-We identified the most extreme (which are displayed in red) by scaling our PCs and then comparing them with some quantiles (with levels over $0.9999$) of a $\mathcal{N}\left(0, 1\right)$. It is remarkable that some outliers have multiplicity equal to $2$: note that in the first boxplot the outliers are actually six.
+We identified the most extreme (which are displayed in red) by scaling our PCs and then comparing them with some quantiles (with levels over $0.9999$) of a $\mathcal{N}\left(0, 1\right)$. It is remarkable that some outliers have multiplicity equal to $2$: note that in the first box plot the outliers are actually six.
 
-We now want to measure how these outliers score in the original variables. We build a dataframe with \textit{min}, \textit{mean} and \textit{max} of each variable. 
+We now want to measure how these outliers score in the original variables. We build a data frame with \textit{min}, \textit{mean} and \textit{max} of each variable. 
 
 ```{r, render = lemon_print, echo = F}
 nt = as.data.frame(nt)
@@ -898,7 +898,7 @@ We can observe that:
 
 ## 3.5
 
-In the figure below we report a 3D scatterplot of the first three principal components.
+In the figure below we report a 3D scatter plot of the first three principal components.
 
 \vspace{-1cm}
 ```{r, out.width = "80%", fig.align = "center", fig.asp = 0.8, echo = F}
@@ -919,7 +919,7 @@ text(plot3d_coords$x[411],	plot3d_coords$y[411],
 ```
 \vspace{-0.5cm}
 
-The outliers found in the previous point are labeled and highlighted in red. The plot shows that the joint distribution of these principal components has high variance. Nevertheless, the red points seem to be significantly far from the cloud. We hypotize that they could be multivariate outliers, as it will be discussed in more detail in the following.
+The outliers found in the previous point are labelled and highlighted in red. The plot shows that the joint distribution of these principal components has high variance. Nevertheless, the red points seem to be significantly far from the cloud. We hypothesise that they could be multivariate outliers, as it will be discussed in more detail in the following.
 
 ## 3.6
 
@@ -930,7 +930,7 @@ par(family = "serif")
 pc1_3 = nt_pca$x[, 1:3]
 d = mahalanobis(pc1_3, center = colMeans(pc1_3), cov = var(pc1_3))
 plot(qchisq(ppoints(d), df = ncol(pc1_3)), sort(d),
-    xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16, ylim = c(0, 140))
+    xlab = "Theoretical quantiles", ylab = "Sample quantiles", pch = 16, ylim = c(0, 140))
 abline(0, 1, col = "blue")
 pos_out_all = c(2, 1, 3, 1, 3, 1, 3, 3, 3)
 for (i in out_all){
@@ -951,7 +951,7 @@ par(family = "serif")
 pc1_3_out = pc1_3[-out_all, ]
 d_out = mahalanobis(pc1_3_out, center = colMeans(pc1_3_out), cov = var(pc1_3_out))
 plot(qchisq(ppoints(d_out), df = ncol(pc1_3_out)), sort(d_out),
-    xlab = "theoretical quantiles", ylab = "sample quantiles", pch = 16, ylim = c(0, 10), xlim = c(0, 12))
+    xlab = "Theoretical quantiles", ylab = "Sample quantiles", pch = 16, ylim = c(0, 10), xlim = c(0, 12))
 abline(0, 1, col = "blue")
 ```
 
@@ -968,14 +968,14 @@ color_out = rep("black", dim(nt)[1])
 label_out = rep("", dim(nt)[1])
 color_out[out_all] = "red"
 label_out[c(32, 286, 411, 49, 866, 84)] = c("32-33", "286-287", "411-412", "49", "866", "84")
-plot(d, pch = 16, xlab = "index", ylab = "squared mahalanobis distance",
+plot(d, pch = 16, xlab = "Index", ylab = "Squared mahalanobis distance",
     col = color_out, ylim = c(0, 140))
 text(seq_len(nrow(pc1_3)), d, labels = label_out, pos = 3, cex = 0.75, offset = 0.3, col = color_out)
 abline(h = qchisq(0.95, df = ncol(pc1_3)), lty = 2, col = "red")
 alpha_data = (nrow(pc1_3) - 0.5) / nrow(pc1_3)
 abline(h = qchisq(alpha_data, df = ncol(pc1_3)), lty = 2, col = "blue")
 legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
-    col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
+    col = c("red", "blue"), lty = 2, title = "Chi-squared quantile")
 ```
 \vspace{-0.6cm}
 
@@ -993,14 +993,14 @@ label_out[out_all] = c("49", "84", "866")
 out_2 = c(439, 429, 440, 438)
 color_out[out_2] = rgb(171 / 255, 248 / 255, 228 / 255)
 d = mahalanobis(nt, center = colMeans(nt), cov = var(nt))
-plot(d, pch = 16, xlab = "index", ylab = "squared mahalanobis distance",
+plot(d, pch = 16, xlab = "Index", ylab = "Squared mahalanobis distance",
     col = color_out, ylim = c(0, 410))
 text(seq_len(nrow(nt)), d, labels = label_out, pos = 3, cex = 0.75, offset = 0.3, col = color_out)
 abline(h = qchisq(0.95, df = ncol(nt)), lty = 2, col = "red")
 alpha_data = (nrow(nt) - 0.5) / nrow(nt)
 abline(h = qchisq(alpha_data, df = ncol(nt)), lty = 2, col = "blue")
 legend(x = "topleft", legend = c("0.95", round(alpha_data, 3)),
-    col = c("red", "blue"), lty = 2, title = "chi-squared quantile")
+    col = c("red", "blue"), lty = 2, title = "Chi-squared quantile")
 ```
 \vspace{-0.6cm}
 
