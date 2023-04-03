@@ -119,7 +119,7 @@ In order to detect potential univariate outliers we first scale our dataset and 
 where $\Phi$ is the cumulative distribution function (\textit{CDF}) of a $\mathcal{N}(0,1)$. \newline
 It is important to emphasise that we do not assume in any way that our data after the scaling procedure have assumed a distribution $\mathcal{N}\left(0, 1\right)$.
 Indeed, the use of the quantiles of a Gaussian is motivated by the fact that the particular bell shape of its density makes it a natural tool for identifying the most extreme values in any normalised distribution.
-Clearly this method is not intended to be exact as it does not take into account possible heavy tails in the distributions nor numerous other degenerate behaviours. 
+Clearly this method is not intended to be exact as it does not take into account possible heavy tails in the distributions nor other degenerate behaviours. 
 There are various ways of identifying potential univariate outliers, for example by using built in tools such as box plots, however the procedure we have used allows us to make preliminary assumptions that can then be confirmed through other techniques.
 
 We used the $99$th percentile since by taking lower values the potential outliers would have been too many. However, we noticed the presence of another potential outlier for the variable \textit{Area} by taking the $98.75$th percentile.
@@ -466,7 +466,7 @@ Thus
     \]
 We can compute $\Sigma^{-1}$ in many other ways; for example we can suppose that $\Sigma^{-1}$ is of the same form $\Sigma$, i.e.
 	\[
-        \Sigma^{-1} = y I + k aa^Tm 
+        \Sigma^{-1} = y I + k aa^T
     \]
 and than observe that $P \deq aa^T$ is such that 
 	\[	
