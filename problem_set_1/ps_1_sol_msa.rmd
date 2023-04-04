@@ -468,7 +468,7 @@ We can compute $\Sigma^{-1}$ in many other ways; for example we can suppose that
 	\[
         \Sigma^{-1} = y I + k aa^T
     \]
-and than observe that $P \deq aa^T$ is such that 
+and then observe that $P \deq aa^T$ is such that 
 	\[	
 		P^2 = aa^Taa^T = \|a\|^2 aa^T = 3 P.
 	\]
