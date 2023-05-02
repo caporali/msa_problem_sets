@@ -1,0 +1,76 @@
+---
+title: "Problem Set 2"
+author: "Basilico Eleonora, Caporali Francesco, Malgieri Luigi Maria"
+date: '`r Sys.setlocale("LC_TIME", "English"); format(Sys.time(), "%d %B %Y")`'
+output:
+    pdf_document:
+        latex_engine: pdflatex
+        includes:
+            in_header: files/preamble.tex
+        extra_dependencies:
+            inputenc: ["utf8"]
+            fontenc: ["T1"]
+            dsfont: null
+            cancel: null
+            mathtools: null
+            amsmath: null
+            amsfonts: null
+            amsthm: null
+    documentclass: article
+    fontsize: 11pt
+    geometry: margin = 2cm
+    header-includes:
+    - \newcommand{\indicator}{\mathds{1}}
+    - \newcommand{\mean}[1]{\mathbb{E}\left[#1\right]}
+    - \newcommand{\var}[1]{\operatorname{Var}\left(#1\right)}
+    - \newcommand{\cov}[2]{\operatorname{Cov}\left(#1,#2\right)}
+    - \newcommand{\corr}[2]{\operatorname{Corr}\left(#1,#2\right)}
+    - \newcommand{\real}{\mathbb{R}}
+    - \newcommand{\prob}[1]{\mathbb{P}\left(#1\right)}
+    - \newcommand{\deq}{\coloneqq}
+    - \renewcommand{\epsilon}{\varepsilon}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(message = F, warning = F)
+
+# pretty print data frames
+library(lemon)
+
+# setwd (change it with your own)
+setwd("c:/users/franc/documents/github/msa_problem_sets/problem_set_2")
+
+# libraries
+```
+
+# Exercise 1
+
+```{r}
+# code
+```
+
+## 1.1
+
+## 1.2
+
+## 1.3
+
+## 1.4
+
+## 1.5
+
+# Exercise 2
+
+```{r}
+# code
+```
+
+## 2.1
+
+## 2.2
+
+## 2.3
+
+## 2.4
+
+## 2.5 (optional)
