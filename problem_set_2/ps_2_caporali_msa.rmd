@@ -1,0 +1,449 @@
+---
+title: "Problem Set 2"
+author: "Basilico Eleonora, Caporali Francesco, Malgieri Luigi Maria"
+date: '`r Sys.setlocale("LC_TIME", "English"); format(Sys.time(), "%d %B %Y")`'
+output:
+    pdf_document:
+        latex_engine: pdflatex
+        includes:
+            in_header: files/preamble.tex
+        extra_dependencies:
+            inputenc: ["utf8"]
+            fontenc: ["T1"]
+            dsfont: null
+            cancel: null
+            mathtools: null
+            amsmath: null
+            amsfonts: null
+            amsthm: null
+            enumitem: null
+    documentclass: article
+    fontsize: 11pt
+    geometry: margin = 2cm
+    header-includes:
+    - \newcommand{\indicator}{\mathds{1}}
+    - \newcommand{\mean}[1]{\mathbb{E}\left[#1\right]}
+    - \newcommand{\var}[1]{\operatorname{Var}\left(#1\right)}
+    - \newcommand{\cov}[2]{\operatorname{Cov}\left(#1,#2\right)}
+    - \newcommand{\corr}[2]{\operatorname{Corr}\left(#1,#2\right)}
+    - \newcommand{\trace}[1]{\operatorname{trace}\left(#1\right)}
+    - \newcommand{\real}{\mathbb{R}}
+    - \newcommand{\prob}[1]{\mathbb{P}\left(#1\right)}
+    - \newcommand{\normal}[2]{\mathcal{N}\left(#1,#2\right)}
+    - \renewcommand{\epsilon}{\varepsilon}
+    - \newcommand{\smallskipm}{\vspace{-12pt}}
+    - \newcommand{\jointables}{\vspace{-24.80pt}}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(message = F, warning = F)
+
+# pretty print data frames
+library(lemon)
+
+# setwd (change it with your own)
+setwd("c:/users/franc/documents/github/msa_problem_sets/problem_set_2")
+
+# libraries
+library(corrplot)
+```
+
+# Exercise 1
+
+Consider the data set \texttt{psych}, which contains $24$ psychological tests ($\text{t}_i, \forall \, i \in \{1, \dots, 24\}$) administered to $301$ students, with ages ranging from $11$
+to $16$, in a suburb of Chicago: 
+\begin{itemize}
+    \item $1$\textsuperscript{st} group of $156$ students ($74$ boys, $82$ girls) from the \textit{Pasteur School};
+    \item $2$\textsuperscript{nd} group of $145$ students ($72$ boys, $73$ girls) from the \textit{Grant-White School}.
+\end{itemize}
+
+\smallskip
+```{r}
+psych_0 = read.table("data/psych.txt", header = T)
+dim_p = dim(psych_0)
+colnames(psych_0) = c(c("case", "sex", "age"), paste0("t_", 1:(dim_p[2] - 4)), "group")
+psych_0[2] = tolower(unlist(psych_0[2]))
+psych_0[28] = tolower(unlist(psych_0[28]))
+```
+```{r, echo = F, render = lemon_print}
+render_p = 1:((dim_p[2] / 2) + 2)
+head(psych_0[render_p])
+```
+\jointables
+```{r, echo = F, render = lemon_print}
+head(psych_0[-render_p])
+```
+\smallskipm
+
+The $24$ tests correspons to the following subjects:
+
+\smallskip
+```{r, echo = F}
+t = c()
+t[1] = "visual perception"
+t[2] = "cubes"
+t[3] = "paper form board"
+t[4] = "flags"
+t[5] = "general information"
+t[6] = "paragraph comprehension"
+t[7] = "sentence completion"
+t[8] = "word classification"
+t[9] = "word meaning"
+t[10] = "addition"
+t[11] = "code"
+t[12] = "counting dots"
+t[13] = "straight-curved capitals"
+t[14] = "word recognition"
+t[15] = "number recognition"
+t[16] = "figure recognition"
+t[17] = "object-number"
+t[18] = "number-figure"
+t[19] = "figure-word"
+t[20] = "deduction"
+t[21] = "numerical puzzles"
+t[22] = "problem reasoning"
+t[23] = "series completion"
+t[24] = "arithmetic problems"
+```
+```{r, echo = F, render = lemon_print}
+df_t = as.data.frame(t)
+rownames(df_t) = names(psych_0[4:(dim_p[2] - 1)])
+head(df_t, 9)
+```
+\smallskipm
+```{r, echo = F, render = lemon_print}
+tail(df_t, 15)
+```
+\smallskipm
+
+We can observe that part of our data is not numerical, in particular the variable \texttt{sex}. Since this variable has only two levels, we can proceed by transforming it into boolean. \newline
+We assign the values as reported:
+\[
+	\begin{cases}
+		0 & \text{ if \texttt{sex} $=$ M} \\
+		1 & \text{ if \texttt{sex} $=$ F}
+	\end{cases}.
+\]
+
+```{r}
+psych_1 = psych_0
+psych_1[2] = as.integer(psych_1[2] == "f")
+```
+
+Another important observation concerns the fact that the variable \texttt{case} is not relevant as it only corresponds to an enumeration of the students who were tested in sequential order (containing some gaps probably due to the absence of data for some students).
+
+```{r}
+psych_2 = subset(psych_1, select = -case)
+```
+
+## 1.1
+
+We are asked to use only the Grant-White students data, so we subset our data frame in accordance with the request.
+
+\smallskip
+```{r}
+gw = subset(psych_2, group == "grant", select = -group)
+```
+
+At this point we look at the correlation matrix of our data, a central object in the execution of the \textit{Factor Analysis}. \newline
+Since we have a very large number of variables, we choose not to display the values directly of the matrix entries, but rather to display them via a plot.
+
+\smallskip
+```{r, fig.align = "center", out.width = "200%"}
+cor_gw = cor(gw)
+colnames(cor_gw) = c(c("sex", "age"), paste0("$t[", 1:(dim_p[2] - 4), "]"))
+rownames(cor_gw) = colnames(cor_gw)
+par(family = "serif")
+corrplot.mixed(cor_gw, upper = "pie",
+	upper.col = COL2("BrBG"), lower.col = COL2("BrBG"),
+	number.cex = 0.4, tl.col = "black", tl.cex = 0.7, cl.cex = 0.7)
+```
+
+```{r, echo = F}
+colnames(cor_gw) = c(c("sex", "age"), paste0("t_", 1:(dim_p[2] - 4)))
+rownames(cor_gw) = colnames(cor_gw)
+```
+
+<!-- todo: 
+	- comment on the blocks of cor_gw;
+	- one could think to remove the variables sex and age because are uncorrelated with the others.
+-->
+
+To obtain the maximum likelihood solution for $m = 5$ and $m = 6$ factors in $R$ we can use the built-in function \texttt{factanal}. \newline
+Before proceeding with the direct computation performed via software, we would like to recall that the \textit{maximum likelihood} method, unlike the \textit{principal component method}, relies on the necessary assumption of normality of the \textit{common factors} ($\boldsymbol{F}$) and the \textit{specific error terms} ($\boldsymbol{\varepsilon}$).
+Recalling also that if $\boldsymbol{F} = (F_1, \dots, F_m)$ and $\boldsymbol{\varepsilon} = (\varepsilon_1, \dots, \varepsilon_p)$ are normally distributed then 
+\[
+	\boldsymbol{X} = \boldsymbol{L} \boldsymbol{F} + \boldsymbol{\varepsilon} \sim \normal{\mu}{\Sigma}, \text{ with } L \in \real^{p \times m}
+\]
+a first check that can be made is that our input data $\boldsymbol{x} \in \real^{2 + 24}$, appropriately rescaled using the command \texttt{scale()}, actually comes from a $\boldsymbol{X} \sim \normal{0}{I}$.
+
+\smallskip
+```{r}
+gws = scale(gw)
+cor_gws = cor(gws)
+dim_gws = dim(gws)
+```
+
+For this purpose we look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi^2_{2 + 24}$.
+
+\smallskip
+```{r, fig.align = "center", fig.asp = 0.48, out.width = "96%"}
+par(family = "serif", mar = c(4, 4, 1, 1))
+d = mahalanobis(gws, center = colMeans(gws), cov = cov(gws))
+plot(qchisq(ppoints(d), df = ncol(gws)), sort(d), pch = 16,
+	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
+abline(0, 1, col = "green")
+```
+
+The plot shows that the variables jointly seem to follow Gaussian behaviour.
+
+We now proceed with the computation of the maximum likelihood solution, first in the case of $m = 5$ factors, then with $m = 6$ (without any rotation):
+\smallskip
+```{r}
+faml_5 = factanal(gws, factors = 5, rotation = "none")
+load_5 = faml_5$loadings[, ]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_5, 4))
+tmp
+```
+
+\smallskip
+```{r}
+faml_6 = factanal(gws, factors = 6, rotation = "none")
+load_6 = faml_6$loadings[, ]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_6, 4))
+tmp
+```
+
+Then we proceed with the computatio of the proportion of total sample variance due to each factor. \newline
+We recall that, according to the theory the operator $\operatorname{ptsv}$ that compute the proportion of total sample variance due to a factor is defined as
+\[
+	\operatorname{ptsv}(k) = \frac{\sum_{j = 1}^{m} \hat{l}_{j, k}^2}{\trace{\boldsymbol{S}}},
+\]
+with $\left(\hat{l}_{j, k}\right)_{j, k = 1}^{m}$ loadings and $\boldsymbol{S}$ sample covariance matrix. \newline
+Due to the scaling performed at the beginning of the computation in our case $\trace{\boldsymbol{S}} = \text{\texttt{size(}}(\boldsymbol{S}\text{\texttt{)}} = `r dim_gws[2]`$ (it is indeed a sample correlation matrix).
+
+\smallskip
+```{r}
+ptsv_5 = colSums(load_5^2) / dim_gws[2]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(ptsv_5)))
+rownames(tmp) = "ptsv_5"
+tmp
+```
+
+```{r, render = lemon_print}
+ptsv_6 = colSums(load_6^2) / dim_gws[2]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(ptsv_6)))
+rownames(tmp) = "ptsv_6"
+tmp
+```
+
+Actually this computation is also performed as a part of the output of the command \texttt{factanal()}, together with the sum of the squares of the loadings and the cumulative proportion of sample variance:
+
+\smallskip
+```{r, results = "hide"}
+faml_5
+```
+```{r, echo = F}
+l2 = colSums(load_5^2)
+rbind(`SS loadings` = round(l2, 3),
+	`Proportion Var` = round(l2 / dim_gws[2], 3),
+	`Cumulative Var` = round(cumsum(l2 / dim_gws[2]), 3))
+```
+
+\smallskip
+```{r}
+faml_6
+```
+```{r, echo = F}
+l2 = colSums(load_6^2)
+rbind(`SS loadings` = round(l2, 3),
+	`Proportion Var` = round(l2 / dim_gws[2], 3),
+	`Cumulative Var` = round(cumsum(l2 / dim_gws[2]), 3))
+```
+
+Both models seem to fit very poorly. In both cases ($m = 5, 6$), they explain about $50\%$ of the total variance collectively. \newline
+Recall that a general criterion, valid for both factor extraction methods seen, is to take $m$ factors with $m$ such that
+\[
+	m = \# \text{ factors necessary to account for $80\%$ of the total variance}.
+\]
+
+Next, as requested, the specific variances $(\psi_j)_{j = 1}^{2 + 24}$ are reported below, again for both $m = 5$ and $6$. 
+In this case we directly exploit the output of \texttt{factanal()} in order not to have to recalculate the values of the specific variances of the factors by hand. We report the results of the computation below:
+
+\smallskip
+```{r}
+psi_5 = faml_5$uniquenesses
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(psi_5, 4))))
+tmp[, 1:13]
+```
+\jointables
+```{r, echo = F, render = lemon_print}
+tmp[, 14:26]
+```
+
+```{r}
+psi_6 = faml_6$uniquenesses
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(psi_6, 4))))
+tmp[, 1:13]
+```
+\jointables
+```{r, echo = F, render = lemon_print}
+tmp[, 14:26]
+```
+\smallskipm
+
+Finally, it is required to assess the accuracy of the given approximation of the correlation matrix. For this purpose, we analyse the residual given by the difference of the starting correlation matrix, $\boldsymbol{R}$, and the correlation matrix given by the approximation performed by the previous procedure, i.e. $\boldsymbol{S} = \hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}$. \newline 
+Then we compare its squared Frobenius norm with the sum of the squares of the neglected eigenvalues, i.e. $\sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2$.
+
+\smallskip
+```{r}
+eig = eigen(cor_gws)$values
+residual_5 = cor_gws - (load_5 %*% t(load_5) + diag(psi_5))
+eig_negl_5 = eig[(5 + 1):dim_gws[2]]
+comparison_5 = c(sum(residual_5^2), sum(eig_negl_5^2))
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(comparison_5)))
+rownames(tmp) = "comparison_5"
+colnames(tmp) = c("ss_residual_5", "ss_eig_negl_5")
+tmp
+```
+\smallskipm
+
+Then we repeat exactly the same computation for $m = 6$:
+
+\smallskip
+```{r}
+residual_6 = cor_gws - (load_6 %*% t(load_6) + diag(psi_6))
+eig_negl_6 = eig[(6 + 1):dim_gws[2]]
+comparison_6 = c(sum(residual_6^2), sum(eig_negl_6^2))
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(comparison_6)))
+rownames(tmp) = "comparison_6"
+colnames(tmp) = c("ss_residual_6", "ss_eig_negl_6")
+tmp
+```
+\smallskipm
+
+Clearly the required condition is fulfilled. Indeed it should be valid
+\[
+	\left\|\boldsymbol{R} - \left(\hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}\right)\right\|_{\rm{F}} \leq \sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2
+\]
+and in our case:
+\begin{itemize}[leftmargin = 2.25cm]
+	\item[$m = 5:$] $`r sum(residual_5^2)` \leq `r sum(eig_negl_5^2)`$;
+	\item[$m = 6:$] $`r sum(residual_6^2)` \leq `r sum(eig_negl_6^2)`$.
+\end{itemize}
+But it is also evident that in both cases the approximation error of the correlation matrix is not negligible.
+
+We can therefore conclude that both choices are very inaccurate, but in some sense acceptable, and although the improvement given by the choice of $m = 6$ is not particularly significant, we tend to prefer it as it is closer to the sufficiency criteria.
+
+<!-- todo: 
+	- analyse statistics of faml_5 / faml_6.
+-->
+
+<!-- 
+\newpage
+The same computation removing the variables \texttt{sex} and \texttt{age} leads to a very similiar result:
+```{r, echo = F}
+gws = gws[, 3:26]
+
+cor_gws = cor(gws)
+dim_gws = dim(gws)
+
+faml_5 = factanal(gws, factors = 5, rotation = "none")
+load_5 = faml_5$loadings[, ]
+psi_5 = faml_5$uniquenesses
+
+faml_6 = factanal(gws, factors = 6, rotation = "none")
+load_6 = faml_6$loadings[, ]
+psi_6 = faml_6$uniquenesses
+
+eig = eigen(cor_gws)$values
+residual_5 = cor_gws - (load_5 %*% t(load_5) + diag(psi_5))
+eig_negl_5 = eig[(5 + 1):dim_gws[2]]
+comparison_5 = c(sum(residual_5^2), sum(eig_negl_5^2))
+
+residual_6 = cor_gws - (load_6 %*% t(load_6) + diag(psi_6))
+eig_negl_6 = eig[(6 + 1):dim_gws[2]]
+comparison_6 = c(sum(residual_6^2), sum(eig_negl_6^2))
+```
+```{r, echo = F}
+ctsv_5 = cumsum(colSums(load_5^2) / dim_gws[2])
+print(ctsv_5[5])
+ctsv_6 = cumsum(colSums(load_6^2) / dim_gws[2])
+print(ctsv_6[6])
+``` 
+```{r, echo = F}
+comparison_5
+```
+```{r, echo = F}
+comparison_6
+``` 
+```{r, echo = F}
+m = 17
+```
+Still considering only the $24$ tests, the number of factors necessary to account nearly $80\%$ of the total variance is $m = `r m`$ (out of $`r dim_gws[2]`$):
+```{r, echo = F}
+faml_m = factanal(gws, factors = m, rotation = "none")
+load_m = faml_m$loadings[, ]
+psi_m = faml_m$uniquenesses
+
+eig = eigen(cor_gws)$values
+residual_m = cor_gws - (load_m %*% t(load_m) + diag(psi_m))
+eig_negl_m = eig[(m + 1):dim_gws[2]]
+comparison_m = c(sum(residual_m^2), sum(eig_negl_m^2))
+
+residual_m = cor_gws - (load_m %*% t(load_m) + diag(psi_m))
+eig_negl_m = eig[(m + 1):dim_gws[2]]
+comparison_m = c(sum(residual_m^2), sum(eig_negl_m^2))
+```
+```{r, echo = F}
+ctsv_m = cumsum(colSums(load_m^2) / dim_gws[2])
+ctsv_m[m]
+```
+```{r, echo = F}
+comparison_m
+``` 
+-->
+
+
+
+## 1.2
+
+## 1.3
+
+## 1.4
+
+## 1.5
+
+\newpage
+
+# Exercise 2
+
+```{r}
+# code
+```
+
+## 2.1
+
+## 2.2
+
+## 2.3
+
+## 2.4
+
+## 2.5 (optional)
