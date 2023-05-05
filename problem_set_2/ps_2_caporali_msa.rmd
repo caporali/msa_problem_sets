@@ -259,7 +259,7 @@ rbind(`SS loadings` = round(l2, 3),
 ```
 
 \smallskip
-```{r}
+```{r, results = "hide"}
 faml_6
 ```
 ```{r, echo = F}
