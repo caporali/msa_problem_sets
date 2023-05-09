@@ -164,30 +164,29 @@ colnames(cor_gw) = c(c("sex", "age"), paste0("t_", 1:(dim_p[2] - 4)))
 rownames(cor_gw) = colnames(cor_gw)
 ```
 
-<!-- todo: 
-	- comment on the blocks of cor_gw;
-	- one could think to remove the variables sex and age because are uncorrelated with the others.
--->
+Looking at the \texttt{corrplot()} we just performed, we immediately realise that the variables \texttt{sex} and \texttt{age} are scarcely correlated with the $24$ tests. For this reason it is reasonable to expect that in a Factor Analysis, including them would entirely characterise the factors in which they appear and have negligible loadings in the others.
+We will therefore initially avoid considering these first two variables and then comment on how the analysis would change by including them. \newline
+Another, more substantial, reason why we discard them is that we do not expect there to be a common factor on which they can depend, as they are in a sense primitive factors themselves.
 
-To obtain the maximum likelihood solution for $m = 5$ and $m = 6$ factors in $R$ we can use the built-in function \texttt{factanal}. \newline
+To obtain the maximum likelihood solution for $m = 5$ and $m = 6$ factors in $R$ we can use the built-in function \texttt{factanal()}. \newline
 Before proceeding with the direct computation performed via software, we would like to recall that the \textit{maximum likelihood} method, unlike the \textit{principal component method}, relies on the necessary assumption of normality of the \textit{common factors} ($\boldsymbol{F}$) and the \textit{specific error terms} ($\boldsymbol{\varepsilon}$).
 Recalling also that if $\boldsymbol{F} = (F_1, \dots, F_m)$ and $\boldsymbol{\varepsilon} = (\varepsilon_1, \dots, \varepsilon_p)$ are normally distributed then 
 \[
 	\boldsymbol{X} = \boldsymbol{L} \boldsymbol{F} + \boldsymbol{\varepsilon} \sim \normal{\mu}{\Sigma}, \text{ with } L \in \real^{p \times m}
 \]
-a first check that can be made is that our input data $\boldsymbol{x} \in \real^{2 + 24}$, appropriately rescaled using the command \texttt{scale()}, actually comes from a $\boldsymbol{X} \sim \normal{0}{I}$.
+a first check that can be made is that our input data $\boldsymbol{x} \in \real^{24}$, appropriately rescaled using the command \texttt{scale()}, actually comes from a $\boldsymbol{X} \sim \normal{0}{I}$.
 
 \smallskip
 ```{r}
-gws = scale(gw)
+gws = scale(gw[, 3:dim(gw)[2]])
 cor_gws = cor(gws)
 dim_gws = dim(gws)
 ```
 
-For this purpose we look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi^2_{2 + 24}$.
+For this purpose we look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi^2_{24}$.
 
 \smallskip
-```{r, fig.align = "center", fig.asp = 0.48, out.width = "96%"}
+```{r, echo = F, fig.align = "center", fig.asp = 0.48, out.width = "96%"}
 par(family = "serif", mar = c(4, 4, 1, 1))
 d = mahalanobis(gws, center = colMeans(gws), cov = cov(gws))
 plot(qchisq(ppoints(d), df = ncol(gws)), sort(d), pch = 16,
@@ -196,6 +195,8 @@ abline(0, 1, col = "green")
 ```
 
 The plot shows that the variables jointly seem to follow Gaussian behaviour.
+
+<!-- todo: shapiro test/marvia -->
 
 We now proceed with the computation of the maximum likelihood solution, first in the case of $m = 5$ factors, then with $m = 6$ (without any rotation):
 \smallskip
@@ -224,14 +225,14 @@ We recall that, according to the theory the operator $\operatorname{ptsv}$ that 
 	\operatorname{ptsv}(k) = \frac{\sum_{j = 1}^{m} \hat{l}_{j, k}^2}{\trace{\boldsymbol{S}}},
 \]
 with $\left(\hat{l}_{j, k}\right)_{j, k = 1}^{m}$ loadings and $\boldsymbol{S}$ sample covariance matrix. \newline
-Due to the scaling performed at the beginning of the computation in our case $\trace{\boldsymbol{S}} = \text{\texttt{size(}}(\boldsymbol{S}\text{\texttt{)}} = `r dim_gws[2]`$ (it is indeed a sample correlation matrix).
+Due to the scaling performed at the beginning of the computation in our case $\trace{\boldsymbol{S}} = \text{\texttt{size(}}\boldsymbol{S}\text{\texttt{)}} = `r dim_gws[2]`$ (it is indeed a sample correlation matrix).
 
 \smallskip
 ```{r}
 ptsv_5 = colSums(load_5^2) / dim_gws[2]
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(t(as.matrix(ptsv_5)))
+tmp = as.data.frame(t(as.matrix(round(ptsv_5, 4))))
 rownames(tmp) = "ptsv_5"
 tmp
 ```
@@ -240,7 +241,7 @@ tmp
 ptsv_6 = colSums(load_6^2) / dim_gws[2]
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(t(as.matrix(ptsv_6)))
+tmp = as.data.frame(t(as.matrix(round(ptsv_6, 4))))
 rownames(tmp) = "ptsv_6"
 tmp
 ```
@@ -251,31 +252,35 @@ Actually this computation is also performed as a part of the output of the comma
 ```{r, results = "hide"}
 faml_5
 ```
-```{r, echo = F}
-l2 = colSums(load_5^2)
-rbind(`SS loadings` = round(l2, 3),
-	`Proportion Var` = round(l2 / dim_gws[2], 3),
-	`Cumulative Var` = round(cumsum(l2 / dim_gws[2]), 3))
+```{r, echo = F, render = lemon_print}
+l2_5 = colSums(load_5^2)
+ss_load_5 = round(l2_5, 4)
+ptsv_5 = round(l2_5 / dim_gws[2], 4)
+ctsv_5 = round(cumsum(l2_5 / dim_gws[2]), 4)
+df_5 = as.data.frame(rbind(ss_load_5, ptsv_5, ctsv_5))
+df_5
 ```
 
 \smallskip
 ```{r, results = "hide"}
 faml_6
 ```
-```{r, echo = F}
-l2 = colSums(load_6^2)
-rbind(`SS loadings` = round(l2, 3),
-	`Proportion Var` = round(l2 / dim_gws[2], 3),
-	`Cumulative Var` = round(cumsum(l2 / dim_gws[2]), 3))
+```{r, echo = F, render = lemon_print}
+l2_6 = colSums(load_6^2)
+ss_load_6 = round(l2_6, 4)
+ptsv_6 = round(l2_6 / dim_gws[2], 4)
+ctsv_6 = round(cumsum(l2_6 / dim_gws[2]), 4)
+df_6 = as.data.frame(rbind(ss_load_6, ptsv_6, ctsv_6))
+df_6
 ```
 
-Both models seem to fit very poorly. In both cases ($m = 5, 6$), they explain about $50\%$ of the total variance collectively. \newline
+Both models seem to fit very poorly. In both cases ($m = 5, 6$), they explain about $50\%$ (respectively $`r round(ctsv_5[5] * 100, 2)`\%$ and $`r round(ctsv_6[6] * 100, 2)`\%$) of the total variance collectively. \newline
 Recall that a general criterion, valid for both factor extraction methods seen, is to take $m$ factors with $m$ such that
 \[
 	m = \# \text{ factors necessary to account for $80\%$ of the total variance}.
 \]
 
-Next, as requested, the specific variances $(\psi_j)_{j = 1}^{2 + 24}$ are reported below, again for both $m = 5$ and $6$. 
+Next, as requested, the specific variances $(\psi_j)_{j = 1}^{24}$ are reported below, again for both $m = 5$ and $6$. 
 In this case we directly exploit the output of \texttt{factanal()} in order not to have to recalculate the values of the specific variances of the factors by hand. We report the results of the computation below:
 
 \smallskip
@@ -284,11 +289,11 @@ psi_5 = faml_5$uniquenesses
 ```
 ```{r, echo = F, render = lemon_print}
 tmp = as.data.frame(t(as.matrix(round(psi_5, 4))))
-tmp[, 1:13]
+tmp[, 1:(dim_gws[2] / 2)]
 ```
 \jointables
 ```{r, echo = F, render = lemon_print}
-tmp[, 14:26]
+tmp[, ((dim_gws[2] / 2) + 1):dim_gws[2]]
 ```
 
 ```{r}
@@ -296,11 +301,11 @@ psi_6 = faml_6$uniquenesses
 ```
 ```{r, echo = F, render = lemon_print}
 tmp = as.data.frame(t(as.matrix(round(psi_6, 4))))
-tmp[, 1:13]
+tmp[, 1:(dim_gws[2] / 2)]
 ```
 \jointables
 ```{r, echo = F, render = lemon_print}
-tmp[, 14:26]
+tmp[, ((dim_gws[2] / 2) + 1):dim_gws[2]]
 ```
 \smallskipm
 
@@ -315,7 +320,7 @@ eig_negl_5 = eig[(5 + 1):dim_gws[2]]
 comparison_5 = c(sum(residual_5^2), sum(eig_negl_5^2))
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(t(as.matrix(comparison_5)))
+tmp = as.data.frame(t(as.matrix(round(comparison_5, 4))))
 rownames(tmp) = "comparison_5"
 colnames(tmp) = c("ss_residual_5", "ss_eig_negl_5")
 tmp
@@ -331,16 +336,16 @@ eig_negl_6 = eig[(6 + 1):dim_gws[2]]
 comparison_6 = c(sum(residual_6^2), sum(eig_negl_6^2))
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(t(as.matrix(comparison_6)))
+tmp = as.data.frame(t(as.matrix(round(comparison_6, 4))))
 rownames(tmp) = "comparison_6"
 colnames(tmp) = c("ss_residual_6", "ss_eig_negl_6")
 tmp
 ```
 \smallskipm
 
-Clearly the required condition is fulfilled. Indeed it should be valid
+Clearly the theoretical required condition is fulfilled. Indeed it should be valid
 \[
-	\left\|\boldsymbol{R} - \left(\hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}\right)\right\|_{\rm{F}} \leq \sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2
+	\left\|\boldsymbol{R} - \left(\hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}\right)\right\|^2_{\rm{F}} \leq \sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2
 \]
 and in our case:
 \begin{itemize}[leftmargin = 2.25cm]
@@ -349,77 +354,85 @@ and in our case:
 \end{itemize}
 But it is also evident that in both cases the approximation error of the correlation matrix is not negligible.
 
-We can therefore conclude that both choices are very inaccurate, but in some sense acceptable, and although the improvement given by the choice of $m = 6$ is not particularly significant, we tend to prefer it as it is closer to the sufficiency criteria.
+We can therefore conclude that both choices are acceptable, but in some sense inaccurate, and observing that the improvement given by the choice of $m = 6$ is not particularly significant, we tend to prefer $m = 5$. Indeed the last factor obtained with $m = 6$ accounts only for the $`r round(ptsv_6[6] * 100, 2)`\%$ of the total sample variance.
 
 <!-- todo: 
 	- analyse statistics of faml_5 / faml_6.
 -->
 
-<!-- 
 \newpage
-The same computation removing the variables \texttt{sex} and \texttt{age} leads to a very similiar result:
-```{r, echo = F}
-gws = gws[, 3:26]
+The same computation including the variables \texttt{sex} and \texttt{age} leads to a very similiar result:
+```{r}
+gws_2 = scale(gw)
+cor_gws_2 = cor(gws_2)
+dim_gws_2 = dim(gws_2)
+eig_2 = eigen(cor_gws_2)$values
 
-cor_gws = cor(gws)
-dim_gws = dim(gws)
+faml_5_2 = factanal(gws_2, factors = 5, rotation = "none")
+load_5_2 = faml_5_2$loadings[, ]
+psi_5_2 = faml_5_2$uniquenesses
+residual_5_2 = cor_gws_2 - (load_5_2 %*% t(load_5_2) + diag(psi_5_2))
+eig_negl_5_2 = eig_2[(5 + 1):dim_gws_2[2]]
+comparison_5_2 = c(sum(residual_5_2^2), sum(eig_negl_5_2^2))
+ctsv_5_2 = cumsum(colSums(load_5_2^2) / dim_gws_2[2])
 
-faml_5 = factanal(gws, factors = 5, rotation = "none")
-load_5 = faml_5$loadings[, ]
-psi_5 = faml_5$uniquenesses
-
-faml_6 = factanal(gws, factors = 6, rotation = "none")
-load_6 = faml_6$loadings[, ]
-psi_6 = faml_6$uniquenesses
-
-eig = eigen(cor_gws)$values
-residual_5 = cor_gws - (load_5 %*% t(load_5) + diag(psi_5))
-eig_negl_5 = eig[(5 + 1):dim_gws[2]]
-comparison_5 = c(sum(residual_5^2), sum(eig_negl_5^2))
-
-residual_6 = cor_gws - (load_6 %*% t(load_6) + diag(psi_6))
-eig_negl_6 = eig[(6 + 1):dim_gws[2]]
-comparison_6 = c(sum(residual_6^2), sum(eig_negl_6^2))
-```
-```{r, echo = F}
-ctsv_5 = cumsum(colSums(load_5^2) / dim_gws[2])
-print(ctsv_5[5])
-ctsv_6 = cumsum(colSums(load_6^2) / dim_gws[2])
-print(ctsv_6[6])
+faml_6_2 = factanal(gws_2, factors = 6, rotation = "none")
+load_6_2 = faml_6_2$loadings[, ]
+psi_6_2 = faml_6_2$uniquenesses
+residual_6_2 = cor_gws_2 - (load_6_2 %*% t(load_6_2) + diag(psi_6_2))
+eig_negl_6_2 = eig_2[(6 + 1):dim_gws_2[2]]
+comparison_6_2 = c(sum(residual_6_2^2), sum(eig_negl_6_2^2))
+ctsv_6_2 = cumsum(colSums(load_6_2^2) / dim_gws_2[2])
 ``` 
-```{r, echo = F}
-comparison_5
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(ctsv_5_2, 4))))
+rownames(tmp) = "ctsv_5_2"
+tmp
 ```
-```{r, echo = F}
-comparison_6
-``` 
-```{r, echo = F}
-m = 17
+\smallskipm
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(ctsv_6_2, 4))))
+rownames(tmp) = "ctsv_6_2"
+tmp
 ```
-Still considering only the $24$ tests, the number of factors necessary to account nearly $80\%$ of the total variance is $m = `r m`$ (out of $`r dim_gws[2]`$):
-```{r, echo = F}
-faml_m = factanal(gws, factors = m, rotation = "none")
-load_m = faml_m$loadings[, ]
-psi_m = faml_m$uniquenesses
+\smallskipm
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(comparison_5_2, 4))))
+rownames(tmp) = "comparison_5_2"
+colnames(tmp) = c("ss_residual_5_2", "ss_eig_negl_5_2")
+tmp
+```
+\smallskipm
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(comparison_6_2, 4))))
+rownames(tmp) = "comparison_6_2"
+colnames(tmp) = c("ss_residual_6_2", "ss_eig_negl_6_2")
+tmp
+```
+\smallskipm
 
-eig = eigen(cor_gws)$values
-residual_m = cor_gws - (load_m %*% t(load_m) + diag(psi_m))
-eig_negl_m = eig[(m + 1):dim_gws[2]]
-comparison_m = c(sum(residual_m^2), sum(eig_negl_m^2))
+<!--
+```{r, echo = F}
+m = 18
+```
+Still considering jointly the variables $\texttt{sex}$, $\texttt{age}$ and the $24$ tests, the number of factors necessary to account nearly $80\%$ of the total variance is $m = `r m`$ (out of $`r dim_gws_2[2]`$):
 
-residual_m = cor_gws - (load_m %*% t(load_m) + diag(psi_m))
-eig_negl_m = eig[(m + 1):dim_gws[2]]
-comparison_m = c(sum(residual_m^2), sum(eig_negl_m^2))
+```{r}
+faml_m_2 = factanal(gws_2, factors = m, rotation = "none")
+load_m_2 = faml_m_2$loadings[, ]
+psi_m_2 = faml_m_2$uniquenesses
+residual_m_2 = cor_gws_2 - (load_m_2 %*% t(load_m_2) + diag(psi_m_2))
+eig_negl_m_2 = eig[(m + 1):dim_gws_2[2]]
+comparison_m_2 = c(sum(residual_m_2^2), sum(eig_negl_m_2^2))
 ```
 ```{r, echo = F}
-ctsv_m = cumsum(colSums(load_m^2) / dim_gws[2])
-ctsv_m[m]
+ctsv_m_2 = cumsum(colSums(load_m_2^2) / dim_gws_2[2])
+ctsv_m_2[m]
 ```
 ```{r, echo = F}
-comparison_m
+comparison_m_2
 ``` 
 -->
-
 
 
 ## 1.2
