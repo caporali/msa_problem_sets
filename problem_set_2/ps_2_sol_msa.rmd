@@ -16,6 +16,7 @@ output:
             amsmath: null
             amsfonts: null
             amsthm: null
+            enumitem: null
     documentclass: article
     fontsize: 11pt
     geometry: margin = 2cm
@@ -25,10 +26,13 @@ output:
     - \newcommand{\var}[1]{\operatorname{Var}\left(#1\right)}
     - \newcommand{\cov}[2]{\operatorname{Cov}\left(#1,#2\right)}
     - \newcommand{\corr}[2]{\operatorname{Corr}\left(#1,#2\right)}
+    - \newcommand{\trace}[1]{\operatorname{trace}\left(#1\right)}
     - \newcommand{\real}{\mathbb{R}}
     - \newcommand{\prob}[1]{\mathbb{P}\left(#1\right)}
-    - \newcommand{\deq}{\coloneqq}
+    - \newcommand{\normal}[2]{\mathcal{N}\left(#1,#2\right)}
     - \renewcommand{\epsilon}{\varepsilon}
+    - \newcommand{\smallskipm}{\vspace{-12pt}}
+    - \newcommand{\jointables}{\vspace{-24.80pt}} # todo: fix
 ---
 
 ```{r setup, include = FALSE}
@@ -38,22 +42,369 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # setwd (change it with your own)
-setwd("c:/users/franc/documents/github/msa_problem_sets/problem_set_2")
+# setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
+setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
+library(corrplot)
+library(goft)
 ```
 
 # Exercise 1
 
+Consider the data set \texttt{psych}, which contains $24$ psychological tests ($\text{t}_i, \forall \, i \in \{1, \dots, 24\}$) administered to $301$ students, with ages ranging from $11$
+to $16$, in a suburb of Chicago: 
+\begin{itemize}
+    \item the $1$\textsuperscript{st} group is made of $156$ students ($74$ boys, $82$ girls) from the \textit{Pasteur School};
+    \item the $2$\textsuperscript{nd} group is made of $145$ students ($72$ boys, $73$ girls) from the \textit{Grant-White School}.
+\end{itemize}
+
+\smallskip
 ```{r}
-# code
+psych_0 = read.table("data/psych.txt", header = T)
+dim_p = dim(psych_0)
+colnames(psych_0) = c(c("case", "sex", "age"), paste0("t_", 1:(dim_p[2] - 4)), "group")
+psych_0[2] = tolower(unlist(psych_0[2]))
+psych_0[28] = tolower(unlist(psych_0[28]))
 ```
+```{r, echo = F, render = lemon_print}
+render_p = 1:((dim_p[2] / 2) + 2)
+head(psych_0[render_p])
+```
+\jointables
+```{r, echo = F, render = lemon_print}
+head(psych_0[-render_p])
+```
+\smallskipm
+
+The $24$ tests corresponds to the following subjects:
+
+\smallskip
+```{r, echo = F}
+t = c()
+t[1] = "visual perception"
+t[2] = "cubes"
+t[3] = "paper form board"
+t[4] = "flags"
+t[5] = "general information"
+t[6] = "paragraph comprehension"
+t[7] = "sentence completion"
+t[8] = "word classification"
+t[9] = "word meaning"
+t[10] = "addition"
+t[11] = "code"
+t[12] = "counting dots"
+t[13] = "straight-curved capitals"
+t[14] = "word recognition"
+t[15] = "number recognition"
+t[16] = "figure recognition"
+t[17] = "object-number"
+t[18] = "number-figure"
+t[19] = "figure-word"
+t[20] = "deduction"
+t[21] = "numerical puzzles"
+t[22] = "problem reasoning"
+t[23] = "series completion"
+t[24] = "arithmetic problems"
+```
+```{r, echo = F, render = lemon_print}
+df_t = as.data.frame(t)
+rownames(df_t) = names(psych_0[4:(dim_p[2] - 1)])
+colnames(df_t) = "test"
+head(df_t, 9)
+```
+\smallskipm
+```{r, echo = F, render = lemon_print}
+tail(df_t, 15)
+```
+\smallskipm
+
+Note that that the variable \texttt{case} is does not give any important information as it only corresponds to an enumeration of the students who were tested in sequential order (containing some gaps probably due to the absence of data for some of the students).
 
 ## 1.1
 
+In performing the factor analysis we are interested only in the $24$ variables corresponding to the psychological tests, hence we remove the variables \texttt{case}, \texttt{age} and \texttt{sex} from our dataset. Moreover, we are asked to use only the Grant-White students data, so we subset the remaining data frame according to the request.
+
+\smallskip
+```{r}
+psych_1 = psych_0[, 4:28]
+gw = subset(psych_1, group == "grant", select = -group)
+```
+
+Before starting fitting the model, we first scale our dataset and then take a look at the correlation matrix of our data. Indeed correlation between variables is the object of interest in \textit{Factor Analysis}. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
+
+\smallskip
+<!-- todo: bigger matrix plot -->
+```{r, fig.align = "center", out.width = "200%"}
+gws = scale(gw)
+cor_gws = cor(gws)
+dim_gws = dim(gws)
+colnames(cor_gws) = paste0("$t[", 1:(dim_p[2] - 4), "]")
+rownames(cor_gws) = colnames(cor_gws)
+par(family = "serif")
+corrplot.mixed(cor_gws, upper = "pie",
+	upper.col = COL2("BrBG"), lower.col = COL2("BrBG"),
+	number.cex = 0.4, tl.col = "black", tl.cex = 0.7, cl.cex = 0.7)
+```
+
+```{r, echo = F}
+colnames(cor_gws) = paste0("t_", 1:(dim_p[2] - 4))
+rownames(cor_gws) = colnames(cor_gws)
+```
+
+```{r}
+neg_cor_gws = ((24^2 - sum(sign(cor_gws))) / 2) / 2
+```
+
+From the correlation matrix we can note that:
+\begin{itemize}
+	\item
+		all the correlation except for \texttt{neg\_cor\_gws} $= `r neg_cor_gws`$ are positive, moreover the majority of them is less than $0.5$;
+		% todo: comment the point
+	\item
+		by just looking at the correlation matrix it is difficult to guess whether $5$ or $6$ common factors are an appropriate choice or not.
+\end{itemize}
+
+In order to obtain the maximum likelihood solution for $m = 5$ and $m = 6$ factors in \texttt{R} we can use the built-in function \texttt{factanal()}. \newline
+Before proceeding with the computation, we would like to recall that the \textit{maximum likelihood} method, unlike the \textit{principal component method}, relies on the necessary assumption of normality of the \textit{common factors} ($\boldsymbol{F}$) and of the \textit{specific error terms} ($\boldsymbol{\varepsilon}$).
+In particular, if $\boldsymbol{F} = (F_1, \dots, F_m)$ and $\boldsymbol{\varepsilon} = (\varepsilon_1, \dots, \varepsilon_p)$ are normally distributed, then 
+\[
+	\boldsymbol{X} = \boldsymbol{L} \boldsymbol{F} + \boldsymbol{\varepsilon} \sim \normal{\mu}{\Sigma}, \text{ with } L \in \real^{p \times m}.
+\]
+We can check the normality by observing that our input data $\boldsymbol{x} \in \real^{24}$, which was reviously rescaled, actually comes from a $\boldsymbol{X} \sim \normal{0}{I}$.
+
+For this purpose we look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi^2_{24}$.
+
+\smallskip
+```{r, echo = F, fig.align = "center", fig.asp = 0.48, out.width = "96%"}
+par(family = "serif", mar = c(4, 4, 1, 1))
+d = mahalanobis(gws, center = colMeans(gws), cov = cov(gws))
+plot(qchisq(ppoints(d), df = ncol(gws)), sort(d), pch = 16,
+	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
+abline(0, 1, col = "green")
+```
+
+The plot shows that the variables jointly seem to follow a gaussian behaviour: except for the last $3$ points, which create a heavy right tail the other points lies on the Q-Q line.
+
+We now proceed with the computation of the maximum likelihood solution, first with $m = 5$ factors, then with $m = 6$ factors (without any rotation):
+\smallskip
+```{r}
+faml_5 = factanal(gws, factors = 5, rotation = "none")
+load_5 = faml_5$loadings[, ]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_5, 4))
+tmp
+```
+
+\smallskip
+```{r}
+faml_6 = factanal(gws, factors = 6, rotation = "none")
+load_6 = faml_6$loadings[, ]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_6, 4))
+tmp
+```
+
+<!-- todo: comments -->
+
+It is remarkable that in the case $m = 5$ all but two variables load on the first factor higher than on any other. This makes any factor interpretation very difficult, at least without applying any rotation to the loadings. We will discuss it in more detail in the next point.
+
+Then we proceed with the computation of the proportion of total sample variance due to each factor. \newline
+We recall that the proportion of total sample variance due to the $k$\textsuperscript{th} factor is defined as
+\[
+	\operatorname{prop\_var}(k) = \frac{\sum_{j = 1}^{p} \hat{l}_{j, k}^2}{\trace{\boldsymbol{S}}},
+\]
+with $\hat{\boldsymbol{L}} = \left(\hat{l}_{j, k}\right)_{\substack{j = 1, \dots p \\ k = 1, \dots, m}}$ factor loadings and $\boldsymbol{S}$ sample covariance matrix. \newline
+Due to the scaling performed at the beginning of the computation in our case $\trace{\boldsymbol{S}} = \text{\texttt{size(}}\boldsymbol{S}\text{\texttt{)}} = `r dim_gws[2]`$ (it is indeed a sample correlation matrix).
+
+\smallskip
+```{r}
+prop_var_5 = colSums(load_5^2) / dim_gws[2]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(prop_var_5, 4))))
+rownames(tmp) = "prop_var_5"
+tmp
+```
+
+```{r, render = lemon_print}
+prop_var_6 = colSums(load_6^2) / dim_gws[2]
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(prop_var_6, 4))))
+rownames(tmp) = "prop_var_6"
+tmp
+```
+
+We could get the associated cumulative proportion of total sample variance by applying the \texttt{cumsum()} function to the previous $2$ variables. However, these computations are also performed as a part of the output of the command \texttt{factanal()}, together with the sum of the squares of the loadings:
+
+\smallskip
+```{r, results = "hide"}
+faml_5
+```
+```{r, echo = F, render = lemon_print}
+l2_5 = colSums(load_5^2)
+ss_load_5 = round(l2_5, 4)
+prop_var_5 = round(l2_5 / dim_gws[2], 4)
+cum_var_5 = round(cumsum(l2_5 / dim_gws[2]), 4)
+df_5 = as.data.frame(rbind(ss_load_5, prop_var_5, cum_var_5))
+df_5
+```
+
+\smallskip
+```{r, results = "hide"}
+faml_6
+```
+```{r, echo = F, render = lemon_print}
+l2_6 = colSums(load_6^2)
+ss_load_6 = round(l2_6, 4)
+prop_var_6 = round(l2_6 / dim_gws[2], 4)
+cum_var_6 = round(cumsum(l2_6 / dim_gws[2]), 4)
+df_6 = as.data.frame(rbind(ss_load_6, prop_var_6, cum_var_6))
+df_6
+```
+
+Both models seem to fit very poorly. 
+A general criterion, for the choice of the number of factors is to take the smallest $m$ such that the total proportion of variance due to the $m$ factors is at least $80\%$. However, in both our cases ($m = 5, 6$), the models explain about $50\%$ (respectively $`r round(cum_var_5[5] * 100, 2)`\%$ and $`r round(cum_var_6[6] * 100, 2)`\%$) of the total variance collectively.
+Hence, the result is not satisfactory.
+
+Next, as requested, we report below the specific variances $(\psi_j)_{j = 1}^{24}$, again for both $m = 5$ and $m = 6$. 
+In this case we directly exploit the output of \texttt{factanal()} in order not to have to recalculate the values of the specific variances of the factors by hand. We report the results of the computation below:
+
+\smallskip
+```{r}
+psi_5 = faml_5$uniquenesses
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(psi_5, 4))))
+tmp[, 1:(dim_gws[2] / 2)]
+```
+\jointables
+```{r, echo = F, render = lemon_print}
+tmp[, ((dim_gws[2] / 2) + 1):dim_gws[2]]
+```
+
+```{r}
+psi_6 = faml_6$uniquenesses
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(psi_6, 4))))
+tmp[, 1:(dim_gws[2] / 2)]
+```
+\jointables
+```{r, echo = F, render = lemon_print}
+tmp[, ((dim_gws[2] / 2) + 1):dim_gws[2]]
+```
+\smallskipm
+
+Finally, we need to assess the accuracy of the approximations of the correlation matrices. For this purpose, for both models we analyse the residual matrix given by the difference between the actual correlation matrix, $\boldsymbol{R}$, and the correlation matrix given by the approximation performed by the maximum likelihood method, i.e. $\boldsymbol{S} = \hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}$, where $\hat{\boldsymbol{\Psi}} = \operatorname{diag}\left((\psi_j)_{j = 1}^{24}\right)$. \newline 
+We first compare the squared Frobenius norm of the approximation matrices with the sum of the squares of the neglected eigenvalues, i.e. $\sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2$, in order to check if the following inequality is fulfilled:
+\[
+	\left\|\boldsymbol{R} - \left(\hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}\right)\right\|^2_{\rm{F}} \leq \sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2.
+\]
+Then, we compare the two squared Frobenius norms in order to see which approximation is more accurate.
+
+\smallskip
+```{r}
+eig = eigen(cor_gws)$values
+residual_5 = cor_gws - (load_5 %*% t(load_5) + diag(psi_5))
+eig_negl_5 = eig[(5 + 1):dim_gws[2]]
+comparison_5 = c(sum(residual_5^2), sum(eig_negl_5^2))
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(comparison_5, 4))))
+rownames(tmp) = "comparison_5"
+colnames(tmp) = c("ss_residual_5", "ss_eig_negl_5")
+tmp
+```
+\smallskipm
+
+Then we repeat the same computation for $m = 6$:
+
+\smallskip
+```{r}
+residual_6 = cor_gws - (load_6 %*% t(load_6) + diag(psi_6))
+eig_negl_6 = eig[(6 + 1):dim_gws[2]]
+comparison_6 = c(sum(residual_6^2), sum(eig_negl_6^2))
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(round(comparison_6, 4))))
+rownames(tmp) = "comparison_6"
+colnames(tmp) = c("ss_residual_6", "ss_eig_negl_6")
+tmp
+```
+\smallskipm
+
+We get
+\begin{align*}
+	& m = 5: \quad `r sum(residual_5^2)` \leq `r sum(eig_negl_5^2)` \\
+	& m = 6: \quad `r sum(residual_6^2)` \leq `r sum(eig_negl_6^2)`
+\end{align*}
+so the inequality is satisfied.
+Moreover, it is evident that in both cases the approximation error of the correlation matrix is not negligible.
+
+We can therefore conclude that both choices are acceptable, but in some sense inaccurate. The improvement given by the choice of $m = 6$ is not particularly significant, hence we tend to prefer $m = 5$. Indeed the last factor obtained with $m = 6$ accounts only for the $`r round(prop_var_6[6] * 100, 2)`\%$ of the total sample variance and the difference between the squared Frobenius norms of the residual matrices shares the same order of magnitude.
+
+<!-- todo: 
+	- analyse statistics of faml_5 / faml_6.
+-->
+
 ## 1.2
 
+We now have to give an interpretation to the common factors in the $m = 5$ solution. Without any rotation the loadings are pretty difficult to comprehend. Indeed, as we noticed in the previous point, when $m = 5$ almost all variables load on the first factor higher than on the other four factors. Therefore, a rotation may help in the interpretation process. As requested, we perform the \texttt{Varimax} rotation.
+
+\smallskip
+
+```{r}
+faml_5_var = factanal(gws, factors = 5, rotation = "varimax")
+load_5_var = faml_5_var$loadings[, ]
+``` 
+
+\smallskip
+
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_5_var, 4))
+tmp
+```
+
+We choose not to visualize the results in a plot since there are too many factors and variables and therefore it would not have been helpful.
+
+After the rotation, things become a little better: as expected, the loadings are in general smaller or larger than the previous ones, and this facilitates the interpretation of the factors. In particular:
+\begin{enumerate}
+	\item 
+		the variables $t_5,t_6,t_7,t_8$ and $t_9$ load highly on the first common factor. The psychological tests associated to these variables primarly assess the language-related capacities of an individual, including reading comprehension, vocabulary knowledge, word associations, sentence construction and general knowledge. Hence, we can interpret the first factor as \textit{verbal ability};
+	\item 
+		the second factor is determined by the variables from $t_1$ to $t_4$ togheter with $t_{20}, t_{22}$ and $t_{23}$. The first four tests measure the spatial ability of an individual, while the last three tests assess the logical ability of an individual. Hence, we choose to assign the second factor the label \textit{logical and spatial ability};
+	\item 
+		the variables $t_{10}$ and $t_{12}$ load highly on the third factor, which is also determined by the variables $t_{21}$ and $t_{24}$. They refer to psychological tests that assess cognitive capacities related to numerical processing, mathematical reasoning and arithmetic skills. We refer to the fourth factor as \textit{numerical/mathematical ability};
+	\item 
+		the variables from $t_{14}$ to $t_{19}$ determine the fourth common factor. The tests associated to these variables measure an individual's capacity of recognising  numbers, words and figures and of making associations between them. Hence, the fourth factor can be interpreted as \textit{recognition and association ability}; %'
+	\item
+		the fifth factor is solely determined by the variable $t_{13}$. Hence we label the factor as its representative test, i.e. \textit{straight-curved capitals}. It is immediate to observe that it is the only factor without an abstract meaning. This could be due to the fact that proportion of variance explained by the factor is $`r round(colSums(load_5_var^2) / dim_gws[2], 3)[5]`$, which is too low to have a significative impact.
+\end{enumerate}
+
+Finally it is remarkable that the variable $t_{11}$ loads uniformly on the last three common factors hence it influences them similarly. This could be reasonable taking into account the psychological test associated with the variable.  
+
+Before we move to the next step we want to underline that we decided not to fix a threshold value to assess significance of factor loadings. This choice is motivated by the fact that the total sample	variance explained by the $5$ factors is only $`r round(cum_var_5[5] * 100, 2)`\%$. Indeed this leads to the shortage of very high loadings and at the same time allows the presence of variables that have not much influence on any factor. Moreover by doing so we obtained a partition of our variables among the factors (with the only minor exception given by $t_{11}$).
+
 ## 1.3
+
+We report below the scatterplot of the first two factor scores for the $m = 5$ solution obtained by the regression method, as requested.
+
+\vspace{-25pt}
+
+```{r, echo = F, fig.align = "center", out.width = "80%"}
+faml_5_var_reg = factanal(gws, factors = 5, rotation = "varimax", scores = "regression")
+fact_load_5 = faml_5_var_reg$scores[, 1:2]
+
+par(family = "serif")
+plot(fact_load_5[, 1], fact_load_5[, 2], pch = 16, xlab = "Factor1", ylab = "Factor2", asp = 1)
+``` 
+
+It seems there is no particular correlation between the two factors. In fact, if we compute it we obtain $`r round(cor(fact_load_5[, 1], fact_load_5[, 2]), 3)`$.
+
 
 ## 1.4
 
