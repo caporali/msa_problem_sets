@@ -42,7 +42,7 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # setwd (change it with your own)
-setwd("c:/users/franc/documents/github/msa_problem_sets/problem_set_2")
+setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
 
 # libraries
 library(corrplot)
@@ -436,8 +436,55 @@ comparison_m_2
 
 
 ## 1.2
+We now have to give an interpretation to the common factors in the $m = 5$ solution. Without any rotation the loadings are pretty difficult to interpret. Indeed, as we noticed in the previous point, when $m = 5$ almost all variables load on the first factor higher than on the other four factors. Therefore, a rotation may help in the interpretation process. As requested, we perform the Varimax rotation.
+
+\smallskip
+
+```{r}
+faml_5_var = factanal(gws, factors = 5, rotation = "varimax")
+load_5_var = faml_5_var$loadings[,]
+``` 
+
+\smallskip
+
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_5_var, 4))
+tmp
+```
+
+We choose not to visualize the results in a plot since there are too many factors and variables, so it woud have not been of any help.
+
+After the rotation, things become a little better: as expected, the loadings are in general smaller or larger than the previous ones, and this facilitates the interpretation of the factors. In particular:
+\begin{itemize}
+   \item The variables $t_5,t_6,t_7,t_8$ and $t_9$ load highly on the first common factor. The psychological tests associated to these variables primarly assess the language-related capacities of an individual, including reading comprehension, vocabulary knowledge, word associations, sentence construction and general knowledge. Hence, we can interpret the first factor as "verbal ability";
+   \item The variables from the $14$th to the $19$th determine the fourth common factor. The tests associated to these variables measure an individual's capacity of recognising  numbers, words and figures and of making associations between them. Hence, the fourth factor can be interpreted as "recognition and association ability";
+   \item The fifth factor is solely determined by the variable $t_{13}$...
+   \item The variables $t_{10}$ and $t_{12}$ load highly on the third factor, which is also determined by the variables $t_{21}$ and $t_{24}$. These variables refer to psychological tests that assess cognitive capacities related to numerical processing, mathematical reasoning, problem-solving and arithmetic skills. We refer to the fourth factor as "numerical/mathematical ability";
+   \item Finally, the second factor is determined by the variables from $t_1$ to $t_4$ togheter with $t_{20}, t_{22}$ and $t_{23}$. The first four tests measure the visual ability of an individual, while the last three tests assess the logical ability of an individual. Hence, we choose to interpret the second factor as "logical and visual ability";
+   \item Note also that the variable $t_{11}$ loads similarly on the last three common factors....
+\end{itemize}
+
+
 
 ## 1.3
+We report below the scatterplot of the first two factor scores for the $m = 5$ solution obtained by the regression method, as requested.
+
+\vspace{-25pt}
+
+```{r, echo = F, fig.align = "center", out.width = "80%"}
+faml_5_var_reg = factanal(gws, factors = 5, rotation = "varimax", scores = "regression")
+fact_load_5 = faml_5_var_reg$scores[,1:2]
+plot(fact_load_5[,1], fact_load_5[, 2], pch = 16, xlab = "factor 1", ylab = "factor 2")
+``` 
+
+It seems there is no particular correlation between the two factors. In fact, if we compute it we obtain 
+
+```{r, echo = F}
+cor(fact_load_5[,1],fact_load_5[,2])
+``` 
+
+
+
 
 ## 1.4
 
