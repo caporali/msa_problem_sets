@@ -13,6 +13,7 @@ prop.dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$dig
 
 ##################### Point 1  #####################################################
 lda.fit <- lda(digit ~.,data = pendigits, prior = prop.dig)
+lda.fit$scaling
 pred <- predict(lda.fit)
 ftld <- as.matrix(pred$x)[,1:2] #creating a dataset with the first two linear discriminant variables
 plot(LD2~LD1, data=ftld, asp=1, pch=16,col=digit.col)
@@ -87,6 +88,9 @@ plot(1:length(cv), cv, xlab = "Discriminant variables used", ylab = "CV test err
 #     cv = c(cv, cvk)
 # }
 # cv
+# 
+# 0.5452147 0.3241448 0.2530932 0.2156114 0.1644833 0.1410116 0.1340975 0.1252729 0.1241812 0.1241812
+
 
 #########################################################################################
 

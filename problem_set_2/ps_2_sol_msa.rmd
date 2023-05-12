@@ -43,9 +43,9 @@ knitr::opts_chunk$set(message = F, warning = F)
 # pretty print data frames
 library(lemon)
 
-# setwd (change it with your own)
+setwd("C:/Users/utente/Dropbox/PC/Documents/Programmi/GitHub/msa_problem_sets/problem_set_2")
 # setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+# setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
@@ -662,16 +662,75 @@ points(mu_gw_age2[1], mu_gw_age2[2], pch = 16, cex = 1, col = "darkgreen")
 For the Grant-White students we basically cannot see any particular difference between the distributions of the two groups: the mean points are very close. As for the Pasteur students we get that they score similarly on the second factor (\textit{logical/spatial ability}) while there is a little difference in the first common factor in favour of the younger students. Since we do not know any additional information about the students and about the exact structure on the psychological tests we are not able to say whether it does make sense or not.
 
 # Exercise 2
+Potentially some introductory comment on the data ? 
 
+## 2.1
+First we apply the r procedure lda. This identitifies recursively 9 discriminant variables, which are linar combinations of the original predictors and such that, in the base for which the matrix variance is sphered, in the subspace ortoghonal to the linear discriminants of smaller index, the class centroid are maximally spaced. 
+
+```{r, echo = FALSE}
+library(MASS)
+library(cvms)
+library(dplyr)
+rm(list=ls())
+pendigits<-read.table("data/pendigits.txt", sep=",",head=F)
+names(pendigits)<-c(paste0(rep(c("x","y"),8),rep(1:8,each=2)),"digit")
+lookup<-c("darkgreen",  "brown", "lightblue",  "magenta", "purple", 
+                     "blue", "red", "lightgreen", "orange", "cyan")
+names(lookup)<-as.character(0:9)
+digit.col<-lookup[as.character(pendigits$digit)]
+prop.dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$digit)))
+```
+
+```{r, render = lemon_print}
+lda.fit <- lda(digit ~.,data = pendigits, prior = prop.dig)
+print(lda.fit$scaling)
+```
+
+In particular, as the discriminant variables are found iteratively as the direction of highest discrimination in smaller and smaller subspaces, they are ordered by power of discrimination. Therefore a plot of the first two discriminant variables should be rather informative of the degree by which classes can be discriminated.
+
+```{r}
+pred <- predict(lda.fit)
+plot(LD2~LD1, data=pred$x, asp=1, pch=16,col=digit.col)
+```
+# Remark: it could be interesting to identify and plot the centroids to highlight the role they play in the identification of discriminant variables. It might be the case to also add a legenda
+The most difficult to discriminate are brown = 1, blue = 5, and cyan = 9.
+
+## 2.2
+One way to make this analysis more rigorous is to take into account the confusion matrix.
+```{r, echo = F, fig.align = "center"}
+conf_mat <- confusion_matrix(targets = pendigits$digit, predictions = pred$class)
+plot_confusion_matrix(conf_mat$`Confusion Matrix`[[1]], class_order = as.character(9:0),
+                      add_normalized = FALSE, palette = 'Green')
+```
+Indeed it is conspicuous that the worst performance are indeed in classifying ones and fives. 
+Also nines are classified quite poorly. Surprisingly, also eights are classified quite badly.In particular, it is wuite surprising that they are classified even worsly than nines. In particular, we observe that lsa yields the following value for train MSE:
+
+```{r, echo=F}
+round(1- conf_mat$`Overall Accuracy`,4)
+```
+
+## 2.3
+The MSE computed in the previous point is a good indicator of how well the model can describe the data. However, this is potentially of little use in making predictions. It is more interesting to assess the performances of the model on novel observations. One way to do so it to estimate the test MSE through a procedure called leave-one-out cross validation (\textit{LOOCV}). With this procedure, as the name suggests, the model is trained leaving out one obervation at a time, and using it as test, and providing then an estimator for the test MSE (or missclassification error respectively) repeating this procedure for all observations. 
+
+```{r}
+lda.CV <- lda(digit ~.,data = pendigits, CV =T)
+```
+Which yields the following missclassification rate:
+```{r, echo =F}
+conf_mat_cv <- confusion_matrix(targets = pendigits$digit, predictions = lda.CV$class)
+round(1 - conf_mat_cv$`Overall Accuracy`, 4)
+#cat(round(((1-conf_mat_cv$`Overall Accuracy`) - (1 - conf_mat$`Overall Accuracy`))/ (1-conf_mat_cv$`Overall Accuracy`) *100, 3), sep = '', '%')
+```
+which constitues an increase of roughly 1% with respect to the previous estimate. It is not surprising  A remark 
 ```{r}
 # code
 ```
 
-## 2.1
 
-## 2.2
 
-## 2.3
+```{r}
+# code
+```
 
 ## 2.4
 
