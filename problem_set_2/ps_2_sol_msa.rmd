@@ -689,12 +689,12 @@ We look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi
 
 \smallskip
 ```{r, fig.align = "center", fig.asp = 0.48, out.width = "96%"}
-par(family = "serif", mar = c(4, 4, 1, 1))
-pendigit_1 = pendigits[, pendigits$digit == 1]
-d = mahalanobis(pendigit_1, center = colMeans(pendigit_1), cov = cov(pendigit_1))
-plot(qchisq(ppoints(d), df = ncol(pendigit_1)), sort(d), pch = 16,
-	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
-abline(0, 1, col = "green")
+# par(family = "serif", mar = c(4, 4, 1, 1))
+# pendigit_1 = pendigits[, pendigits$digit == 1]
+# d = mahalanobis(pendigit_1, center = colMeans(pendigit_1), cov = cov(pendigit_1))
+# plot(qchisq(ppoints(d), df = ncol(pendigit_1)), sort(d), pch = 16,
+# 	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
+# abline(0, 1, col = "green")
 ```
 
 ```{r}
@@ -739,13 +739,14 @@ round(1 - conf_mat$"Overall Accuracy", 4)
 The MSE computed in the previous point is a good indicator of how well the model can describe the data. However, this is potentially of little use in making predictions. It is more interesting to assess the performances of the model on novel observations. One way to do so it to estimate the test MSE through a procedure called leave-one-out cross validation (\textit{LOOCV}). With this procedure, as the name suggests, the model is trained leaving out one obervation at a time, and using it as test, and providing then an estimator for the test MSE (or missclassification error respectively) repeating this procedure for all observations. 
 
 ```{r}
-lda.CV <- lda(digit ~.,data = pendigits, CV =T)
+lda_cv = lda(digit ~ ., data = pendigits, CV = T)
 ```
 Which yields the following missclassification rate:
 ```{r, echo =F}
-conf_mat_cv <- confusion_matrix(targets = pendigits$digit, predictions = lda.CV$class)
-round(1 - conf_mat_cv$`Overall Accuracy`, 4)
-#cat(round(((1-conf_mat_cv$`Overall Accuracy`) - (1 - conf_mat$`Overall Accuracy`))/ (1-conf_mat_cv$`Overall Accuracy`) *100, 3), sep = '', '%')
+conf_mat_cv <- confusion_matrix(targets = pendigits$digit, predictions = lda_cv$class)
+round(1 - conf_mat_cv$"Overall Accuracy", 4)
+cat(round(((1 - conf_mat_cv$"Overall Accuracy") -
+	(1 - conf_mat$"Overall Accuracy")) / (1 - conf_mat_cv$"Overall Accuracy") * 100, 3), sep = "", "%")
 ```
 which constitues an increase of roughly 1% with respect to the previous estimate. It is not surprising  A remark 
 ```{r}
