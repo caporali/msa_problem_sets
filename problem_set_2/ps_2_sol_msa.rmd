@@ -685,24 +685,41 @@ head(pendigits)
 ## 2.1
 The Linear Discriminant Analysis (LDA) technique relies on the assumption that each different class is multivariate gaussian distributed with different means $\mu_i$ (centroids) and with the same covariance matrix $\boldsymbol{\Sigma}$. Hence, we should first check if this assumption holds.
 
-We look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi_{16}^2$.
+We look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi_{16}^2$ for each different class.
 
 \smallskip
-```{r, fig.align = "center", fig.asp = 0.48, out.width = "96%"}
-# par(family = "serif", mar = c(4, 4, 1, 1))
-# pendigit_1 = pendigits[, pendigits$digit == 1]
-# d = mahalanobis(pendigit_1, center = colMeans(pendigit_1), cov = cov(pendigit_1))
-# plot(qchisq(ppoints(d), df = ncol(pendigit_1)), sort(d), pch = 16,
-# 	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
-# abline(0, 1, col = "green")
-```
-
-```{r}
+```{r, echo = f, fig.align = "center", out.width = "100%"}
 sub_digits = list()
 for (i in 1:10){
-	sub_digits[[i]] = pendigits[pendigits[, 17] == (i - 1), 1:17]
+	sub_digits[[i]] = pendigits[pendigits[, 17] == (i - 1), 1:16]
+}
+par(mfrow = c(3, 3), mar = c(2, 2, 2, 1), family = "serif")
+for (i in 1:4){
+	d = mahalanobis(sub_digits[[i]], center = colMeans(sub_digits[[i]]), cov = cov(sub_digits[[i]]))
+	plot(qchisq(ppoints(d), df = ncol(sub_digits[[i]])), sort(d), pch = 16,
+		xlab = "Theoretical Quantiles", ylab = "Sample Quantiles", main = paste0("digit ", (i - 1)))
+	abline(0, 1, col = "green")
+}
+for (i in 6:10){
+	d = mahalanobis(sub_digits[[i]], center = colMeans(sub_digits[[i]]), cov = cov(sub_digits[[i]]))
+	plot(qchisq(ppoints(d), df = ncol(sub_digits[[i]])), sort(d), pch = 16,
+		xlab = "Theoretical Quantiles", ylab = "Sample Quantiles", main = paste0("digit ", (i - 1)))
+	abline(0, 1, col = "green")
 }
 ```
+
+Let us first note that we removed 
+
+\smallskip
+```{r, fig.align = "center", out.width = "75%"}
+sub_digits_5_var = sub_digits[[5]][, 1:15]
+d = mahalanobis(sub_digits_5_var, center = colMeans(sub_digits_5_var), cov = cov(sub_digits_5_var))
+plot(qchisq(ppoints(d), df = ncol(sub_digits_5_var)), sort(d), pch = 16,
+	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles", main = paste0("digit ", 4))
+abline(0, 1, col = "green")
+```
+
+
 
 First we apply the r procedure lda. This identitifies recursively 9 discriminant variables, which are linar combinations of the original predictors and such that, in the base for which the matrix variance is sphered, in the subspace ortoghonal to the linear discriminants of smaller index, the class centroid are maximally spaced. 
 
@@ -715,8 +732,32 @@ colSums(lda_fit$scaling)
 In particular, as the discriminant variables are found iteratively as the direction of highest discrimination in smaller and smaller subspaces, they are ordered by power of discrimination. Therefore a plot of the first two discriminant variables should be rather informative of the degree by which classes can be discriminated.
 
 ```{r}
-pred <- predict(lda_fit)
-plot(LD2 ~ LD1, data = pred$x, asp = 1, pch = 16, col = digit_col)
+all = matrix(rep(0, 160), ncol = 10)
+for (i in 1:10){
+	all[, i] = as.matrix(colMeans(sub_digits[[i]]))
+}
+prop_dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$digit)))
+grand_mean = all %*% as.matrix(prop_dig)
+centroids_other = matrix(rep(0, 20), ncol = 2)
+for (i in 1:10){
+	centroids_other[i, ] = t(t(lda_fit$scaling[, 1:2]) %*% (as.matrix(colMeans(sub_digits[[i]])) - grand_mean))
+}
+```
+
+```{r, fig.align = "center", fi}
+par(family = "serif")
+pred = predict(lda_fit)
+plot(LD2 ~ LD1, data = pred$x, pch = 16, cex = 0.5,
+	col = digit_col, asp = 1)
+
+centroids = aggregate(pred$x, by = list(pendigits$digit), FUN = mean)
+centroids = centroids[, -1]
+points(centroids[, 1], centroids[, 2], cex = 1, bg = lookup, pch = 21)
+points(centroids_other[, 1], centroids_other[, 2], cex = 1, bg = lookup, pch = 21)
+```
+
+```{r}
+centroids_other - centroids[, 1:2]
 ```
 # Remark: it could be interesting to identify and plot the centroids to highlight the role they play in the identification of discriminant variables. It might be the case to also add a legenda
 The most difficult to discriminate are brown = 1, blue = 5, and cyan = 9.
