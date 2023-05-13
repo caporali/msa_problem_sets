@@ -44,9 +44,9 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # set working directory
-# setwd("C:/Users/utente/Dropbox/PC/Documents/Programmi/GitHub/msa_problem_sets/problem_set_2")
+setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
 # setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+# setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
@@ -125,11 +125,11 @@ tail(df_t, 15)
 ```
 \smallskipm
 
-Note that that the variable \texttt{case} is does not give any important information as it only corresponds to an enumeration of the students who were tested in sequential order (containing some gaps probably due to the absence of data for some of the students).
+Note that the variable \texttt{case} does not provide any important information as it only corresponds to an enumeration of the students, who were tested in sequential order (containing some gaps probably due to the absence of data for some of the students).
 
 ## 1.1
 
-In performing the factor analysis we are interested only in the $24$ variables corresponding to the psychological tests, hence we remove the variables \texttt{case}, \texttt{age} and \texttt{sex} from our dataset. Moreover, we are asked to use only the Grant-White students data, so we subset the remaining data frame according to the request.
+In performing the factor analysis we are only interested  in the $24$ variables corresponding to the psychological tests, hence we remove the variables \texttt{case}, \texttt{age} and \texttt{sex} from our dataset. Moreover, we are asked to use only the Grant-White students data, so we subset the remaining data frame according to the request.
 
 \smallskip
 ```{r}
@@ -137,7 +137,8 @@ psych_1 = psych_0[, 4:28]
 gw = subset(psych_1, group == "grant", select = -group)
 ```
 
-Before starting fitting the model, we first scale our dataset and then take a look at the correlation matrix of our data. Indeed correlation between variables is the object of interest in \textit{Factor Analysis}. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
+Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlation between variables is the object of interest in \textit{Factor Analysis}. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
+<!-- todo: what do you mean exactly with the sentence "correlation between variables is the object of interest in \textit{Factor Analysis}." ? It is kind of vague and can be misleading.  -->
 
 \smallskip
 <!-- todo: bigger matrix plot -->
@@ -168,7 +169,7 @@ From the correlation matrix we can note that:
 		all the correlation except for \texttt{neg\_cor\_gws} $= `r neg_cor_gws`$ are positive, moreover the majority of them is less than $0.5$;
 		% todo: comment the point
 	\item
-		by just looking at the correlation matrix it is difficult to guess whether $5$ or $6$ common factors are an appropriate choice or not.
+		by just looking at the correlation matrix, it is difficult to guess whether $5$ or $6$ common factors are an appropriate choice or not.
 \end{itemize}
 
 In order to obtain the maximum likelihood solution for $m = 5$ and $m = 6$ factors in \texttt{R} we can use the built-in function \texttt{factanal()}. \newline
@@ -688,7 +689,7 @@ The Linear Discriminant Analysis (LDA) technique relies on the assumption that e
 We look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi_{16}^2$ for each different class.
 
 \smallskip
-```{r, echo = f, fig.align = "center", out.width = "100%"}
+```{r, echo = F, fig.align = "center", out.width = "100%"}
 sub_digits = list()
 for (i in 1:10){
 	sub_digits[[i]] = pendigits[pendigits[, 17] == (i - 1), 1:16]
