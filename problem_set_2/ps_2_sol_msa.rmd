@@ -33,7 +33,7 @@ output:
     - \newcommand{\normal}[2]{\mathcal{N}\left(#1,#2\right)}
     - \renewcommand{\epsilon}{\varepsilon}
     - \newcommand{\smallskipm}{\vspace{-12pt}}
-    - \newcommand{\figurespacem}{\vspace{-40pt}}
+    - \newcommand{\figurespace}{\vspace{-40pt}}
     - \newcommand{\jointables}{\vspace{-24.80pt}} # todo: fix
 ---
 
@@ -44,16 +44,17 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # set working directory
-setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
+# setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
 # setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-# setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
 library(ellipse)
 library(MASS)
 library(cvms)
-library(dplyr)
+library(ggplot2)
+# library(dplyr)
 ```
 
 # Exercise 1
@@ -138,10 +139,11 @@ gw = subset(psych_1, group == "grant", select = -group)
 ```
 
 Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlation between variables is the object of interest in \textit{Factor Analysis}. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
-<!-- todo: what do you mean exactly with the sentence "correlation between variables is the object of interest in \textit{Factor Analysis}." ? It is kind of vague and can be misleading.  -->
+<!-- 
+	todo: what do you mean exactly with the sentence "correlation between variables is the object of interest in \textit{Factor Analysis}." ? It is kind of vague and can be misleading.  
+-->
 
 \smallskip
-<!-- todo: bigger matrix plot -->
 ```{r, fig.align = "center", out.width = "200%"}
 gws = scale(gw)
 cor_gws = cor(gws)
@@ -153,6 +155,7 @@ corrplot.mixed(cor_gws, upper = "pie",
 	upper.col = COL2("BrBG"), lower.col = COL2("BrBG"),
 	number.cex = 0.4, tl.col = "black", tl.cex = 0.7, cl.cex = 0.7)
 ```
+<!-- todo: bigger matrix plot -->
 
 ```{r, echo = F}
 colnames(cor_gws) = paste0("t_", 1:(dim_p[2] - 4))
@@ -193,6 +196,8 @@ abline(0, 1, col = "green")
 
 The plot shows that the variables jointly seem to follow a gaussian behaviour: except for the last $3$ points, which create a heavy right tail the other points lies on the Q-Q line.
 
+<!-- todo: mardia mvn -->
+
 We now proceed with the computation of the maximum likelihood solution, first with $m = 5$ factors, then with $m = 6$ factors (without any rotation):
 \smallskip
 ```{r}
@@ -213,7 +218,6 @@ load_6 = faml_6$loadings[, ]
 tmp = as.data.frame(round(load_6, 4))
 tmp
 ```
-
 <!-- todo: comments -->
 
 It is remarkable that in the case $m = 5$ all but two variables load on the first factor higher than on any other. This makes any factor interpretation very difficult, at least without applying any rotation to the loadings. We will discuss it in more detail in the next point.
@@ -355,7 +359,7 @@ Moreover, it is evident that in both cases the approximation error of the correl
 Another possibile way to see if $5$ or $6$ factor are enough to explain the observed covariances is to consider test performed automatically by the command \texttt{factanal()} whose p-value is displayed at the end of the output. We obtain respectively:
 
 \smallskip
-```{r, results = F}
+```{r, results = "hide"}
 faml_5$PVAL
 faml_6$PVAL
 ```
@@ -425,7 +429,7 @@ mu_5_var_reg = colMeans(score_5_var_reg[, 1:2])
 sigma_5_var_reg = cov(score_5_var_reg[, 1:2])
 eig_var_reg = eigen(sigma_5_var_reg, symmetric = T)
 ``` 
-\figurespacem
+\figurespace
 ```{r, echo = F, fig.align = "center", out.width = "95%", fig.asp = 0.75}
 par(family = "serif")
 plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = 0.95),
@@ -443,6 +447,7 @@ d = -eig_var_reg$vectors[1, 1] / eig_var_reg$vectors[2, 1]
 c = -d * mu_5_var_reg[1] + mu_5_var_reg[2]
 abline(c, d, lwd = 1, lty = 2)
 ```
+<!-- todo: change every 0.99 with (n - 0.5) / n -->
 
 It seems there is no particular correlation between the two factors. In fact, if we compute it explicitly we obtain $`r round(cor(score_5_var_reg[, 1], score_5_var_reg[, 2]), 3)`$.
 Moreover the covariance matrix turns out to be
@@ -524,7 +529,7 @@ mu_5_pas_reg = colMeans(score_5_pas_reg[, 1:2])
 sigma_5_pas_reg = cov(score_5_pas_reg[, 1:2])
 eig_pas_reg = eigen(sigma_5_pas_reg, symmetric = T)
 ``` 
-\figurespacem
+\figurespace
 ```{r, echo = F, fig.align = "center", out.width = "95%", fig.asp = 0.75}
 par(family = "serif")
 plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = 0.95),
@@ -683,6 +688,12 @@ digit_col = lookup[as.character(pendigits$digit)]
 head(pendigits)
 ```
 
+```{r}
+count_dig = as.vector(table(pendigits$digit))
+prop_dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$digit)))
+```
+<!-- todo: hist -->
+
 ## 2.1
 The Linear Discriminant Analysis (LDA) technique relies on the assumption that each different class is multivariate gaussian distributed with different means $\mu_i$ (centroids) and with the same covariance matrix $\boldsymbol{\Sigma}$. Hence, we should first check if this assumption holds.
 
@@ -709,97 +720,204 @@ for (i in 6:10){
 }
 ```
 
-Let us first note that we removed 
+Let us first note that we removed the digit $4$ from our analysis. This is because the last variable of the dataset restricted to this class is entirely made of zeros. Hence, in this case the Mahalanobis distance is not well-defined since the covariance matrix is singular. This problem can be overcame by recalling that by definition a multivariate gaussian vector $\boldsymbol{X}$ should satisfy the following property:
+\[
+	a^T \boldsymbol{X} + b \sim \normal{\mu}{\sigma^2}, \forall a, b \in \real^{\text{\texttt{size(}}\boldsymbol{X}\text{\texttt{)}}}.
+\]
+This definition still holds if $\boldsymbol{X} = (\boldsymbol{Y}, 0)$ with $\boldsymbol{Y}$ multivariate gaussian, indeed the idea is that a constant random variable $c$ can be considered a $\normal{c}{0}$. 
+Thus, for the digit $4$, we test the normality assumption by just removing the last variable (\texttt{y\_8}).
 
 \smallskip
-```{r, fig.align = "center", out.width = "75%"}
+```{r, echo = F, fig.align = "center", out.width = "60%"}
+par(family = "serif")
 sub_digits_5_var = sub_digits[[5]][, 1:15]
-d = mahalanobis(sub_digits_5_var, center = colMeans(sub_digits_5_var), cov = cov(sub_digits_5_var))
+d = mahalanobis(sub_digits_5_var, center = colMeans(sub_digits_5_var),
+	cov = cov(sub_digits_5_var))
 plot(qchisq(ppoints(d), df = ncol(sub_digits_5_var)), sort(d), pch = 16,
 	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles", main = paste0("digit ", 4))
 abline(0, 1, col = "green")
 ```
 
+By looking at the Q-Q plots, it is clear that no class is normally distributed: all the digits, except for $6$ and $9$, seems to have heavy right tails. Actually, the plots of the remaining two variables appear to be closer to the Q-Q line but this is only because in both cases there is an extreme outlier which distorts the figure.
 
+It is also possible to check whether the covariance matrices of the different classes are similar or not. In order to do so we display below the matrix $M$ such that
+\[
+	M_{i,j} = \left\|\var{\text{\texttt{pendigits}} \big|_{\text{\texttt{digit}} = i}} - \var{\text{\texttt{pendigits}} \big|_{\text{\texttt{digit}} = j}}\right\|_{\rm{F}},
+\]
+where $\|\cdot\|_{\rm{F}}$ is the Frobenius norm of a matrix while $\var{\cdot}$ denotes the covariance matrix of a random vector.
 
-First we apply the r procedure lda. This identitifies recursively 9 discriminant variables, which are linar combinations of the original predictors and such that, in the base for which the matrix variance is sphered, in the subspace ortoghonal to the linear discriminants of smaller index, the class centroid are maximally spaced. 
-
+\smallskip
 ```{r}
-lda_fit <- lda(digit ~ ., data = pendigits)
-print(lda_fit$scaling)
-colSums(lda_fit$scaling)
+sub_digits_cov = list()
+for (i in 1:10){
+	sub_digits_cov[[i]] = cov(sub_digits[[i]])
+}
+mat = matrix(rep(1, 100), ncol = 10)
+for (i in 1:10){
+	for (j in 1:10){
+		mat[i, j] = norm(sub_digits_cov[[i]] - sub_digits_cov[[j]], "f")
+	}
+}
+```
+```{r, include = F}
+mat = round(mat, 0)
+mat = format(mat, scientific = F)
 ```
 
-In particular, as the discriminant variables are found iteratively as the direction of highest discrimination in smaller and smaller subspaces, they are ordered by power of discrimination. Therefore a plot of the first two discriminant variables should be rather informative of the degree by which classes can be discriminated.
+\[
+	\begin{pmatrix}
+		`r mat[1, 1]` & `r mat[1, 2]` & `r mat[1, 3]` & `r mat[1, 4]` & `r mat[1, 5]` & `r mat[1, 6]` & `r mat[1, 7]` & `r mat[1, 8]` & `r mat[1, 9]` & `r mat[1, 10]` \\
+		`r mat[2, 1]` & `r mat[2, 2]` & `r mat[2, 3]` & `r mat[2, 4]` & `r mat[2, 5]` & `r mat[2, 6]` & `r mat[2, 7]` & `r mat[2, 8]` & `r mat[2, 9]` & `r mat[1, 10]` \\
+		`r mat[3, 1]` & `r mat[3, 2]` & `r mat[3, 3]` & `r mat[3, 4]` & `r mat[3, 5]` & `r mat[3, 6]` & `r mat[3, 7]` & `r mat[3, 8]` & `r mat[3, 9]` & `r mat[3, 10]` \\
+		`r mat[4, 1]` & `r mat[4, 2]` & `r mat[4, 3]` & `r mat[4, 4]` & `r mat[4, 5]` & `r mat[4, 6]` & `r mat[4, 7]` & `r mat[4, 8]` & `r mat[4, 9]` & `r mat[4, 10]` \\
+		`r mat[5, 1]` & `r mat[5, 2]` & `r mat[5, 3]` & `r mat[5, 4]` & `r mat[5, 5]` & `r mat[5, 6]` & `r mat[5, 7]` & `r mat[5, 8]` & `r mat[5, 9]` & `r mat[5, 10]` \\
+		`r mat[6, 1]` & `r mat[6, 2]` & `r mat[6, 3]` & `r mat[6, 4]` & `r mat[6, 5]` & `r mat[6, 6]` & `r mat[6, 7]` & `r mat[6, 8]` & `r mat[6, 9]` & `r mat[6, 10]` \\
+		`r mat[7, 1]` & `r mat[7, 2]` & `r mat[7, 3]` & `r mat[7, 4]` & `r mat[7, 5]` & `r mat[7, 6]` & `r mat[7, 7]` & `r mat[7, 8]` & `r mat[7, 9]` & `r mat[7, 10]` \\
+		`r mat[8, 1]` & `r mat[8, 2]` & `r mat[8, 3]` & `r mat[8, 4]` & `r mat[8, 5]` & `r mat[8, 6]` & `r mat[8, 7]` & `r mat[8, 8]` & `r mat[8, 9]` & `r mat[8, 10]` \\
+		`r mat[9, 1]` & `r mat[9, 2]` & `r mat[9, 3]` & `r mat[9, 4]` & `r mat[9, 5]` & `r mat[9, 6]` & `r mat[9, 7]` & `r mat[9, 8]` & `r mat[9, 9]` & `r mat[9, 10]` \\
+		`r mat[10, 1]` & `r mat[10, 2]` & `r mat[10, 3]` & `r mat[10, 4]` & `r mat[10, 5]` & `r mat[10, 6]` & `r mat[10, 7]` & `r mat[10, 8]` & `r mat[10, 9]` & `r mat[10, 10]`
+	\end{pmatrix}
+\]
 
+The fact that our classes do not appear to be normally distributed and not to have similar covariance matrices does not compromise the applicability of the LDA since these assumptions are only required for an optimal solution.
+
+We now apply the LDA procedure (already implemented in \texttt{R}). It identitifies recursively $9$ discriminant variables from the $10$ classes. 
+
+<!--
+	todo: theoretical explaination...
+
+	First we sphere the data. Then we look at the centroid as random vectors and we  consider its variance matrix. In particular we estimate it by looking at the centroids as different realizations. We call it between variance matrix. This induces a distance. We look for the direction in the p-dimensional space that maximizes.
+	subspace generated by the sphered centroids $H_1$, then we look for the direction that maximizes the distance between the centroids and we call that direction first discriminant variable (LD1). \newline
+	Now we consider $H_2$...
+-->
+
+\smallskip
+```{r}
+lda_fit = lda(digit ~ ., data = pendigits)
+```
+```{r, echo = F, render = lemon_print}
+# colSums(lda_fit$scaling)
+as.data.frame(round(lda_fit$scaling, 4))
+```
+
+In particular, as the discriminant variables are found iteratively as the direction of highest discrimination in smaller and smaller subspaces, they are ordered by their \textit{power of discrimination}. Therefore a plot of the first two discriminant variables should be rather informative of the degree by which classes can be discriminated.
+
+We now consider only the first two discriminant variables (LD1 and LD2) and we perform a scatterplot of the data restricted on these two components, color coding the observations according to variable \texttt{digit\_col} and adding the centroids for each class.
+
+\smallskip
+```{r}
+pred = predict(lda_fit)
+centroids = aggregate(pred$x, by = list(pendigits$digit), FUN = mean)
+centroids = centroids[, -1]
+covariances = list()
+for (i in 1:10){
+	covariances[[i]] = cov(pred$x[pendigits[, 17] == (i - 1), ])
+}
+```
+```{r, fig.align = "center", echo = F}
+par(family = "serif")
+plot(LD2 ~ LD1, data = pred$x, pch = 16, cex = 0.5,
+	col = digit_col, asp = 1)
+points(centroids[, 1], centroids[, 2], cex = 1, bg = lookup, pch = 21)
+for (i in 1:10){
+	rug(centroids[i, 1], side = 1, lwd = 2, col = lookup[i])
+	rug(centroids[i, 2], side = 2, lwd = 2, col = lookup[i])
+}
+```
+
+<!--
+	todo: it might be the case to also add a legenda. 
+-->
+
+The most difficult to discriminate are brown = 1, blue = 5, and cyan = 9.
+
+\smallskipm
+```{r, fig.align = "center", echo = F}
+par(family = "serif")
+plot(LD2 ~ LD1, data = pred$x, pch = 16, cex = 0.5,
+	col = digit_col, asp = 1)
+points(centroids[, 1], centroids[, 2], cex = 1, bg = lookup, pch = 21)
+for (i in 1:10){
+	rug(centroids[i, 1], side = 1, lwd = 2, col = lookup[i])
+	rug(centroids[i, 2], side = 2, lwd = 2, col = lookup[i])
+}
+for (i in 1:10){
+	lines(ellipse(x = covariances[[i]][1:2, 1:2],
+		centre = c(t(centroids[i, 1:2])),
+		level = 0.95), col = lookup[i])
+}
+```
+
+We have also tried to compute in a more theoretical way the centroids of our $9$ classes. First we have collected in a $16 \times 10$ matrix the means of our classes, then we have computed a \textit{grand mean} by multiplying this matrix for the vector containing the proportion of observations for each class (\texttt{prop\_dig}).
+Finally we have \textit{centered} the mean vector of each class by subtracting the grand mean and we have applied the linear trasformation given by the \texttt{scaling} given as output by the \texttt{lda} procedure.
+
+\smallskip
 ```{r}
 all = matrix(rep(0, 160), ncol = 10)
 for (i in 1:10){
 	all[, i] = as.matrix(colMeans(sub_digits[[i]]))
 }
-prop_dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$digit)))
 grand_mean = all %*% as.matrix(prop_dig)
 centroids_other = matrix(rep(0, 20), ncol = 2)
 for (i in 1:10){
-	centroids_other[i, ] = t(t(lda_fit$scaling[, 1:2]) %*% (as.matrix(colMeans(sub_digits[[i]])) - grand_mean))
+	centroids_other[i, ] = t(t(lda_fit$scaling[, 1:2]) %*%
+		(as.matrix(colMeans(sub_digits[[i]])) - grand_mean))
 }
+
+norm_diff = norm(centroids_other - as.matrix(centroids[, 1:2]), "i")
 ```
 
-```{r, fig.align = "center", fi}
-par(family = "serif")
-pred = predict(lda_fit)
-plot(LD2 ~ LD1, data = pred$x, pch = 16, cex = 0.5,
-	col = digit_col, asp = 1)
-
-centroids = aggregate(pred$x, by = list(pendigits$digit), FUN = mean)
-centroids = centroids[, -1]
-points(centroids[, 1], centroids[, 2], cex = 1, bg = lookup, pch = 21)
-points(centroids_other[, 1], centroids_other[, 2], cex = 1, bg = lookup, pch = 21)
-```
-
-```{r}
-centroids_other - centroids[, 1:2]
-```
-# Remark: it could be interesting to identify and plot the centroids to highlight the role they play in the identification of discriminant variables. It might be the case to also add a legenda
-The most difficult to discriminate are brown = 1, blue = 5, and cyan = 9.
+What we obtained was the $10 \times 2$ matrix \texttt{centroids\_other}, practically identical to the first two columns of the previously computed matrix \texttt{centroids}. Indeed the uniform norm of the difference of the two distinct computation is $`r norm_diff`$.
 
 ## 2.2
-One way to make this analysis more rigorous is to take into account the confusion matrix.
-```{r, echo = F, fig.align = "center"}
-conf_mat <- confusion_matrix(targets = pendigits$digit, predictions = pred$class)
-plot_confusion_matrix(conf_mat$"Confusion Matrix"[[1]],
-	class_order = as.character(9:0), add_normalized = FALSE, palette = "Green")
-```
-Indeed it is conspicuous that the worst performance are indeed in classifying ones and fives. 
-Also nines are classified quite poorly. Surprisingly, also eights are classified quite badly.In particular, it is wuite surprising that they are classified even worsly than nines. In particular, we observe that lsa yields the following value for train MSE:
 
-```{r, echo=F}
+One way to make this analysis more rigorous is to take into account the confusion matrix.
+
+```{r, echo = F, fig.align = "center", out.width = "150%"}
+conf_mat = confusion_matrix(targets = pendigits$digit, predictions = pred$class)
+plot_confusion_matrix(conf_mat$"Confusion Matrix"[[1]],
+	class_order = as.character(9:0), add_normalized = F, palette = "Green",
+	font_counts = font(size = 3, family = "serif"),
+	# font_normalized = font(size = 2, family = "serif"),
+	font_row_percentages = font(size = 2.25, family = "serif"),
+	font_col_percentages = font(size = 2, family = "serif")) +
+	theme(text = element_text(size = 11,  family = "serif"))
+```
+
+Indeed it is conspicuous that the worst performance are indeed in classifying $1$'s and $5$'s. Also the $9$'s are classified quite poorly. Surprisingly, $8$'s are classified quite badly too. In particular, it is quite surprising that they are classified even worsly than the $9$'s. <!-- ' -->
+We observe that LDA yields the following value for train \textit{MSE} (mean square error):
+
+\smallskip
+```{r, echo = F}
 round(1 - conf_mat$"Overall Accuracy", 4)
 ```
 
 ## 2.3
-The MSE computed in the previous point is a good indicator of how well the model can describe the data. However, this is potentially of little use in making predictions. It is more interesting to assess the performances of the model on novel observations. One way to do so it to estimate the test MSE through a procedure called leave-one-out cross validation (\textit{LOOCV}). With this procedure, as the name suggests, the model is trained leaving out one obervation at a time, and using it as test, and providing then an estimator for the test MSE (or missclassification error respectively) repeating this procedure for all observations. 
 
+The \textit{MSE} computed in the previous point is a good indicator of how well the model can describe the data. However, this is potentially of little use in making predictions. It is more interesting to assess the performances of the model on novel observations. One way to do so it to estimate the test \textit{MSE} through a procedure called leave-one-out cross validation (\textit{LOOCV}). With this procedure, as the name suggests, the model is trained leaving out one obervation at a time, and using it as test, and providing then an estimator for the test \textit{MSE} (or missclassification error respectively) repeating this procedure for all observations. 
+
+\smallskip
 ```{r}
 lda_cv = lda(digit ~ ., data = pendigits, CV = T)
 ```
+
 Which yields the following missclassification rate:
-```{r, echo =F}
-conf_mat_cv <- confusion_matrix(targets = pendigits$digit, predictions = lda_cv$class)
-round(1 - conf_mat_cv$"Overall Accuracy", 4)
-cat(round(((1 - conf_mat_cv$"Overall Accuracy") -
-	(1 - conf_mat$"Overall Accuracy")) / (1 - conf_mat_cv$"Overall Accuracy") * 100, 3), sep = "", "%")
-```
-which constitues an increase of roughly 1% with respect to the previous estimate. It is not surprising  A remark 
-```{r}
-# code
+
+\smallskip
+```{r, echo = F, render = lemon_print}
+conf_mat_cv = confusion_matrix(targets = pendigits$digit, predictions = lda_cv$class)
+mse = round(1 - conf_mat_cv$"Overall Accuracy", 4)
+misc_rate = paste0(round(((1 - conf_mat_cv$"Overall Accuracy") -
+	(1 - conf_mat$"Overall Accuracy")) /
+	(1 - conf_mat_cv$"Overall Accuracy") * 100, 3), " %")
+
+tmp = as.data.frame(t(as.matrix(c(mse, misc_rate))))
+rownames(tmp) = ""
+colnames(tmp) = c("mse", "misclassification_rate")
+tmp
 ```
 
-
-
-```{r}
-# code
-```
+which constitues an increase of roughly $`r misc_rate`%$ with respect to the previous estimate. It is not surprising. A remark...
 
 ## 2.4
 
