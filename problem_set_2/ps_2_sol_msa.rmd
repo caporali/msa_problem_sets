@@ -140,13 +140,10 @@ psych_1 = psych_0[, 4:28]
 gw = subset(psych_1, group == "grant", select = -group)
 ```
 
-Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlation between variables is the object of interest in \textit{Factor Analysis}. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
-<!-- 
-	todo: what do you mean exactly with the sentence "correlation between variables is the object of interest in \textit{Factor Analysis}." ? It is kind of vague and can be misleading.  
--->
+Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlation between variables plays a central role in \textit{Factor Analysis}. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
 
 \smallskip
-```{r, fig.align = "center", out.width = "200%"}
+```{r, fig.align = "center", out.width = "1000px"}
 gws = scale(gw)
 cor_gws = cor(gws)
 dim_gws = dim(gws)
@@ -154,10 +151,8 @@ colnames(cor_gws) = paste0("$t[", 1:(dim_p[2] - 4), "]")
 rownames(cor_gws) = colnames(cor_gws)
 par(family = "serif")
 corrplot.mixed(cor_gws, upper = "pie",
-	upper.col = COL2("BrBG"), lower.col = COL2("BrBG"),
 	number.cex = 0.4, tl.col = "black", tl.cex = 0.7, cl.cex = 0.7)
 ```
-<!-- todo: bigger matrix plot -->
 
 ```{r, echo = F}
 colnames(cor_gws) = paste0("t_", 1:(dim_p[2] - 4))
@@ -220,7 +215,6 @@ load_6 = faml_6$loadings[, ]
 tmp = as.data.frame(round(load_6, 4))
 tmp
 ```
-<!-- todo: comments -->
 
 It is remarkable that in the case $m = 5$ all but two variables load on the first factor higher than on any other. This makes any factor interpretation very difficult, at least without applying any rotation to the loadings. We will discuss it in more detail in the next point.
 
@@ -383,12 +377,15 @@ In conclusion, both choices are acceptable, but in some sense inaccurate. The im
 
 ## 1.2
 
-We now have to give an interpretation to the common factors in the $m = 5$ solution. Without any rotation the loadings are pretty difficult to comprehend. Indeed, as we noticed in the previous point, when $m = 5$ almost all variables load on the first factor higher than on the other four factors. Therefore, a rotation may help in the interpretation process. As requested, we perform the \texttt{Varimax} rotation.
+We now want to give an interpretation to the common factors in the $m = 5$ solution. It is important to recall that factor loadings are identified up to a rotation. Thus, different rotations yield different factors which lead to different interpretations. A wise choice of the rotation can therefore ease the analysis significantly. For example, in the previous point,
+when $m = 5$ almost all variables load on the first factor higher than on the other four factors, revealing that the \textit{uniqueness condition} through which the model was fit yields a poor choice of the rotation as for the understanding the factors. It is preferable to perform instead the \texttt{Varimax} rotation. It identifies the rotation matrix $\boldsymbol{T}$, thus the rotated loadings $\hat{\boldsymbol{L}}^* = \hat{\boldsymbol{L}} \boldsymbol{T}$. This is optimal in the following sense:
+<!-- Remark: I forgot to correct the l_jk^2 by their respective communalities h_j.  -->
+\[
+	\max\left\{\frac{1}{m} \sum_{k = 1}^m \left[\frac{1}{p} \sum_{j = 1}^p \left(\tilde{l}^*_{jk}\right)^4 - \left(\frac{1}{p} \sum_{j = 1}^p \left(\tilde{l}^{*}_{jk}\right)^2 \right)^2\right]\right\},
+\]
+where $\forall j = 1, \dots, p$, $k = 1, \dots, m$, we denote $\tilde{l}^*_{jk} = \frac{\hat{l}^*_{jk}}{\sqrt{\hat{h}_{j}}}$ and $\hat{h}_{j} = \left\|\left(\hat{l}_{j, k}\right)_{k = 1}^{m}\right\|_{2}$ (communality of the $j$\textsuperscript{th} variable).
 
-<!-- \[
-	\max \frac{1}{n} \sum_{k = 1}^m \left[ \frac{1}{p} \sum_{j=1}^p \tilde{l_{jk}^{\star \, 4}} - \left( \frac{1}{p} \sum_{j=1}^p \tilde{l_{jk}^{\star \, 2}} \right)^2 \right]
-
-\] -->
+We try to give a simple explaination of what we are maximizing: first we consider, for each factor $k$, the vector of their square loadings, normalized by the variable communality. We then consider the sample variance of such vectors and we maximize their average over all factors. This procedure tries to concentrate the mass of each column into a few points close to the extremes $0$ and $1$, and doing it "democratically" for all factors. This rotation is optimal to identify which variables are most affected by a specific factor and which are not, which is our main goal. Moreover, is it reasonable that, in doing so, the procedure also disperses the mass \textit{row-wise}, so that each variable is high only on one or few factors. In the following we will favour this type of analysis, putting for each variable more emphasis on the one factor that is most influencial for it.
 
 \smallskip
 
@@ -443,7 +440,7 @@ plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = 0.95),
 	col = "red", type = "l", asp = 1,
 	xlim = c(-4.5, 4.5), ylim = c(-3.5, 3.5),
 	xlab = "Factor1", ylab = "Factor2")
-lines(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = 0.99),
+lines(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = (dim_gws[1] - 0.5) / dim_gws[1]),
 	col = "red")
 points(score_5_var_reg[, 1], score_5_var_reg[, 2], pch = 16,  cex = 0.75)
 
@@ -454,7 +451,6 @@ d = -eig_var_reg$vectors[1, 1] / eig_var_reg$vectors[2, 1]
 c = -d * mu_5_var_reg[1] + mu_5_var_reg[2]
 abline(c, d, lwd = 1, lty = 2)
 ```
-<!-- todo: change every 0.99 with (n - 0.5) / n -->
 
 It seems there is no particular correlation between the two factors. In fact, if we compute it explicitly we obtain $`r round(cor(score_5_var_reg[, 1], score_5_var_reg[, 2]), 3)`$.
 Moreover the covariance matrix turns out to be
@@ -466,7 +462,7 @@ Moreover the covariance matrix turns out to be
 \end{equation*}
 As we can see from the scatterplot, the correlation is really close to $0$. We should have excepted it since the factors scores are the estimated values of the common factors and in the theoretical model the covariance between any couple of common factors is $0$, which implies that also their correlation is $0$. In particular the theoretical covariance matrix of the factors is equal to the identity matrix and our estimated covariance matrix is quite close to it: the estimated variance of the second factor is slightly smaller then what it should be, but it still acceptable taking into account that we are considering only $5$ common factors which actually explain only the $`r round(cum_var_5[5] * 100, 2)`\%$ of the total sample variance.
 
-Finally, in order to analyse better the distribution of our data we decided to display the ellipsoids containing the $95\%$ and the $99\%$ of the points. We can see that the ellipsoid are in fact circles (nearly) which confirms that the first two common factors are jointly normally distributed.
+Finally, in order to analyse better the distribution of our data we decided to display the ellipsoids containing the $95\%$ and the $\frac{n - 0.5}{n}\%$ of the points (with $n$ number of observations we are considering). We can see that the ellipsoid are in fact circles (nearly) which confirms that the first two common factors are jointly normally distributed.
 
 ## 1.4
 
@@ -543,7 +539,7 @@ plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = 0.95),
 	col = "red", type = "l", asp = 1,
 	xlim = c(-4.5, 4.5), ylim = c(-3.5, 3.5),
 	xlab = "Factor1", ylab = "Factor2")
-lines(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = 0.99),
+lines(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = (dim_pas[1] - 0.5) / dim_pas[1]),
 	col = "red")
 points(score_5_pas_reg[, 1], score_5_pas_reg[, 2], pch = 16, cex = 0.75)
 
@@ -563,7 +559,7 @@ The correlation between the factors is $`r round(cor(score_5_pas_reg[, 1], score
 		`r sigma_5_pas_reg[2, 1]` & `r sigma_5_pas_reg[2, 2]`
 	\end{pmatrix}.
 \end{equation*}
-Again the factors appears to be jointly normally distributed: almost every point (except for $2$) falls inside the ellipsoid containing the $99\%$ of the mass.
+Again the factors appears to be jointly normally distributed: almost every point (except for $1$) falls inside the ellipsoid which is supposed to  contain $\frac{n - 0.5}{n}\%$ of the mass under a multivariate normal with the sample covariance matrix as variance matrix and centre in the sample mean.
 
 Note also that this covariance matrix is closer to the identity matrix then the previous one, however the gap between the variances of the first two factors still holds.
 
@@ -594,7 +590,7 @@ In the following plots the blue points (\textcolor{blue}{$\blacksquare$}) refer 
 ```{r, echo = F, fig.align = "center", fig.asp = 0.5}
 par(mfrow = c(1, 2), mar = c(2, 2, 3, 1), family = "serif", cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
 
-plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = 0.99),
+plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = (dim_pas[1] - 0.5) / dim_pas[1]),
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3.1, 3.1),
 	main = "Pasteur")
@@ -608,7 +604,7 @@ abline(c, d, lwd = 1, lty = 2)
 points(mu_pa_sexm[1], mu_pa_sexm[2], pch = 16, cex = 1, col = "blue")
 points(mu_pa_sexf[1], mu_pa_sexf[2], pch = 16, cex = 1, col = "red")
 
-plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = 0.99),
+plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = (dim_gws[1] - 0.5) / dim_gws[1]),
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3, 3),
 	main = "Grant-White")
@@ -647,7 +643,7 @@ mu_gw_age2 = colMeans(score_5_var_reg[age_gw >= 13, 1:2])
 ```{r, echo = F, fig.align = "center", fig.asp = 0.5}
 par(mfrow = c(1, 2), mar = c(2, 2, 3, 1), family = "serif", cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
 
-plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = 0.99),
+plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = (dim_pas[1] - 0.5) / dim_pas[1]),
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3.1, 3.1),
 	main = "Pasteur")
@@ -661,7 +657,7 @@ abline(c, d, lwd = 1, lty = 2)
 points(mu_pa_age1[1], mu_pa_age1[2], pch = 16, cex = 1, col = "purple")
 points(mu_pa_age2[1], mu_pa_age2[2], pch = 16, cex = 1, col = "darkgreen")
 
-plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = 0.99),
+plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = (dim_gws[1] - 0.5) / dim_gws[1]),
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3, 3),
 	main = "Grant-White")
@@ -699,7 +695,25 @@ head(pendigits)
 count_dig = as.vector(table(pendigits$digit))
 prop_dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$digit)))
 ```
-<!-- todo: hist -->
+
+It could be useful to have an idea of the class sizes hence we display them below.
+
+```{r, fig.show = "hide"}
+plt_count_dig = t(as.matrix(count_dig))
+colnames(plt_count_dig) = 0:9
+bp = barplot(plt_count_dig,
+    xlab = "digits", ylab = "count",
+    col = "lightblue")
+```
+\vspace{-20pt}
+```{r, fig.align = "center", out.width = "75%", echo = F}
+par(family = "serif")
+bp = barplot(plt_count_dig,
+    xlab = "digits", ylab = "count",
+    col = "lightblue")
+```
+
+We can see that the distributions are pretty homogeneous: the classes corresponding to the digits $3$, $5$, $6$, $8$ and $9$ are just slightly less numerous then the others. 
 
 ## 2.1
 The Linear Discriminant Analysis (LDA) technique relies on the assumption that each different class is multivariate gaussian distributed with different means $\mu_i$ (centroids) and with the same covariance matrix $\boldsymbol{\Sigma}$. Hence, we should first check if this assumption holds.
@@ -797,7 +811,7 @@ We now apply the LDA procedure (already implemented in \texttt{R}). It identitif
 <!--
 	todo: theoretical explaination...
 
-	First we sphere the data. Then we look at the centroid as random vectors and we  consider its variance matrix. In particular we estimate it by looking at the centroids as different realizations. We call it between variance matrix. This induces a distance. We look for the direction in the p-dimensional space that maximizes.
+	First we sphere the data. Then we look at the centroid as random vectors and we consider its variance matrix. In particular we estimate it by looking at the centroids as different realizations. We call it between variance matrix. This induces a distance. We look for the direction in the p-dimensional space that maximizes.
 	subspace generated by the sphered centroids $H_1$, then we look for the direction that maximizes the distance between the centroids and we call that direction first discriminant variable (LD1). \newline
 	Now we consider $H_2$...
 -->
@@ -828,7 +842,7 @@ for (i in 1:10){
 	\begin{tabular}{ c | c c c c c c c c c c }
 		\texttt{digit} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
 		\hline
-		\multirow{2}{4em}{\texttt{color}} & \footnotesize{`r paste(lookup[0 + 1])`} & \footnotesize{`r paste(lookup[1 + 1])`} & \footnotesize{`r paste(lookup[2 + 1])`} & \footnotesize{`r paste(lookup[3 + 1])`} & \footnotesize{`r paste(lookup[4 + 1])`} & \footnotesize{`r paste(lookup[5 + 1])`} & \footnotesize{`r paste(lookup[6 + 1])`} & \footnotesize{`r paste(lookup[7 + 1])`} & \footnotesize{`r paste(lookup[8 + 1])`} & \footnotesize{`r paste(lookup[9 + 1])`} \\ 
+		\multirow{2}{2.75em}{\texttt{color}} & \footnotesize{`r paste(lookup[0 + 1])`} & \footnotesize{`r paste(lookup[1 + 1])`} & \footnotesize{`r paste(lookup[2 + 1])`} & \footnotesize{`r paste(lookup[3 + 1])`} & \footnotesize{`r paste(lookup[4 + 1])`} & \footnotesize{`r paste(lookup[5 + 1])`} & \footnotesize{`r paste(lookup[6 + 1])`} & \footnotesize{`r paste(lookup[7 + 1])`} & \footnotesize{`r paste(lookup[8 + 1])`} & \footnotesize{`r paste(lookup[9 + 1])`} \\ 
 		& \textcolor{`r paste(lookup[0 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[4 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[6 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[7 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[8 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$} \\ 
 	\end{tabular}
 \end{center}
@@ -874,7 +888,7 @@ In order to have a better understanding of how much the classes overlap we add t
 	\begin{tabular}{ c | c c c c c c c c c c }
 		\texttt{digit} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
 		\hline
-		\multirow{2}{4em}{\texttt{color}} & \footnotesize{`r paste(lookup[0 + 1])`} & \footnotesize{`r paste(lookup[1 + 1])`} & \footnotesize{`r paste(lookup[2 + 1])`} & \footnotesize{`r paste(lookup[3 + 1])`} & \footnotesize{`r paste(lookup[4 + 1])`} & \footnotesize{`r paste(lookup[5 + 1])`} & \footnotesize{`r paste(lookup[6 + 1])`} & \footnotesize{`r paste(lookup[7 + 1])`} & \footnotesize{`r paste(lookup[8 + 1])`} & \footnotesize{`r paste(lookup[9 + 1])`} \\ 
+		\multirow{2}{2.75em}{\texttt{color}} & \footnotesize{`r paste(lookup[0 + 1])`} & \footnotesize{`r paste(lookup[1 + 1])`} & \footnotesize{`r paste(lookup[2 + 1])`} & \footnotesize{`r paste(lookup[3 + 1])`} & \footnotesize{`r paste(lookup[4 + 1])`} & \footnotesize{`r paste(lookup[5 + 1])`} & \footnotesize{`r paste(lookup[6 + 1])`} & \footnotesize{`r paste(lookup[7 + 1])`} & \footnotesize{`r paste(lookup[8 + 1])`} & \footnotesize{`r paste(lookup[9 + 1])`} \\ 
 		& \textcolor{`r paste(lookup[0 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[4 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[6 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[7 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[8 + 1])`}{$\blacksquare$} & \textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$} \\ 
 	\end{tabular}
 \end{center}
@@ -901,9 +915,9 @@ In particular:
 	\item 
 		the ellipses corresponding to the digits $5$ (\textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$}) and $9$ (\textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$}) intersect all the others except for the one corresponding to the digit $2$ (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}), which is located on the extreme left of the cloud. Hence, we expect this two classes to be largely misclassified;
 	\item
-	    the $4$\textsuperscript{th} (\textcolor{`r paste(lookup[4 + 1])`}{$\blacksquare$}) and the $2$\textsuperscript{nd} (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}) classes are the only two whose ellipses do not contain any other centroid, although they intersect the ellipses of other classes (respectively three and two classes). Therefore, we expect them to be the best classified ones;
+	    the $4$\textsuperscript{th} (\textcolor{`r paste(lookup[4 + 1])`}{$\blacksquare$}) and the $2$\textsuperscript{nd} (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}) classes are the only two whose ellipses do not contain any other centroid, although they intersect the ellipses of other classes (respectively three and two classes). However, unlike the purple one (\textcolor{`r paste(lookup[4 + 1])`}{$\blacksquare$}), the lightblue one (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}) is almost entirely contained in the brown one (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}). Therefore, we expect the digit $2$ to be confused with the digit $1$ while the digit $4$ to be one of the best classified;
 	\item
-		the classes corresponding to magenta (\textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$}, i.e. $3$), brown (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}, i.e. $1$), lightgreen (\textcolor{`r paste(lookup[7 + 1])`}{$\blacksquare$}, i.e. $7$), blue (\textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$}, i.e. $5$) and cyan (\textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$}, i.e. $9$) have ellipses which contain at least three different centroids (the brown one even contains four different centroids and touches a fifth one);
+		the classes corresponding to magenta (\textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$}, i.e. $3$), brown (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}, i.e. $1$), lightgreen (\textcolor{`r paste(lookup[7 + 1])`}{$\blacksquare$}, i.e. $7$), blue (\textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$}, i.e. $5$) and cyan (\textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$}, i.e. $9$) have ellipses which contain at least three different centroids (the brown one even contains four different centroids and touches a fifth one). In particular, as it happens for the lightblue (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}) ellipse, the magenta one (\textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$}) is completely contained in the lightgreen one (\textcolor{`r paste(lookup[7 + 1])`}{$\blacksquare$}), thus we expect the corresponding digits to be often confused;
 	\item
 	    the ellipses corresponding to the digits $6$ (\textcolor{`r paste(lookup[6 + 1])`}{$\blacksquare$}), $0$ (\textcolor{`r paste(lookup[0 + 1])`}{$\blacksquare$}) and $8$ (\textcolor{`r paste(lookup[8 + 1])`}{$\blacksquare$}), which are located on the extrems of the cloud, dispite being large, contain "only" two different centroids (actually the red one only touches the cyan one).
 \end{itemize}
@@ -911,7 +925,14 @@ In conclusion, we can say that we expect there to be various missclassifications
 
 ## 2.2
 
-We now compute and display the confusion matrix on the training data, as requested.
+We now compute and display the confusion matrix on the training data, as requested. We use the \texttt{confusion\_matrix()} function, which displays togheter with the number of correct\/incorrect classifications the following percentages:
+\begin{itemize}
+	\item
+		the percentage of $j$'s classified as $i$'s is located at the bottom of the square corresponding to the entrance $(i,j)$, with $i, j \in \{0, \dots, 9\}$;
+	\item
+		the percentage of predicted $i$'s with target $j$ is located at the right of the square corresponding to the entrance $(i,j)$ (here with the word target we indicate the true belonging class). %'
+\end{itemize} 
+In particular, the blank squares correspond to zeros.
 
 \smallskip
 ```{r}
@@ -927,49 +948,136 @@ plot_confusion_matrix(conf_mat$"Confusion Matrix"[[1]],
 	font_col_percentages = font(size = 2, family = "serif")) +
 	theme(text = element_text(size = 11,  family = "serif"))
 ```
-```{r, echo = F}
+
+We can also compute the training error rate (we can extract it from \texttt{conf\_mat} or compute it directly):
+
+\smallskip
+```{r}
 error_rate = 1 - conf_mat$"Overall Accuracy"
 # error_rate = 1 - mean(pendigits$digit == pred$class)
 ```
 \smallskip
-```{r, render = lemon_print}
-tmp = as.data.frame(error_rate)
+```{r, render = lemon_print, echo = F}
+tmp = as.data.frame(t(as.matrix(error_rate)))
+rownames(tmp) = "train_error_rate"
+colnames(tmp) = ""
 tmp
 ```
 
-
-It is conspicuous that the worst performances are indeed in classifying the classes corresponding to the digits $1$ and $5$: unlike the other classes, whose percentage of correct classifications.
-
-Indeed it is conspicuous that the worst performance are indeed in classifying $1$'s and $5$'s. Also the $9$'s are classified quite poorly. Surprisingly, $8$'s are classified quite badly too. In particular, it is quite surprising that they are classified even worsly than the $9$'s. <!-- ' -->
-We observe that LDA yields the following value for train \textit{MSE} (mean square error): `r round(error_rate, 4)`.
+The training error rate is unexpectedly low: only the $`r round(error_rate * 100, 2)`\%$ of the observations are misclassified. In particular:
+\begin{itemize}
+    \item 
+		it is conspicuous that the worst performances are indeed related to the classes corresponding to the digits $1$ and $5$: unlike the other classes, whose percentage of correct classifications exceeds the $80\%$, in these cases we respectively obtain $69.9\%$ and $67.7\%$;
+	\item
+		moreover, we can observe that the percentage of obervations misclassified as $9$'s is $27\%$ and the majority of it comes from the $5$'s ($20.7\%$). This is consistent with what we previously observed in the scatterplot, since the cyan ellipse (\textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$}, i.e. $9$) is located in the middle of the cloud and particularly overlaps with the blue one (\textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$}, i.e. $5$);
+	\item
+		similarly to what happens with the variables $9$ and $5$ a considerable amount of $1$'s is misclassified as $2$, % '
+		which is consistent with the fact that the lightblue ellipse (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}, i.e. $2$) is almost entirely contained in the brown one (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}, i.e. $1$);
+	\item
+		surprisingly the digit $3$ (associated to the color magenta \textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$}) does not have as many misclassifications as we thought. In particular, we excepted an higher number of misclassifications between the digits $3$ and $7$ since the cloud corresponding the first one is completely contained in the ellipse related to the second one;
+	\item
+		there are no misclassifications among the classes which are the most distant in the LD1$\sim$LD2 space, as expected.
+\end{itemize}
 
 ## 2.3
 
-The \textit{MSE} computed in the previous point is a good indicator of how well the model can describe the data. However, this is potentially of little use in making predictions. It is more interesting to assess the performances of the model on novel observations. One way to do so it to estimate the test \textit{MSE} through a procedure called leave-one-out cross validation (\textit{LOOCV}). With this procedure, as the name suggests, the model is trained leaving out one obervation at a time, and using it as test, and providing then an estimator for the test \textit{MSE} (or missclassification error respectively) repeating this procedure for all observations. 
+The \textit{training error rate} computed in the previous point is a good indicator of how well the model can describe the data.
+However, this is potentially of little use in making predictions. 
+It is more interesting to assess the performance of the model on novel observations. One way to do so is to compute the \textit{leave-one-out cross-validation error rate} (\textit{LOOCV error rate}), which can be interpreted as an estimator of the misclassification error for future observations. With this procedure, as the name suggests, the model is trained leaving out one obervation at a time, and using it for testing.
 
 \smallskip
 ```{r}
 lda_cv = lda(digit ~ ., data = pendigits, CV = T)
 ```
 
-Which yields the following missclassification rate:
+We obtain the following confusion matrix
 
 \smallskip
-```{r, echo = F, render = lemon_print}
+```{r, }
 conf_mat_cv = confusion_matrix(targets = pendigits$digit, predictions = lda_cv$class)
-mse = round(1 - conf_mat_cv$"Overall Accuracy", 4)
-misc_rate = paste0(round(((1 - conf_mat_cv$"Overall Accuracy") -
-	(1 - conf_mat$"Overall Accuracy")) /
-	(1 - conf_mat_cv$"Overall Accuracy") * 100, 3), " %")
+```
+```{r, echo = F, fig.align = "center", out.width = "150%"}
+plot_confusion_matrix(conf_mat_cv$"Confusion Matrix"[[1]],
+	class_order = as.character(9:0), add_normalized =  F,
+	palette = "Blue",
+	font_counts = font(size = 3, family = "serif"),
+	# font_normalized = font(size = 2, family = "serif"),
+	font_row_percentages = font(size = 2.25, family = "serif"),
+	font_col_percentages = font(size = 2, family = "serif")) +
+	theme(text = element_text(size = 11,  family = "serif"))
+```
 
-tmp = as.data.frame(t(as.matrix(c(mse, misc_rate))))
-rownames(tmp) = ""
-colnames(tmp) = c("mse", "misclassification_rate")
+and the following \textit{LOOCV error rate}
+
+\smallskip
+```{r}
+loocv_error = 1 - conf_mat_cv$"Overall Accuracy"
+comparison_errors = (loocv_error - error_rate) / error_rate
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(t(as.matrix(loocv_error)))
+rownames(tmp) = "loocv_error"
+colnames(tmp) = ""
 tmp
 ```
 
-which constitues an increase of roughly $`r misc_rate`%$ with respect to the previous estimate. It is not surprising. A remark...
+The confusion matrix is almost identical to the previous one, which is reasonable because actually we are just "leaving out" one observation at a time.
+
+Moreover, the error rate given by this procedure is slightly larger then the one we computed in the previous point. We might have expected it since for each \textit{test} we are using all the dataset as training set except for one observation. In particular, we can compute the \textit{relative error} between the two error rates in order to compare them. We obtain that our new error increases of roughly $`r round(comparison_errors * 100, 3)`\%$ with respect to the previous one.
 
 ## 2.4
+
+```{r}
+group_cv = rep(1:44, each = 250)
+group_cv = group_cv[seq_along(pendigits$digit)]
+```
+```{r}
+cv_44_fold = function(data, grouping, rank) {
+	misclassified = 0
+	for (group in 1:44){
+		train_set = data[-which(grouping == group), ]
+		test_set = data[which(grouping == group), ]
+		model = lda(digit ~ ., data = train_set)
+		pred = predict(model, test_set, dimen = rank)
+		confusion_matrix = table(pred$class, test_set$digit)
+		misclassified = misclassified + dim(test_set)[1] - sum(diag(confusion_matrix))
+	}
+	cv_error = misclassified / dim(data)[1]
+	return(cv_error)
+}
+```
+
+```{r}
+train_errors = 0
+cv_errors = 0
+for (rank in 1:9){
+	pred_train = predict(lda_fit, dimen = rank)
+	confusion_matrix_train = table(pred_train$class, pendigits$digit)
+	train_errors[rank] = 1 - sum(diag(confusion_matrix_train) / dim(pendigits)[1])
+
+	cv_errors[rank] = cv_44_fold(pendigits, group_cv, rank)
+}
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(matrix(c(train_errors, cv_errors), nrow = 2, byrow = T), 4))
+rownames(tmp) = c("train_errors", "cv_errors")
+colnames(tmp) = paste0("rank_", 1:9)
+tmp
+```
+\vspace{-40pt}
+```{r, echo = F, fig.align = "center", out.width = "90%"}
+par(family = "serif")
+plot(seq(1:9), train_errors, type = "b", pch = 16, col = "blue",
+	xlab = "rank", ylab = "error", lwd = 0.5)
+lines(seq(1:9), cv_errors, type = "b", pch = 16, col = "red")
+legend("topright", legend = c("train_errors", "cv_errors"),
+	col = c("blue", "red"), pch = c(16, 16), lty = c(1, 1))
+```
+
+Surprisingly the \textit{training error rate} and the \textit{$44$-fold CV error rate} are almost identical: the first one is always lower than the second one (in accordance with the theory), but the discrepancy between them is at most `r round(max(cv_errors - train_errors), 4)`. Note also that in both cases as the number $L$ of discriminant directions increases, the corresponding \textit{error value} decreases. Therefore, the full-rank LDA classifier should provide the best classifications, **that** is, when considering $L = 9$ discriminant directions, the projected centroids achieve the maximum spread relative to the within-class variance.
+
+If we were interested in having a dimensionality reduction we could decide to keep only $L = 6$ dimensions, since the difference between dimension $6$ and $9$ is approximately `r round(max(c(cv_errors[6] - cv_errors[9], train_errors[6] - train_errors[9])), 4)` in both \textit{training error rate} and the \textit{CV error rate}. This leads to a reasonable dimensionality-reduction.
+
+Clearly, due to the high dimensionality it is not possible to have a graphical representation of observations and centroids. To this aim $L = 2$ discriminant directions should be used, as previously done.
 
 ## 2.5 (optional)
