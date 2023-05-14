@@ -45,9 +45,9 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # set working directory
-# setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
+setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
 # setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+# setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
@@ -384,6 +384,13 @@ In conclusion, both choices are acceptable, but in some sense inaccurate. The im
 
 We now have to give an interpretation to the common factors in the $m = 5$ solution. Without any rotation the loadings are pretty difficult to comprehend. Indeed, as we noticed in the previous point, when $m = 5$ almost all variables load on the first factor higher than on the other four factors. Therefore, a rotation may help in the interpretation process. As requested, we perform the \texttt{Varimax} rotation.
 
+<!-- \[
+	\max \frac{1}{n} \sum_{k = 1}^m \left[ \frac{1}{p} \sum_{j=1}^p \tilde{l_{jk}^{\star \, 4}} - \left( \frac{1}{p} \sum_{j=1}^p \tilde{l_{jk}^{\star \, 2}} \right)^2 \right]
+
+\] -->
+
+
+
 \smallskip
 
 ```{r}
@@ -414,7 +421,7 @@ After the rotation, things become a little better: as expected, the loadings are
 		the fifth factor is solely determined by the variable $t_{13}$. Hence we label the factor as its representative test, i.e. \textit{straight-curved capitals}. It is immediate to observe that it is the only factor without an abstract meaning. This could be due to the fact that proportion of variance explained by the factor is $`r round(colSums(load_5_var^2) / dim_gws[2], 3)[5]`$, which is too low to have a significative impact.
 \end{enumerate}
 
-Finally it is remarkable that the variable $t_{11}$ loads uniformly on the last three common factors hence it influences them similarly. This could be reasonable taking into account the psychological test associated with the variable.  
+Finally it is remarkable that the variable $t_{11}$ loads uniformly on the last three common factors hence is influenced by them similarly. This could be reasonable taking into account the psychological test associated with the variable.  
 
 Before we move to the next step we want to underline that we decided not to fix a threshold value to assess significance of factor loadings. This choice is motivated by the fact that the total sample	variance explained by the $5$ factors is only $`r round(cum_var_5[5] * 100, 2)`\%$. Indeed this leads to the shortage of very high loadings and at the same time allows the presence of variables that have not much influence on any factor. Moreover by doing so we obtained a partition of our variables among the factors (with the only minor exception given by $t_{11}$).
 
