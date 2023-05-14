@@ -740,7 +740,7 @@ abline(0, 1, col = "green")
 
 By looking at the Q-Q plots, it is clear that no class is normally distributed: all the digits, except for $6$ and $9$, seems to have heavy right tails. Actually, the plots of the remaining two variables appear to be closer to the Q-Q line but this is only because in both cases there is an extreme outlier which distorts the figure.
 
-It is also possible to check whether the covariance matrices of the different classes are similar or not. In order to do so we display below the matrix $M$ such that
+It is also possible to check whether the covariance matrices of the different classes are similar or not. In order to do so, we display below the matrix $M$ such that
 \[
 	M_{i,j} = \left\|\var{\text{\texttt{pendigits}} \big|_{\text{\texttt{digit}} = i}} - \var{\text{\texttt{pendigits}} \big|_{\text{\texttt{digit}} = j}}\right\|_{\rm{F}},
 \]
@@ -779,6 +779,10 @@ mat = format(mat, scientific = F)
 	\end{pmatrix}
 \]
 
+\smallskip
+
+As we can see, the covariance matrices seem pretty far from being similar: the entrances of the matrix $M$ are very large, in particular the ones corresponding to the sixth row.
+
 The fact that our classes do not appear to be normally distributed and not to have similar covariance matrices does not compromise the applicability of the LDA since these assumptions are only required for an optimal solution.
 
 We now apply the LDA procedure (already implemented in \texttt{R}). It identitifies recursively $9$ discriminant variables from the $10$ classes. 
@@ -800,11 +804,11 @@ lda_fit = lda(digit ~ ., data = pendigits)
 as.data.frame(round(lda_fit$scaling, 4))
 ```
 
-In particular, as the discriminant variables are found iteratively as the direction of highest discrimination in smaller and smaller subspaces, they are ordered by their \textit{power of discrimination}. Therefore a plot of the first two discriminant variables should be rather informative of the degree by which classes can be discriminated.
-
-We now consider only the first two discriminant variables (LD1 and LD2) and we perform a scatterplot of the data restricted on these two components, color coding the observations according to variable \texttt{digit\_col} and adding the centroids for each class.
+Consider now the first two discriminant directions, that is the first two columns of the scaling matrix (LD1 and LD2). We display below the scatterplot of the data restricted to these two components, color coding the observations according to variable \texttt{digit\_col} and adding the centroids for each class. In particular, as the discriminant variables are found iteratively as the direction of highest discrimination in smaller and smaller subspaces, they are ordered by their \textit{power of discrimination}; hence, a plot of the first two discriminant variables should be rather informative of the degree by which classes can be discriminated.
 
 \smallskip
+\smallskip
+
 ```{r}
 pred = predict(lda_fit)
 centroids = aggregate(pred$x, by = list(pendigits$digit), FUN = mean)
@@ -815,7 +819,7 @@ for (i in 1:10){
 }
 ```
 
-\vspace{-25pt}
+\vspace{-30pt}
 
 ```{r, fig.align = "center", echo = F}
 par(family = "serif")
@@ -832,9 +836,28 @@ for (i in 1:10){
 	todo: it might be the case to also add a legenda. 
 -->
 
-The most difficult to discriminate are brown = 1, blue = 5, and cyan = 9.
+Before commenting the scatterplot, we would like to say that we have also tried to compute the centroids of our $9$ classes in a more theoretical way. First we have collected in a $16 \times 10$ matrix the means of our classes, then we have computed a \textit{grand mean} by multiplying this matrix by the vector containing the proportion of observations for each class (\texttt{prop\_dig}).
+Finally, we have "centered" the mean vector of each class by subtracting the grand mean and we have applied the linear trasformation given by the \texttt{scaling}, which is given as output by the \texttt{lda} procedure.
 
-By looking at the plot, we can say that although the centroids are separated from one another (more or less distant), there is a considerable overlap between the classes. In particular, the ones corresponding to the digits $5$, $1$ and $9$ seem to be the most difficult to discriminate as they mix with almost all the others.
+\smallskip
+```{r}
+all = matrix(rep(0, 160), ncol = 10)
+for (i in 1:10){
+	all[, i] = as.matrix(colMeans(sub_digits[[i]]))
+}
+grand_mean = all %*% as.matrix(prop_dig)
+centroids_other = matrix(rep(0, 20), ncol = 2)
+for (i in 1:10){
+	centroids_other[i, ] = t(t(lda_fit$scaling[, 1:2]) %*%
+		(as.matrix(colMeans(sub_digits[[i]])) - grand_mean))
+}
+
+norm_diff = norm(centroids_other - as.matrix(centroids[, 1:2]), "i")
+```
+
+By doing so, we get the $10 \times 2$ matrix \texttt{centroids\_other}, which is almost identical to the first two columns of the previously computed matrix \texttt{centroids}. Indeed, the uniform norm of the difference of the two distinct computation is $`r norm_diff`$.
+
+We can now comment the scatterplot. By looking at it, we can say that although the centroids are separated from one another (more or less distant), there is a considerable overlap between the classes. In particular, the ones corresponding to the digits $5$, $1$ and $9$ seem to be the most difficult to discriminate as they mix with almost all the others.
 
 In order to have a better understanding of how much the classes overlap we add to the previous plot the ellipses containing the $95\%$ of the data points (we do it for every class).
 
@@ -856,27 +879,6 @@ for (i in 1:10){
 ```
 
 The plot confirms what we observed before: the classes corresponding to the digits $5$ (blue), $9$ (cyan) and $1$ (brown) 
-
-We have also tried to compute in a more theoretical way the centroids of our $9$ classes. First we have collected in a $16 \times 10$ matrix the means of our classes, then we have computed a \textit{grand mean} by multiplying this matrix for the vector containing the proportion of observations for each class (\texttt{prop\_dig}).
-Finally we have \textit{centered} the mean vector of each class by subtracting the grand mean and we have applied the linear trasformation given by the \texttt{scaling} given as output by the \texttt{lda} procedure.
-
-\smallskip
-```{r}
-all = matrix(rep(0, 160), ncol = 10)
-for (i in 1:10){
-	all[, i] = as.matrix(colMeans(sub_digits[[i]]))
-}
-grand_mean = all %*% as.matrix(prop_dig)
-centroids_other = matrix(rep(0, 20), ncol = 2)
-for (i in 1:10){
-	centroids_other[i, ] = t(t(lda_fit$scaling[, 1:2]) %*%
-		(as.matrix(colMeans(sub_digits[[i]])) - grand_mean))
-}
-
-norm_diff = norm(centroids_other - as.matrix(centroids[, 1:2]), "i")
-```
-
-What we obtained was the $10 \times 2$ matrix \texttt{centroids\_other}, practically identical to the first two columns of the previously computed matrix \texttt{centroids}. Indeed the uniform norm of the difference of the two distinct computation is $`r norm_diff`$.
 
 ## 2.2
 
