@@ -18,6 +18,7 @@ output:
             amsthm: null
             enumitem: null
             lipsum: null
+            multirow: null
     documentclass: article
     fontsize: 11pt
     geometry: margin = 2cm
@@ -45,8 +46,8 @@ library(lemon)
 
 # set working directory
 # setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
-setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-#setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+# setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
+setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
@@ -806,9 +807,7 @@ as.data.frame(round(lda_fit$scaling, 4))
 
 Consider now the first two discriminant directions, that is the first two columns of the scaling matrix (LD1 and LD2). We display below the scatterplot of the data restricted to these two components, color coding the observations according to variable \texttt{digit\_col} and adding the centroids for each class. In particular, as the discriminant variables are found iteratively as the direction of highest discrimination in smaller and smaller subspaces, they are ordered by their \textit{power of discrimination}; hence, a plot of the first two discriminant variables should be rather informative of the degree by which classes can be discriminated.
 
-\smallskip
-\smallskip
-
+\vspace{24pt}
 ```{r}
 pred = predict(lda_fit)
 centroids = aggregate(pred$x, by = list(pendigits$digit), FUN = mean)
@@ -818,9 +817,7 @@ for (i in 1:10){
 	covariances[[i]] = cov(pred$x[pendigits[, 17] == (i - 1), ])
 }
 ```
-
 \vspace{-30pt}
-
 ```{r, fig.align = "center", echo = F}
 par(family = "serif")
 plot(LD2 ~ LD1, data = pred$x, pch = 16, cex = 0.5,
@@ -835,6 +832,15 @@ for (i in 1:10){
 <!--
 	todo: it might be the case to also add a legenda. 
 -->
+
+\begin{center}
+	\begin{tabular}{ c | c c c c c c c c c c }
+		\texttt{digit} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+		\hline
+		\multirow{2}{4em}{\texttt{color}} & \small{`r paste(lookup[1])`} & \small{`r paste(lookup[2])`} & \small{`r paste(lookup[3])`} & \small{`r paste(lookup[4])`} & \small{`r paste(lookup[5])`} & \small{`r paste(lookup[6])`} & \small{`r paste(lookup[7])`} & \small{`r paste(lookup[8])`} & \small{`r paste(lookup[9])`} & \small{`r paste(lookup[10])`} \\ 
+		& \textcolor{`r paste(lookup[1])`}{$\bullet$} & \textcolor{`r paste(lookup[2])`}{$\bullet$} & \textcolor{`r paste(lookup[3])`}{$\bullet$} & \textcolor{`r paste(lookup[4])`}{$\bullet$} & \textcolor{`r paste(lookup[5])`}{$\bullet$} & \textcolor{`r paste(lookup[6])`}{$\bullet$} & \textcolor{`r paste(lookup[7])`}{$\bullet$} & \textcolor{`r paste(lookup[8])`}{$\bullet$} & \textcolor{`r paste(lookup[9])`}{$\bullet$} & \textcolor{`r paste(lookup[10])`}{$\bullet$} \\ 
+	\end{tabular}
+\end{center}
 
 Before commenting the scatterplot, we would like to say that we have also tried to compute the centroids of our $9$ classes in a more theoretical way. First we have collected in a $16 \times 10$ matrix the means of our classes, then we have computed a \textit{grand mean} by multiplying this matrix by the vector containing the proportion of observations for each class (\texttt{prop\_dig}).
 Finally, we have "centered" the mean vector of each class by subtracting the grand mean and we have applied the linear trasformation given by the \texttt{scaling}, which is given as output by the \texttt{lda} procedure.
