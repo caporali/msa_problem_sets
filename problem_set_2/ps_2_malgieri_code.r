@@ -113,3 +113,24 @@ plot(1:length(cv), cv, xlab = "Discriminant variables used", ylab = "CV test err
 # this "between variance". helding constant the "within variance". 
 
 #########################################################################
+
+
+# KNN
+set.seed(123)
+
+k <- 1
+vars <- select(pendigits, -digit)
+cl <- pendigits$class
+pred <- knn(train = vars, test = vars, cl = pendigits$digit, k)
+err <- 1 - mean(pendigits$digit == pred)
+err
+
+err = c()
+for(i in 1:44){
+    train <- filter(pendigits, groupCV != i)
+    test <- filter(pendigits, groupCV == i)
+    pred <- knn(train = select(train, -digit), test = select(test, -digit), cl = train$digit, k)
+    erri <- 1 - mean(test$digit == pred)
+    err = c(err, erri)
+}
+paste0(round(mean(err)*100,2), "%")
