@@ -45,8 +45,8 @@ library(lemon)
 
 # set working directory
 # setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
-# setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
+#setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
@@ -814,6 +814,9 @@ for (i in 1:10){
 	covariances[[i]] = cov(pred$x[pendigits[, 17] == (i - 1), ])
 }
 ```
+
+\vspace{-25pt}
+
 ```{r, fig.align = "center", echo = F}
 par(family = "serif")
 plot(LD2 ~ LD1, data = pred$x, pch = 16, cex = 0.5,
@@ -831,7 +834,11 @@ for (i in 1:10){
 
 The most difficult to discriminate are brown = 1, blue = 5, and cyan = 9.
 
-\smallskipm
+By looking at the plot, we can say that although the centroids are separated from one another (more or less distant), there is a considerable overlap between the classes. In particular, the ones corresponding to the digits $5$, $1$ and $9$ seem to be the most difficult to discriminate as they mix with almost all the others.
+
+In order to have a better understanding of how much the classes overlap we add to the previous plot the ellipses containing the $95\%$ of the data points (we do it for every class).
+
+\vspace{-30pt}
 ```{r, fig.align = "center", echo = F}
 par(family = "serif")
 plot(LD2 ~ LD1, data = pred$x, pch = 16, cex = 0.5,
@@ -847,6 +854,8 @@ for (i in 1:10){
 		level = 0.95), col = lookup[i])
 }
 ```
+
+The plot confirms what we observed before: the classes corresponding to the digits $5$ (blue), $9$ (cyan) and $1$ (brown) 
 
 We have also tried to compute in a more theoretical way the centroids of our $9$ classes. First we have collected in a $16 \times 10$ matrix the means of our classes, then we have computed a \textit{grand mean} by multiplying this matrix for the vector containing the proportion of observations for each class (\texttt{prop\_dig}).
 Finally we have \textit{centered} the mean vector of each class by subtracting the grand mean and we have applied the linear trasformation given by the \texttt{scaling} given as output by the \texttt{lda} procedure.
