@@ -52,12 +52,12 @@ setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
+library(MVN)
 library(ellipse)
 library(MASS)
 library(cvms)
 library(ggplot2)
-library(purrr)
-library(dplyr)
+# library(purrr)
 ```
 
 # Exercise 1
@@ -194,9 +194,52 @@ abline(0, 1, col = "green")
 
 The plot shows that the variables jointly seem to follow a gaussian behaviour: except for the last $3$ points, which create a heavy right tail the other points lies on the Q-Q line.
 
-<!-- todo: mardia mvn -->
+Moreover we can test the multivariate normality through statistical tests to be able to state with greater accuracy if our hypotheses are satisfied. In particular we use the Mardia test implemented in \texttt{R} inside the library \texttt{MVN}: \texttt{mvn(\_, mvnTest = "mardia")}.
+
+\smallskip
+```{r, render = lemon_print}
+test_gws = mvn(data = gws, mvnTest = "mardia")
+test_gws$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
+names(test_gws$multivariateNormality) = c("test", "stat", "p_value", "result")
+test_gws$multivariateNormality$result = tolower(test_gws$multivariateNormality$result)
+test_gws$multivariateNormality
+```
+
+The results show that our data appear to fail the multivariate gaussianity test. However this could be due to the presence of some possible outliers. What we do is try to remove them and retry the test.
+In order to  identify the outliers of the multivariate distribution, we plot the vector of the squared Mahalanobis distances and then add two threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_{24}^2$. In particular, we used $\alpha_1 = 0.95$ (in red (\textcolor{red}{$\blacksquare$})) and $\alpha_2 = \frac{(n - 0.5)}{n}$ with $n = \texttt{nrow(gws)}$ (in blue (\textcolor{blue}{$\blacksquare$})).
+
+\vspace{-20pt}
+```{r, fig.align = "center", echo = F, out.width = "95%"}
+par(family = "serif")
+out = c(12, 24)
+label_out = rep("", nrow(gws))
+label_out[out] = as.character(out)
+col_out = rep("black", nrow(gws))
+col_out[out] = "red"
+plot(d, pch = 16, xlab = "Index", ylab = "Squared Mahalanobis distance", col = col_out)
+text(seq_len(nrow(gws)), d, labels = label_out, col = col_out,
+	pos = 2, cex = 0.6, offset = 0.5)
+abline(h = qchisq(0.95, df = ncol(gws)), lty = 2, col = "red")
+alpha_data = (nrow(gws) - 0.5) / nrow(gws)
+abline(h = qchisq(alpha_data, df = ncol(gws)), lty = 2, col = "blue")
+```
+
+After removing the two most extreme outliers (corresponding to the $12$\textsuperscript{th} an the $24$\textsuperscript{th} students) we obtain the following results:
+
+```{r}
+test_gws_out = mvn(data = gws[-out, ], mvnTest = "mardia")
+```
+```{r, render = lemon_print, echo = F}
+test_gws_out$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
+names(test_gws_out$multivariateNormality) = c("test", "stat", "p_value", "result")
+test_gws_out$multivariateNormality$result = tolower(test_gws_out$multivariateNormality$result)
+test_gws_out$multivariateNormality
+```
+
+We can therefore conclude that it is reasonable to assume that our variables are normally distributed since the presence of $2$ outliers on $`r nrow(gws)`$ is amply justifiable considering the source of our data (i.e. some tests).
 
 We now proceed with the computation of the maximum likelihood solution, first with $m = 5$ factors, then with $m = 6$ factors (without any rotation):
+
 \smallskip
 ```{r}
 faml_5 = factanal(gws, factors = 5, rotation = "none")
@@ -368,7 +411,7 @@ tmp
 ```
 
 Let us explain the meaning of the test performed above. \newline
-The function uses the model's likelihood estimation to check the quality of the fitting of our factors by testing
+The function uses the model's likelihood estimation to check the quality of the fitting of our factors by testing <!-- ' -->
 \[
 	H_0: \boldsymbol{\Sigma} = \boldsymbol{L} \boldsymbol{L}^T + \boldsymbol{\Psi} \quad vs \quad H_1 : \boldsymbol{\Sigma} \text{ generic positive definite matrix.}
 \]
@@ -401,6 +444,8 @@ load_5_var = faml_5_var$loadings[, ]
 tmp = as.data.frame(round(load_5_var, 4))
 tmp
 ```
+
+<!-- todo: add plot of factor loadings -->
 
 We choose not to visualize the results in a plot since there are too many factors and variables and therefore it would not have been helpful.
 
@@ -463,7 +508,7 @@ Moreover the covariance matrix turns out to be
 \end{equation*}
 As we can see from the scatterplot, the correlation is really close to $0$. We should have excepted it since the factors scores are the estimated values of the common factors and in the theoretical model the covariance between any couple of common factors is $0$, which implies that also their correlation is $0$. In particular the theoretical covariance matrix of the factors is equal to the identity matrix and our estimated covariance matrix is quite close to it: the estimated variance of the second factor is slightly smaller then what it should be, but it still acceptable taking into account that we are considering only $5$ common factors which actually explain only the $`r round(cum_var_5[5] * 100, 2)`\%$ of the total sample variance.
 
-Finally, in order to analyse better the distribution of our data we decided to display the ellipsoids containing the $95\%$ and the $\frac{n - 0.5}{n}\%$ of the points (with $n$ number of observations we are considering). We can see that the ellipsoid are in fact circles (nearly) which confirms that the first two common factors are jointly normally distributed.
+Finally, in order to analyse better the distribution of our data we decided to display the ellipsoids containing the $95\%$ and the $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with means the sample mean and covariance matrix the sample covariance matrix (with $n$ number of observations we are considering). We can see that the ellipsoid are in fact circles (nearly) which confirms that the first two common factors are jointly normally distributed.
 
 ## 1.4
 
@@ -487,7 +532,53 @@ plot(qchisq(ppoints(d), df = ncol(pas)), sort(d), pch = 16,
 abline(0, 1, col = "green")
 ```
 
-The Chi-squared Q-Q plot of the Mahalanobis distance shows that almos all the points lie on Q-Q line. Hence, we can say that the sum of the squares of our variables ($(t_1, \dots, t_{24})$) is $\chi_{24}^2$ distributed and so our variables can be considered jointly distributed as a multivariate gaussian.
+The Chi-squared Q-Q plot of the Mahalanobis distance shows that almos all the points lie on Q-Q line. Hence, we can say that the sum of the squares of our variables $(t_1, \dots, t_{24})$ is $\chi_{24}^2$ distributed and so our variables can be considered jointly distributed as a multivariate gaussian.
+
+As we did for the Grant-White students we double-check our result for the Pasteur students exploiting the Mardia test.
+
+\smallskip
+```{r}
+test_pas = mvn(data = pas, mvnTest = "mardia")
+```
+```{r, render = lemon_print, echo = F}
+test_pas$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
+names(test_pas$multivariateNormality) = c("test", "stat", "p_value", "result")
+test_pas$multivariateNormality$result = tolower(test_pas$multivariateNormality$result)
+test_pas$multivariateNormality
+```
+
+As before the data initially fails the test but by removing the most extreme outlier (i.e. the $43$\textsuperscript{rd} student) we obtain:
+
+<!-- 
+\vspace{-20pt}
+```{r, fig.align = "center", echo = F, out.width = "95%"}
+par(family = "serif")
+out = c(43)
+label_out = rep("", nrow(pas))
+label_out[out] = as.character(out)
+col_out = rep("black", nrow(pas))
+col_out[out] = "red"
+plot(d, pch = 16, xlab = "Index", ylab = "Squared Mahalanobis distance", col = col_out)
+text(seq_len(nrow(pas)), d, labels = label_out, col = col_out,
+	pos = 2, cex = 0.6, offset = 0.5)
+abline(h = qchisq(0.95, df = ncol(pas)), lty = 2, col = "red")
+alpha_data = (nrow(pas) - 0.5) / nrow(pas)
+abline(h = qchisq(alpha_data, df = ncol(pas)), lty = 2, col = "blue")
+``` 
+-->
+
+\smallskip
+```{r}
+test_pas_out = mvn(data = pas[-out, ], mvnTest = "mardia")
+```
+```{r, render = lemon_print, echo = F}
+test_pas_out$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
+names(test_pas_out$multivariateNormality) = c("test", "stat", "p_value", "result")
+test_pas_out$multivariateNormality$result = tolower(test_pas_out$multivariateNormality$result)
+test_pas_out$multivariateNormality
+```
+
+We can again conclude that it is reasonable to assume that this portion of the \texttt{psych} dataset is also normal (in this case the number of outliers removed is even smaller: $1$ out of $`r nrow(pas)`$).
 
 We can now proceed with the computation of the maximum likelihood solution with \texttt{Varimax} rotation for $m = 5$.
 
@@ -560,7 +651,7 @@ The correlation between the factors is $`r round(cor(score_5_pas_reg[, 1], score
 		`r sigma_5_pas_reg[2, 1]` & `r sigma_5_pas_reg[2, 2]`
 	\end{pmatrix}.
 \end{equation*}
-Again the factors appears to be jointly normally distributed: almost every point (except for $1$) falls inside the ellipsoid which is supposed to  contain $\frac{n - 0.5}{n}\%$ of the mass under a multivariate normal with the sample covariance matrix as variance matrix and centre in the sample mean.
+Again the factors appears to be jointly normally distributed: almost every point (except for $1$) falls inside the ellipsoid which is supposed to  contain $\frac{n - 0.5}{n}\%$ of the mass under a multivariate normal with the sample covariance matrix as covariance matrix and centre in the sample mean.
 
 Note also that this covariance matrix is closer to the identity matrix then the previous one, however the gap between the variances of the first two factors still holds.
 
@@ -586,7 +677,7 @@ mu_gw_sexm = colMeans(score_5_var_reg[sex_gw == "m", 1:2])
 mu_gw_sexf = colMeans(score_5_var_reg[sex_gw == "f", 1:2])
 ```
 
-In the following plots the blue points (\textcolor{blue}{$\blacksquare$}) refer to male students while the red ones (\textcolor{red}{$\blacksquare$}) to the female students. We also plot the respective mean points of the two groups with bigger dots (with the same colors).
+In the following plots the blue points (\textcolor{blue}{$\blacksquare$}) refer to male students while the red ones (\textcolor{red}{$\blacksquare$}) to the female students. We also plot the respective mean points of the two groups with bigger dots (with the same colors). The ellipses cover the $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with means the sample means and covariance matrix the sample covariance matrix.
 
 ```{r, echo = F, fig.align = "center", fig.asp = 0.5}
 par(mfrow = c(1, 2), mar = c(2, 2, 3, 1), family = "serif", cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
@@ -810,8 +901,8 @@ The fact that our classes do not appear to be normally distributed and not to ha
 We now apply the LDA procedure (already implemented in \texttt{R}). It identitifies recursively $9$ discriminant variables from the $10$ classes. 
 
 The linear discriminant classifier can be obtained from two alternative derivation. Both consider each group as sample from distributions with the same variance - thus we speak of \textit{pooled variance}. 
-The first derivation further assumes that, for all groups, data are distributed as multivariate gaussian, with different means (the \textit{centroids}) and pooled variance matrix. Under this assumption, the LDA classifier is the bayes classifier and thus is optimal.
-If we now relax the assumption of gaussianity, the centroids and the pooled variance matrix $\boldsymbol{\Sigma}_{X}$ do not fully identity the distribution within each group anymore. However, we can still recover the LDA classifier as solution to a different problem. Consider the matrix 
+The first derivation further assumes that, for all groups, data are distributed as multivariate gaussian, with different means (the \textit{centroids}) and pooled covariance matrix. Under this assumption, the LDA classifier is the bayes classifier and thus is optimal.
+If we now relax the assumption of gaussianity, the centroids and the pooled covariance matrix $\boldsymbol{\Sigma}_{X}$ do not fully identity the distribution within each group anymore. However, we can still recover the LDA classifier as solution to a different problem. Consider the matrix 
 \[
 	\boldsymbol{B}_{X} \coloneqq \frac{1}{K} \sum_{j = 1}^K (\mu_{X, j} - \mu_X) (\mu_{X, j} - \mu_X)^T,
 \]
@@ -888,7 +979,7 @@ By doing so, we get the $10 \times 2$ matrix \texttt{centroids\_other}, which is
 
 We can now comment the scatterplot. By looking at it, we can say that although the centroids are separated from one another (more or less distant), there is a considerable overlap between the classes. In particular, the ones corresponding to the digits $3$ (\textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$}), $5$ (\textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$}), $1$ (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}) and $9$ (\textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$}) seem to be the most difficult to discriminate as they mix with almost all the others.
 
-In order to have a better understanding of how much the classes overlap we add to the previous plot the ellipses containing the $95\%$ of the data points (we do it for every class).
+In order to have a better understanding of how much the classes overlap we add to the previous plot the ellipses covering the $95\%$ of the mass of a gaussian distribution with means the centroids and covariance matrix the sample covariance matrix, for each of the $10$ classes.
 
 \begin{center}
 	\begin{tabular}{ c | c c c c c c c c c c }
@@ -1074,7 +1165,7 @@ tmp
 ```{r, echo = F, fig.align = "center", out.width = "90%"}
 par(family = "serif")
 plot(seq(1:9), train_errors, type = "b", pch = 16, col = "blue",
-	xlab = "rank", ylab = "error", lwd = 0.5)
+	xlab = "Rank", ylab = "Error", lwd = 0.5)
 lines(seq(1:9), cv_errors, type = "b", pch = 16, col = "red")
 legend("topright", legend = c("train_errors", "cv_errors"),
 	col = c("blue", "red"), pch = c(16, 16), lty = c(1, 1))
