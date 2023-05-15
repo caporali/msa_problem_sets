@@ -47,8 +47,8 @@ library(lemon)
 
 # set working directory
 # setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
-# setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
+#setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
@@ -87,7 +87,7 @@ head(psych_0[-render_p])
 ```
 \smallskipm
 
-The $24$ tests corresponds to the following subjects:
+The $24$ tests correspond to the following subjects:
 
 \smallskip
 ```{r, echo = F}
@@ -141,7 +141,7 @@ psych_1 = psych_0[, 4:28]
 gw = subset(psych_1, group == "grant", select = -group)
 ```
 
-Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlation between variables plays a central role in \textit{Factor Analysis}. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
+Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlations between variables play a central role in Factor Analysis. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
 
 \smallskip
 ```{r, fig.align = "center", out.width = "1000px"}
@@ -164,11 +164,10 @@ rownames(cor_gws) = colnames(cor_gws)
 neg_cor_gws = ((24^2 - sum(sign(cor_gws))) / 2) / 2
 ```
 
-From the correlation matrix we can note that:
+From the correlation matrix we can immediatly note that:
 \begin{itemize}
 	\item
-		all the correlation except for \texttt{neg\_cor\_gws} $= `r neg_cor_gws`$ are positive, moreover the majority of them is less than $0.5$;
-		% todo: comment the point
+		all the correlations except for \texttt{neg\_cor\_gws} $= `r neg_cor_gws`$ are positive (\texttt{neg\_cor\_gws} computes the number of total negative correlations in the matrix, without multiplicity. See the computation above). This is reasonable since all the variables represent psychological tests measuring different kinds of cognitive abilities, which of course are more or less related to one another;
 	\item
 		by just looking at the correlation matrix, it is difficult to guess whether $5$ or $6$ common factors are an appropriate choice or not.
 \end{itemize}
@@ -179,7 +178,9 @@ In particular, if $\boldsymbol{F} = (F_1, \dots, F_m)$ and $\boldsymbol{\varepsi
 \[
 	\boldsymbol{X} = \boldsymbol{L} \boldsymbol{F} + \boldsymbol{\varepsilon} \sim \normal{\mu}{\Sigma}, \text{ with } \boldsymbol{L} \in \real^{p \times m}.
 \]
-We can check the normality by observing that our input data $\boldsymbol{x} \in \real^{24}$, which was reviously rescaled, actually comes from a $\boldsymbol{X} \sim \normal{0}{I}$.
+We can check the normality by observing that our input data $\boldsymbol{x} \in \real^{24}$, which was previously rescaled, actually comes from a $\boldsymbol{X} \sim \normal{0}{I}$.
+
+\pagebreak
 
 For this purpose we look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi^2_{24}$.
 
@@ -192,21 +193,21 @@ plot(qchisq(ppoints(d), df = ncol(gws)), sort(d), pch = 16,
 abline(0, 1, col = "green")
 ```
 
-The plot shows that the variables jointly seem to follow a gaussian behaviour: except for the last $3$ points, which create a heavy right tail the other points lies on the Q-Q line.
+The plot shows that the variables jointly seem to follow a gaussian behaviour: except for the last $3$ points, which create a heavy right tail the other points lie on the Q-Q line.
 
-Moreover we can test the multivariate normality through statistical tests to be able to state with greater accuracy if our hypotheses are satisfied. In particular we use the Mardia test implemented in \texttt{R} inside the library \texttt{MVN}: \texttt{mvn(\_, mvnTest = "mardia")}.
+Moreover, we can test the multivariate normality through statistical tests in order to be able to state with greater accuracy if our hypotheses are satisfied. In particular, we use the Mardia test implemented in \texttt{R} inside the library \texttt{MVN}: \texttt{mvn(\_, mvnTest = "mardia")}.
 
 \smallskip
 ```{r, render = lemon_print}
 test_gws = mvn(data = gws, mvnTest = "mardia")
 test_gws$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
-names(test_gws$multivariateNormality) = c("test", "stat", "p_value", "result")
+names(test_gws$multivariateNormality) = c("test", "stat", "p-value", "result")
 test_gws$multivariateNormality$result = tolower(test_gws$multivariateNormality$result)
 test_gws$multivariateNormality
 ```
 
-The results show that our data appear to fail the multivariate gaussianity test. However this could be due to the presence of some possible outliers. What we do is try to remove them and retry the test.
-In order to  identify the outliers of the multivariate distribution, we plot the vector of the squared Mahalanobis distances and then add two threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_{24}^2$. In particular, we used $\alpha_1 = 0.95$ (in red (\textcolor{red}{$\blacksquare$})) and $\alpha_2 = \frac{(n - 0.5)}{n}$ with $n = \texttt{nrow(gws)}$ (in blue (\textcolor{blue}{$\blacksquare$})).
+The results show that our data appear to fail the multivariate gaussianity test. This could be due to the presence of some possible outliers, hence we try to remove them and do the test again.
+In order to  identify the outliers of the multivariate distribution, we plot the vector of the squared Mahalanobis distances and then add two threshold lines corresponding to different levels of the theoretical quantiles of a $\chi_{24}^2$. In particular, we use $\alpha_1 = 0.95$ (in red (\textcolor{red}{$\blacksquare$})) and $\alpha_2 = \frac{(n - 0.5)}{n}$ with $n = \texttt{nrow(gws)}$ (in blue (\textcolor{blue}{$\blacksquare$})).
 
 \vspace{-20pt}
 ```{r, fig.align = "center", echo = F, out.width = "95%"}
@@ -224,21 +225,22 @@ alpha_data = (nrow(gws) - 0.5) / nrow(gws)
 abline(h = qchisq(alpha_data, df = ncol(gws)), lty = 2, col = "blue")
 ```
 
-After removing the two most extreme outliers (corresponding to the $12$\textsuperscript{th} an the $24$\textsuperscript{th} students) we obtain the following results:
+After removing the two most extreme outliers (corresponding to the $12$\textsuperscript{th} an the $24$\textsuperscript{th} students), we obtain the following results:
 
 ```{r}
+out = c(12, 24)
 test_gws_out = mvn(data = gws[-out, ], mvnTest = "mardia")
 ```
 ```{r, render = lemon_print, echo = F}
 test_gws_out$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
-names(test_gws_out$multivariateNormality) = c("test", "stat", "p_value", "result")
+names(test_gws_out$multivariateNormality) = c("test", "stat", "p-value", "result")
 test_gws_out$multivariateNormality$result = tolower(test_gws_out$multivariateNormality$result)
 test_gws_out$multivariateNormality
 ```
 
 We can therefore conclude that it is reasonable to assume that our variables are normally distributed since the presence of $2$ outliers on $`r nrow(gws)`$ is amply justifiable considering the source of our data (i.e. some tests).
 
-We now proceed with the computation of the maximum likelihood solution, first with $m = 5$ factors, then with $m = 6$ factors (without any rotation):
+We can now proceed with the computation of the maximum likelihood solution, first with $m = 5$ factors, then with $m = 6$ factors (without any rotation):
 
 \smallskip
 ```{r}
@@ -246,7 +248,11 @@ faml_5 = factanal(gws, factors = 5, rotation = "none")
 load_5 = faml_5$loadings[, ]
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(round(load_5, 4))
+tmp = as.data.frame(round(load_5[1:5, ], 4))
+tmp
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_5[6:24, ], 4))
 tmp
 ```
 
@@ -318,7 +324,7 @@ df_6
 ```
 
 Both models seem to fit very poorly. 
-A general criterion, for the choice of the number of factors is to take the smallest $m$ such that the total proportion of variance due to the $m$ factors is at least $80\%$. However, in both our cases ($m = 5, 6$), the models explain about $50\%$ (respectively $`r round(cum_var_5[5] * 100, 2)`\%$ and $`r round(cum_var_6[6] * 100, 2)`\%$) of the total variance collectively.
+A general criterion for the choice of the number of factors is to take the smallest $m$ such that the total proportion of variance due to the $m$ factors is at least $80\%$. However, in both our cases ($m = 5, 6$), the models explain about $50\%$ (respectively $`r round(cum_var_5[5] * 100, 2)`\%$ and $`r round(cum_var_6[6] * 100, 2)`\%$) of the total variance collectively.
 Hence, the result is not satisfactory.
 
 Next, as requested, we report below the specific variances $(\psi_j)_{j = 1}^{24}$, again for both $m = 5$ and $m = 6$. 
@@ -351,52 +357,27 @@ tmp[, ((dim_gws[2] / 2) + 1):dim_gws[2]]
 \smallskipm
 
 Finally, we need to assess the accuracy of the approximations of the correlation matrices. For this purpose, for both models we analyse the residual matrix given by the difference between the actual correlation matrix, $\boldsymbol{R}$, and the correlation matrix given by the approximation performed by the maximum likelihood method, i.e. $\boldsymbol{S} = \hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}$, where $\hat{\boldsymbol{\Psi}} = \operatorname{diag}\left((\psi_j)_{j = 1}^{24}\right)$. \newline 
-We first compare the squared Frobenius norm of the approximation matrices with the sum of the squares of the neglected eigenvalues, i.e. $\sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2$, in order to check if the following inequality is fulfilled:
-\[
-	\left\|\boldsymbol{R} - \left(\hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}\right)\right\|^2_{\rm{F}} \leq \sum_{i = m + 1}^{\text{\texttt{size(}$\boldsymbol{S}$\texttt{)}}} \lambda_i^2.
-\]
-Then, we compare the two squared Frobenius norms in order to see which approximation is more accurate.
+Let us compare the squared Frobenius norms of the approximation matrices in order to see which approximation is more accurate.
 
 \smallskip
 ```{r}
-eig = eigen(cor_gws)$values
 residual_5 = cor_gws - (load_5 %*% t(load_5) + diag(psi_5))
-eig_negl_5 = eig[(5 + 1):dim_gws[2]]
-comparison_5 = c(sum(residual_5^2), sum(eig_negl_5^2))
-```
-```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(t(as.matrix(round(comparison_5, 4))))
-rownames(tmp) = "comparison_5"
-colnames(tmp) = c("ss_residual_5", "ss_eig_negl_5")
-tmp
-```
-\smallskipm
-
-Then we repeat the same computation for $m = 6$:
-
-\smallskip
-```{r}
+ss_residual_5 = sum(residual_5^2)
 residual_6 = cor_gws - (load_6 %*% t(load_6) + diag(psi_6))
-eig_negl_6 = eig[(6 + 1):dim_gws[2]]
-comparison_6 = c(sum(residual_6^2), sum(eig_negl_6^2))
+ss_residual_6 = sum(residual_6^2)
+comparison = c(ss_residual_5, ss_residual_6)
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(t(as.matrix(round(comparison_6, 4))))
-rownames(tmp) = "comparison_6"
-colnames(tmp) = c("ss_residual_6", "ss_eig_negl_6")
+tmp = as.data.frame(t(as.matrix(round(comparison, 4))))
+rownames(tmp) = "comparison"
+colnames(tmp) = c("ss_residual_5", "ss_residual_6")
 tmp
 ```
 \smallskipm
 
-We get
-\begin{align*}
-	& m = 5: \quad `r sum(residual_5^2)` \leq `r sum(eig_negl_5^2)` \\
-	& m = 6: \quad `r sum(residual_6^2)` \leq `r sum(eig_negl_6^2)`
-\end{align*}
-so the inequality is satisfied.
-Moreover, it is evident that in both cases the approximation error of the correlation matrix is not negligible.
+It is evident that in both cases the approximation error of the correlation matrix is not negligible, however the second one is slightly lowe then the first one.
 
-Another possibile way to see if $5$ or $6$ factor are enough to explain the observed covariances is to consider test performed automatically by the command \texttt{factanal()} whose p-value is displayed at the end of the output. We obtain respectively:
+Another possibile way to see if $5$ or $6$ factors are enough to explain the observed covariances is to consider a test which is performed automatically by the command \texttt{factanal()}. The p-value of this test is displayed at the end of the output. We obtain respectively:
 
 \smallskip
 ```{r, results = "hide"}
@@ -410,14 +391,14 @@ rownames(tmp) = ""
 tmp
 ```
 
-Let us explain the meaning of the test performed above. \newline
-The function uses the model's likelihood estimation to check the quality of the fitting of our factors by testing <!-- ' -->
+Let us briefly explain the meaning of the test performed above. \newline
+The function uses the model's likelihood estimation to check the quality of the fitting of our factors and it does it by testing <!-- ' -->
 \[
 	H_0: \boldsymbol{\Sigma} = \boldsymbol{L} \boldsymbol{L}^T + \boldsymbol{\Psi} \quad vs \quad H_1 : \boldsymbol{\Sigma} \text{ generic positive definite matrix.}
 \]
-Both our models have high p-values ($> 0.05$) hence it seems that both the number of factor is reasonable in both cases.
+Both our models have high p-values ($> 0.05$), hence it seems that the number of factors is reasonable in both cases.
 
-In conclusion, both choices are acceptable, but in some sense inaccurate. The improvement given by the choice of $m = 6$ is not particularly significant, hence we tend to prefer $m = 5$. Indeed the last factor obtained with $m = 6$ accounts only for the $`r round(prop_var_6[6] * 100, 2)`\%$ of the total sample variance and the difference between the squared Frobenius norms of the residual matrices shares the same order of magnitude.
+In conclusion, both choices are acceptable, but in some sense inaccurate. The improvement given by the choice of $m = 6$ factors is not particularly significant, hence we tend to prefer $m = 5$. Indeed the additional factor obtained with $m = 6$ accounts only for the $`r round(prop_var_6[6] * 100, 2)`\%$ of the total sample variance and the squared Frobenius norms of the residual matrices share the same order of magnitude.
 
 ## 1.2
 
@@ -454,16 +435,16 @@ After the rotation, things become a little better: as expected, the loadings are
 	\item 
 		the variables $t_5, t_6, t_7, t_8$ and $t_9$ load highly on the first common factor. The psychological tests associated to these variables primarly assess the language-related capacities of an individual, including reading comprehension, vocabulary knowledge, word associations, sentence construction and general knowledge. Hence, we can interpret the first factor as \textit{verbal ability};
 	\item 
-		the second factor is determined by the variables from $t_1$ to $t_4$ togheter with $t_{20}, t_{22}$ and $t_{23}$. The first four tests measure the spatial ability of an individual, while the last three tests assess the logical ability of an individual. Hence, we choose to assign the second factor the label \textit{logical and spatial ability};
+		the second factor is determined by the variables from $t_1$ to $t_4$ togheter with $t_{20}, t_{22}$ and $t_{23}$. The first four tests measure the spatial ability of an individual, while the last three tests assess the logical ability of an individual. Hence, we choose to assign to the second factor the label \textit{logical and spatial ability};
 	\item 
 		the variables $t_{10}$ and $t_{12}$ load highly on the third factor, which is also determined by the variables $t_{21}$ and $t_{24}$. They refer to psychological tests that assess cognitive capacities related to numerical processing, mathematical reasoning and arithmetic skills. We refer to the fourth factor as \textit{numerical/mathematical ability};
 	\item 
-		the variables from $t_{14}$ to $t_{19}$ determine the fourth common factor. The tests associated to these variables measure an individual's capacity of recognising  numbers, words and figures and of making associations between them. Hence, the fourth factor can be interpreted as \textit{recognition and association ability}; %'
+		the variables from $t_{14}$ to $t_{19}$ determine the fourth common factor. The tests associated to these variables measure an individual's capacity of recognising  numbers, words and figures and of making associations among them. Hence, the fourth factor can be interpreted as \textit{recognition and association ability}; %'
 	\item
-		the fifth factor is solely determined by the variable $t_{13}$. Hence we label the factor as its representative test, i.e. \textit{straight-curved capitals}. It is immediate to observe that it is the only factor without an abstract meaning. This could be due to the fact that proportion of variance explained by the factor is $`r round(colSums(load_5_var^2) / dim_gws[2], 3)[5]`$, which is too low to have a significative impact.
+		the fifth factor is solely determined by the variable $t_{13}$. Hence we label the factor as its representative test, i.e. \textit{straight-curved capitals}. It is immediate to observe that it is the only factor without an abstract meaning. This could be due to the fact that the proportion of variance explained by the factor is $`r round(colSums(load_5_var^2) / dim_gws[2], 3)[5]`$, which is too low to have a significative impact.
 \end{enumerate}
 
-Finally it is remarkable that the variable $t_{11}$ loads uniformly on the last three common factors hence is influenced by them similarly. This could be reasonable taking into account the psychological test associated with the variable.  
+Finally it is remarkable that the variable $t_{11}$ loads uniformly on the last three common factors, hence it is influenced by them similarly. This could be reasonable taking into account the psychological test associated with the variable (\texttt{code}).  
 
 Before we move to the next step we want to underline that we decided not to fix a threshold value to assess significance of factor loadings. This choice is motivated by the fact that the total sample	variance explained by the $5$ factors is only $`r round(cum_var_5[5] * 100, 2)`\%$. Indeed this leads to the shortage of very high loadings and at the same time allows the presence of variables that have not much influence on any factor. Moreover by doing so we obtained a partition of our variables among the factors (with the only minor exception given by $t_{11}$).
 
@@ -499,16 +480,16 @@ abline(c, d, lwd = 1, lty = 2)
 ```
 
 It seems there is no particular correlation between the two factors. In fact, if we compute it explicitly we obtain $`r round(cor(score_5_var_reg[, 1], score_5_var_reg[, 2]), 3)`$.
-Moreover the covariance matrix turns out to be
+Moreover, the covariance matrix turns out to be
 \begin{equation*}
 	\boldsymbol{\Sigma}_{\rm{fs}} = \begin{pmatrix}
 		`r sigma_5_var_reg[1, 1]` & `r sigma_5_var_reg[1, 2]` \\
 		`r sigma_5_var_reg[2, 1]` & `r sigma_5_var_reg[2, 2]`
 	\end{pmatrix}.
 \end{equation*}
-As we can see from the scatterplot, the correlation is really close to $0$. We should have excepted it since the factors scores are the estimated values of the common factors and in the theoretical model the covariance between any couple of common factors is $0$, which implies that also their correlation is $0$. In particular the theoretical covariance matrix of the factors is equal to the identity matrix and our estimated covariance matrix is quite close to it: the estimated variance of the second factor is slightly smaller then what it should be, but it still acceptable taking into account that we are considering only $5$ common factors which actually explain only the $`r round(cum_var_5[5] * 100, 2)`\%$ of the total sample variance.
+As we can see from the scatterplot, the correlation is really close to $0$. We should have excepted it since the factors scores are the estimated values of the common factors and in the theoretical model the covariance between any couple of common factors is $0$, which implies that also their correlation is $0$. In particular, the theoretical covariance matrix of the factors is equal to the identity matrix and our estimated covariance matrix is quite close to it: the estimated variance of the second factor is slightly smaller then what it should be, but is still acceptable taking into account that we are considering only $5$ common factors which explain only the $`r round(cum_var_5[5] * 100, 2)`\%$ of the total sample variance.
 
-Finally, in order to analyse better the distribution of our data we decided to display the ellipsoids containing the $95\%$ and the $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with means the sample mean and covariance matrix the sample covariance matrix (with $n$ number of observations we are considering). We can see that the ellipsoid are in fact circles (nearly) which confirms that the first two common factors are jointly normally distributed.
+Finally, in order to analyse better the distribution of our data we decided to display the ellipsoids containing the $95\%$ and the $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with mean the sample mean and covariance matrix the sample covariance matrix (with $n$ number of observations). We can see that the ellipsoids are in fact circles (nearly) which confirms that the first two common factors are jointly normally distributed.
 
 ## 1.4
 
@@ -542,7 +523,7 @@ test_pas = mvn(data = pas, mvnTest = "mardia")
 ```
 ```{r, render = lemon_print, echo = F}
 test_pas$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
-names(test_pas$multivariateNormality) = c("test", "stat", "p_value", "result")
+names(test_pas$multivariateNormality) = c("test", "stat", "p-value", "result")
 test_pas$multivariateNormality$result = tolower(test_pas$multivariateNormality$result)
 test_pas$multivariateNormality
 ```
@@ -573,7 +554,7 @@ test_pas_out = mvn(data = pas[-out, ], mvnTest = "mardia")
 ```
 ```{r, render = lemon_print, echo = F}
 test_pas_out$multivariateNormality$Test = c("mardia_skewness", "mardia_kurtosis", "mvn")
-names(test_pas_out$multivariateNormality) = c("test", "stat", "p_value", "result")
+names(test_pas_out$multivariateNormality) = c("test", "stat", "p-value", "result")
 test_pas_out$multivariateNormality$result = tolower(test_pas_out$multivariateNormality$result)
 test_pas_out$multivariateNormality
 ```
@@ -783,13 +764,13 @@ digit_col = lookup[as.character(pendigits$digit)]
 head(pendigits)
 ```
 
+It could be useful to have an idea of the class sizes hence we display them below.
+
+\smallskip
 ```{r}
 count_dig = as.vector(table(pendigits$digit))
 prop_dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$digit)))
 ```
-
-It could be useful to have an idea of the class sizes hence we display them below.
-
 ```{r, fig.show = "hide"}
 plt_count_dig = t(as.matrix(count_dig))
 colnames(plt_count_dig) = 0:9
@@ -851,7 +832,7 @@ plot(qchisq(ppoints(d), df = ncol(sub_digits_5_var)), sort(d), pch = 16,
 abline(0, 1, col = "green")
 ```
 
-By looking at the Q-Q plots, it is clear that no class is normally distributed: all the digits, except for $6$ and $9$, seems to have heavy right tails. Actually, the plots of the remaining two variables appear to be closer to the Q-Q line but this is only because in both cases there is an extreme outlier which distorts the figure.
+By looking at the Q-Q plots, it is clear that no class is normally distributed: all the digits, except for $6$ and $9$, seems to have heavy right tails. Actually, the plots of the remaining two digits appear to be closer to the Q-Q line but this is only because in both cases there is an extreme outlier which distorts the figure.
 
 It is also possible to check whether the covariance matrices of the different classes are similar or not. In order to do so, we display below the matrix $M$ such that
 \[
@@ -861,6 +842,10 @@ where $\|\cdot\|_{\rm{F}}$ is the Frobenius norm of a matrix while $\var{\cdot}$
 
 \smallskip
 ```{r}
+sub_digits = list()
+for (i in 1:10){
+	sub_digits[[i]] = pendigits[pendigits[, 17] == (i - 1), 1:16]
+}
 sub_digits_cov = list()
 for (i in 1:10){
 	sub_digits_cov[[i]] = cov(sub_digits[[i]])
@@ -894,9 +879,9 @@ mat = format(mat, scientific = F)
 
 \smallskip
 
-As we can see, the covariance matrices seem pretty far from being similar: the entrances of the matrix $M$ are very large, in particular the ones corresponding to the sixth row.
+As we can see, the covariance matrices seem pretty far from being similar: the entries of the matrix $M$ are very large, in particular the ones corresponding to the sixth row.
 
-The fact that our classes do not appear to be normally distributed and not to have similar covariance matrices does not compromise the applicability of the LDA since these assumptions are only required for an optimal solution.
+The fact that our classes do not appear to be normally distributed and not to have similar covariance matrices does not compromise the applicability of the LDA, since these assumptions are only required for an optimal solution.
 
 We now apply the LDA procedure (already implemented in \texttt{R}). It identitifies recursively $9$ discriminant variables from the $10$ classes. 
 
@@ -1018,7 +1003,7 @@ In particular:
 	\item
 	    the ellipses corresponding to the digits $6$ (\textcolor{`r paste(lookup[6 + 1])`}{$\blacksquare$}), $0$ (\textcolor{`r paste(lookup[0 + 1])`}{$\blacksquare$}) and $8$ (\textcolor{`r paste(lookup[8 + 1])`}{$\blacksquare$}), which are located on the extrems of the cloud, dispite being large, contain "only" two different centroids (actually the red one only touches the cyan one).
 \end{itemize}
-In conclusion, we can say that we expect there to be various missclassifications, particularly between those classes which overlap the most. On the contrary we except not to have any missclassification between the most distant classes, such as $(4, 8)$, $(2, 0)$ and $(6, 7)$. 
+In conclusion, we can say that we expect there to be various missclassifications, particularly between those classes which overlap the most. On the contrary, we expect not to have any missclassification between the most distant classes, such as $(4, 8)$, $(2, 0)$ and $(6, 7)$. 
 
 ## 2.2
 
@@ -1068,12 +1053,12 @@ The training error rate is unexpectedly low: only the $`r round(error_rate * 100
 	\item
 		moreover, we can observe that the percentage of obervations misclassified as $9$'s is $27\%$ and the majority of it comes from the $5$'s ($20.7\%$). This is consistent with what we previously observed in the scatterplot, since the cyan ellipse (\textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$}, i.e. $9$) is located in the middle of the cloud and particularly overlaps with the blue one (\textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$}, i.e. $5$);
 	\item
-		similarly to what happens with the variables $9$ and $5$ a considerable amount of $1$'s is misclassified as $2$, % '
-		which is consistent with the fact that the lightblue ellipse (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}, i.e. $2$) is almost entirely contained in the brown one (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}, i.e. $1$);
+		similarly to what happens with the classes $9$ and $5$ a considerable amount of $1$'s is misclassified as $2$, % '
+		which is coherent with the fact that the lightblue ellipse (\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}, i.e. $2$) is almost entirely contained in the brown one (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}, i.e. $1$);
 	\item
 		surprisingly the digit $3$ (associated to the color magenta \textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$}) does not have as many misclassifications as we thought. In particular, we excepted an higher number of misclassifications between the digits $3$ and $7$ since the cloud corresponding the first one is completely contained in the ellipse related to the second one;
 	\item
-		there are no misclassifications among the classes which are the most distant in the LD1$\sim$LD2 space, as expected.
+		there are no misclassifications among the classes which are the most distant in the LD1$\sim$LD2 space, as we thought.
 \end{itemize}
 
 ## 2.3
@@ -1109,6 +1094,8 @@ and the following \textit{LOOCV error rate}
 \smallskip
 ```{r}
 loocv_error = 1 - conf_mat_cv$"Overall Accuracy"
+```
+```{r,echo = F}
 comparison_errors = (loocv_error - error_rate) / error_rate
 ```
 ```{r, echo = F, render = lemon_print}
@@ -1124,10 +1111,19 @@ Moreover, the error rate given by this procedure is slightly larger then the one
 
 ## 2.4
 
+In reduced-rank linear discriminant analysis, it is possible to perform the nearest centroid classification in a subspace of dimension $L<\min\{K-1,p\}$ by using for the prediction only the first $L$ discriminant directions. When $L=\min\{K-1,p\}$ we call it full-rank linear discriminant analysis. In order to perform reduced-rank LDA, it is sufficient to specify the dimension of the space to be used  for the prediction when calling the \texttt{predict()} function.
+
+We are asked to implement the \textit{$44-$fold cross validation} for each reduced-rank LDA, including the full-rank LDA, by using the partition of the observations provided by the variable \texttt{group\_cv} in order to estimate the error rate. 
+
+\smallskip
 ```{r}
 group_cv = rep(1:44, each = 250)
 group_cv = group_cv[seq_along(pendigits$digit)]
 ```
+
+The \textit{$44-$fold cross validation} fits the model on $43$ out of $44$ subsets (the training set) and uses the remaining  subset as test set. This procedure is then repeated $44$ times so that each subset will be used as test set for the model. The function below implement the process and returns the corresponding \textit{CV error rate}.
+
+\smallskip
 ```{r}
 cv_44_fold = function(data, grouping, rank) {
 	misclassified = 0
@@ -1144,6 +1140,9 @@ cv_44_fold = function(data, grouping, rank) {
 }
 ```
 
+We can now call the function and print the results. Note that we decided to compute also the training error rates in order to make a comparison.
+
+\smallskip
 ```{r}
 train_errors = 0
 cv_errors = 0
@@ -1161,6 +1160,11 @@ rownames(tmp) = c("train_errors", "cv_errors")
 colnames(tmp) = paste0("rank_", 1:9)
 tmp
 ```
+
+Note only that the training error rate we get for the full-rank LDA is the same as the one we obtained in point $2.2$.
+
+We can now plot the error curves against the number of discriminant variables.
+
 \vspace{-40pt}
 ```{r, echo = F, fig.align = "center", out.width = "90%"}
 par(family = "serif")
@@ -1171,10 +1175,10 @@ legend("topright", legend = c("train_errors", "cv_errors"),
 	col = c("blue", "red"), pch = c(16, 16), lty = c(1, 1))
 ```
 
-Surprisingly the \textit{training error rate} and the \textit{$44$-fold CV error rate} are almost identical: the first one is always lower than the second one (in accordance with the theory), but the discrepancy between them is at most `r round(max(cv_errors - train_errors), 4)`. Note also that in both cases as the number $L$ of discriminant directions increases, the corresponding \textit{error value} decreases. Therefore, the full-rank LDA classifier should provide the best classifications, **that** is, when considering $L = 9$ discriminant directions, the projected centroids achieve the maximum spread relative to the within-class variance.
+Surprisingly the \textit{training error rate} and the \textit{$44$-fold CV error rate} are almost identical: the first one is always lower than the second one (in accordance with the theory), but the discrepancy between them is at most `r round(max(cv_errors - train_errors), 4)`. Note also that in both cases as the number $L$ of discriminant directions increases, the corresponding error value decreases. Therefore, the full-rank LDA classifier should provide the best classifications, that is, when considering $L = 9$ discriminant directions, the projected centroids achieve the maximum spread relative to the within-class variance.
 
-If we were interested in having a dimensionality reduction we could decide to keep only $L = 6$ dimensions, since the difference between dimension $6$ and $9$ is approximately `r round(max(c(cv_errors[6] - cv_errors[9], train_errors[6] - train_errors[9])), 4)` in both \textit{training error rate} and the \textit{CV error rate}. This leads to a reasonable dimensionality-reduction.
+If we were interested in having a dimensionality reduction we could decide to keep only $L = 6$ dimensions, since the difference between dimension $6$ and $9$ is approximately `r round(max(c(cv_errors[6] - cv_errors[9], train_errors[6] - train_errors[9])), 4)` in both \textit{training error rate} and \textit{CV error rate}. This leads to a reasonable dimensionality-reduction.
 
-Clearly, due to the high dimensionality it is not possible to have a graphical representation of observations and centroids. To this aim $L = 2$ discriminant directions should be used, as previously done.
+Clearly, due to the high dimensionality it is not possible to have a graphical representation of observations and centroids. To this aim, $L = 2$ discriminant directions should be used, as previously done.
 
 ## 2.5 (optional)
