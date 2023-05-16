@@ -1,2 +1,0 @@
-ex_1
-	- fa: https://advstats.psychstat.org/book/factor/efa.php

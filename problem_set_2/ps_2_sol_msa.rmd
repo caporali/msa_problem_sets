@@ -57,6 +57,7 @@ library(ellipse)
 library(MASS)
 library(cvms)
 library(ggplot2)
+library(shape)
 library(class)
 library(klaR)
 library(randomForest)
@@ -137,7 +138,7 @@ Note that the variable \texttt{case} does not provide any important information 
 
 ## 1.1
 
-In performing the factor analysis we are only interested  in the $24$ variables corresponding to the psychological tests, hence we remove the variables \texttt{case}, \texttt{age} and \texttt{sex} from our dataset. Moreover, we are asked to use only the Grant-White students data, so we subset the remaining data frame according to the request.
+In performing the Factor Analysis we are only interested  in the $24$ variables corresponding to the psychological tests, hence we remove the variables \texttt{case}, \texttt{age} and \texttt{sex} from our dataset. Moreover, we are asked to use only the Grant-White students data, so we subset the remaining data frame according to the request.
 
 \smallskip
 ```{r}
@@ -145,7 +146,7 @@ psych_1 = psych_0[, 4:28]
 gw = subset(psych_1, group == "grant", select = -group)
 ```
 
-Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlations between variables play a central role in Factor Analysis. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualize them with a plot.
+Before fitting the model, we scale our data and examine the correlation matrix. Indeed correlations between variables play a central role in Factor Analysis. Since we have a very large number of variables, we choose not to display the values of the matrix directly, but we rather visualise them with a plot.
 
 \smallskip
 ```{r, fig.align = "center", out.width = "1000px"}
@@ -177,7 +178,7 @@ From the correlation matrix we can immediatly note that:
 \end{itemize}
 
 In order to obtain the maximum likelihood solution for $m = 5$ and $m = 6$ factors in \texttt{R} we can use the built-in function \texttt{factanal()}. \newline
-Before proceeding with the computation, we would like to recall that the \textit{maximum likelihood} method, unlike the \textit{principal component method}, relies on the necessary assumption of normality of the \textit{common factors} ($\boldsymbol{F}$) and of the \textit{specific error terms} ($\boldsymbol{\varepsilon}$).
+Before proceeding with the computation, we would like to recall that the \textit{maximum likelihood} method, unlike the \textit{principal component} method, relies on the necessary assumption of normality of the \textit{common factors} ($\boldsymbol{F}$) and of the \textit{specific error terms} ($\boldsymbol{\varepsilon}$).
 In particular, if $\boldsymbol{F} = (F_1, \dots, F_m)$ and $\boldsymbol{\varepsilon} = (\varepsilon_1, \dots, \varepsilon_p)$ are normally distributed, then 
 \[
 	\boldsymbol{X} = \boldsymbol{L} \boldsymbol{F} + \boldsymbol{\varepsilon} \sim \normal{\mu}{\Sigma}, \text{ with } \boldsymbol{L} \in \real^{p \times m}.
@@ -242,7 +243,7 @@ test_gws_out$multivariateNormality$result = tolower(test_gws_out$multivariateNor
 test_gws_out$multivariateNormality
 ```
 
-We can therefore conclude that it is reasonable to assume that our variables are normally distributed since the presence of $2$ outliers on $`r nrow(gws)`$ is amply justifiable considering the source of our data (i.e. some tests).
+We can therefore conclude that it is reasonable to assume that our variables are normally distributed since the presence of $2$ outliers out of $`r nrow(gws)`$ is amply justifiable considering the source of our data (i.e. some tests).
 
 We can now proceed with the computation of the maximum likelihood solution, first with $m = 5$ factors, then with $m = 6$ factors (without any rotation):
 
@@ -360,7 +361,7 @@ tmp[, ((dim_gws[2] / 2) + 1):dim_gws[2]]
 ```
 \smallskipm
 
-Finally, we need to assess the accuracy of the approximations of the correlation matrices. For this purpose, for both models we analyse the residual matrix given by the difference between the actual correlation matrix, $\boldsymbol{R}$, and the correlation matrix given by the approximation performed by the maximum likelihood method, i.e. $\boldsymbol{S} = \hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}$, where $\hat{\boldsymbol{\Psi}} = \operatorname{diag}\left((\psi_j)_{j = 1}^{24}\right)$. \newline 
+Finally, we need to assess the accuracy of the approximations of the correlation matrices. For this purpose, for both models we analyse the residual matrix given by the difference between the actual correlation matrix, $\boldsymbol{R}$, and the correlation matrix given by the approximation performed by the maximum likelihood method, i.e. $\boldsymbol{S} = \hat{\boldsymbol{L}}\hat{\boldsymbol{L}}^{T} + \hat{\boldsymbol{\Psi}}$, where $\hat{\boldsymbol{\Psi}} = \operatorname{diag}\left((\hat{\psi}_j)_{j = 1}^{24}\right)$. \newline 
 Let us compare the squared Frobenius norms of the approximation matrices in order to see which approximation is more accurate.
 
 \smallskip
@@ -379,7 +380,7 @@ tmp
 ```
 \smallskipm
 
-It is evident that in both cases the approximation error of the correlation matrix is not negligible, however the second one is slightly lowe then the first one.
+It is evident that in both cases the approximation error of the correlation matrix is not negligible, however the second one is slightly lower then the first one.
 
 Another possibile way to see if $5$ or $6$ factors are enough to explain the observed covariances is to consider a test which is performed automatically by the command \texttt{factanal()}. The p-value of this test is displayed at the end of the output. We obtain respectively:
 
@@ -406,15 +407,9 @@ In conclusion, both choices are acceptable, but in some sense inaccurate. The im
 
 ## 1.2
 
-<!-- todo: adjust -->
-We now want to give an interpretation to the common factors in the $m = 5$ solution. It is important to recall that factor loadings are identified up to a rotation. Thus, different rotations yield different factors which lead to different interpretations. A wise choice of the rotation can therefore ease the analysis significantly. For example, in the previous point,
-when $m = 5$ almost all variables load on the first factor higher than on the other four factors, revealing that the \textit{uniqueness condition} through which the model was fit yields a poor choice of the rotation as for the understanding the factors. It is preferable to perform instead the \texttt{Varimax} rotation. It identifies the rotation matrix $\boldsymbol{T}$, thus the rotated loadings $\hat{\boldsymbol{L}}^* = \hat{\boldsymbol{L}} \boldsymbol{T}$. This is optimal in the following sense:
-\[
-	\max\left\{\frac{1}{m} \sum_{k = 1}^m \left[\frac{1}{p} \sum_{j = 1}^p \left(\tilde{l}^*_{jk}\right)^4 - \left(\frac{1}{p} \sum_{j = 1}^p \left(\tilde{l}^{*}_{jk}\right)^2 \right)^2\right]\right\},
-\]
-where $\forall j = 1, \dots, p$, $k = 1, \dots, m$, we denote $\tilde{l}^*_{jk} = \frac{\hat{l}^*_{jk}}{\sqrt{\hat{h}_{j}}}$ and $\hat{h}_{j} = \left\|\left(\hat{l}_{j, k}\right)_{k = 1}^{m}\right\|_{2}$ (communality of the $j$\textsuperscript{th} variable).
+We now want to give an interpretation of the common factors in the $m = 5$ solution. It is important to recall that factor loadings are identified up to a rotation. Thus, different rotations yield different factors which lead to different interpretations. A wise choice of the rotation can therefore ease the analysis significantly. 
 
-We try to give a simple explaination of what we are maximizing: first we consider, for each factor $k$, the vector of their square loadings, normalized by the variable communality. We then consider the sample variance of such vectors and we maximize their average over all factors. This procedure tries to concentrate the mass of each column into a few points close to the extremes $0$ and $1$, and doing it "democratically" for all factors. This rotation is optimal to identify which variables are most affected by a specific factor and which are not, which is our main goal. Moreover, is it reasonable that, in doing so, the procedure also disperses the mass \textit{row-wise}, so that each variable is high only on one or few factors. In the following we will favour this type of analysis, putting for each variable more emphasis on the one factor that is most influencial for it.
+In the previous point, when $m = 5$ almost all variables load on the first factor higher than on the other four factors and this makes the factors pretty difficult to interpret. Hence, it makes sense to perform the \texttt{Varimax} rotation, which is optimal to identify which variables are most affected by a specific factor and which are not: in doing so, the procedure disperses the mass \textit{row-wise}, so that each variable loads highly only on one or few factors. In the following we will favour this type of analysis, putting for each variable more emphasis on the one factor that is most influencial for it.
 
 \smallskip
 
@@ -429,10 +424,6 @@ load_5_var = faml_5_var$loadings[, ]
 tmp = as.data.frame(round(load_5_var, 4))
 tmp
 ```
-
-<!-- todo: add plot of factor loadings -->
-
-We choose not to visualize the results in a plot since there are too many factors and variables and therefore it would not have been helpful.
 
 After the rotation, things become a little better: as expected, the loadings are in general smaller or larger than the previous ones, and this facilitates the interpretation of the factors. In particular:
 \begin{enumerate}
@@ -450,7 +441,111 @@ After the rotation, things become a little better: as expected, the loadings are
 
 Finally it is remarkable that the variable $t_{11}$ loads uniformly on the last three common factors, hence it is influenced by them similarly. This could be reasonable taking into account the psychological test associated with the variable (\texttt{code}).  
 
-Before we move to the next step we want to underline that we decided not to fix a threshold value to assess significance of factor loadings. This choice is motivated by the fact that the total sample	variance explained by the $5$ factors is only $`r round(cum_var_5[5] * 100, 2)`\%$. Indeed this leads to the shortage of very high loadings and at the same time allows the presence of variables that have not much influence on any factor. Moreover by doing so we obtained a partition of our variables among the factors (with the only minor exception given by $t_{11}$).
+Before we move to the next step we want to underline that we decided not to fix a threshold value to assess significance of factor loadings. This choice is motivated by the fact that the total sample	variance explained by the $5$ factors is only $`r round(cum_var_5[5] * 100, 2)`\%$. Indeed this leads to the shortage of very high loadings and at the same time allows the presence of variables that have not much influence on any factor. Moreover, by doing so we obtained a partition of our variables among the factors (with the only minor exception given by $t_{11}$).
+
+\textbf{Note}: It is important to point out that in the description above, when we say that a certain common factor "is determined" by some variables, we are referring to its meaning. In fact, Factor Analysis assumes the variables to be linear combinations of the factors, therefore it would be more appropriate to say that it is the factor that actually determines a variable and not vice versa. 
+
+It might be interesting to visualise how much the different variables load on the factors in some of the planes associated to them (two by two). In the figures below we represent the projections of our variables as arrows, by making more evident the ones associated to the variables which give significance to the corresponding factors.
+
+```{r, echo = F, out.width = "90%", fig.asp = 0.5}
+par(mfrow = c(1, 2), mar = c(5, 5, 0, 0), family = "serif")
+rel_var = list(c(5, 6, 7, 8, 9), c(1, 2, 3, 4, 20, 22, 23),
+	c(10, 12, 21, 24), c(14, 15, 16, 17, 18, 19), c(13))
+
+flist = list(c(1, 2), c(1, 3))
+for (var in flist){
+	xf = var[1]
+	yf = var[2]
+	plot(1, type = "n", xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.1), asp = 1,
+		xlab = paste0("Factor", xf), ylab = paste0("Factor", yf))
+	for (i in 1:24){
+		special = i %in% rel_var[[xf]] | i %in% rel_var[[yf]]
+		Arrows(0, 0, load_5_var[i, xf], load_5_var[i, yf],
+			col = alpha("black", 0.2 + 0.8 * special))
+	}
+	for (i in 1:24){
+		if (prod(var == c(1, 2))) {
+			special = i %in% rel_var[[xf]] | i %in% rel_var[[yf]]
+			pos_f = rep(3, 24)
+			pos_f[6] = 1
+			pos_f[7] = 2
+			pos_f[8] = 3
+			pos_f[9] = 4
+			off_f = rep(0.75, 24)
+			off_f[8] = 0.4
+			off_f[23] = 0.3
+			if (special == T) {
+				text(load_5_var[i, xf], load_5_var[i, yf], labels = t[i],
+					pos = pos_f[i], cex = 0.45, offset = off_f[i], col = "red")
+			}
+		}
+		if (prod(var == c(1, 3))) {
+			special = i %in% rel_var[[xf]] | i %in% rel_var[[yf]]
+			pos_f = rep(3, 24)
+			pos_f[6] = 3
+			pos_f[9] = 1
+			off_f = rep(0.75, 24)
+			off_f[6] = 0.4
+			off_f[9] = 0.4
+			if (special == T) {
+				text(load_5_var[i, xf], load_5_var[i, yf], labels = t[i],
+					pos = pos_f[i], cex = 0.45, offset = off_f[i], col = "red")
+			}
+		}
+	}
+}
+```
+
+```{r, echo = F, out.width = "90%", fig.asp = 0.5}
+par(mfrow = c(1, 2), mar = c(5, 5, 0, 0), family = "serif")
+
+flist = list(c(2, 3), c(1, 4))
+for (var in flist){
+	xf = var[1]
+	yf = var[2]
+	plot(1, type = "n", xlim = c(-0.35, 1.2), ylim = c(-0.35, 1.2), asp = 1,
+		xlab = paste0("Factor", xf), ylab = paste0("Factor", yf))
+	for (i in 1:24){
+		special = i %in% rel_var[[xf]] | i %in% rel_var[[yf]]
+		Arrows(0, 0, load_5_var[i, xf], load_5_var[i, yf],
+			col = alpha("black", 0.2 + 0.8 * special))
+	}
+	for (i in 1:24){
+		if (prod(var == c(2, 3))) {
+			special = i %in% rel_var[[xf]] | i %in% rel_var[[yf]]
+			pos_f = rep(3, 24)
+			pos_f[3] = 1
+			pos_f[1] = 4
+			pos_f[2] = 1
+			pos_f[4] = 1
+			off_f = rep(0.75, 24)
+			off_f[7] = 0.4
+			off_f[22] = 0.4
+			if (special == T) {
+				text(load_5_var[i, xf], load_5_var[i, yf], labels = t[i],
+					pos = pos_f[i], cex = 0.45, offset = off_f[i], col = "red")
+			}
+		}
+		if (prod(var == c(1, 4))) {
+			special = i %in% rel_var[[xf]] | i %in% rel_var[[yf]]
+			pos_f = rep(3, 24)
+			pos_f[19] = 4
+			pos_f[14] = 4
+			pos_f[16] = 2
+			pos_f[18] = 2
+			pos_f[7] = 1
+			pos_f[5] = 4
+			off_f = rep(0.75, 24)
+			off_f[8] = 0.4
+			off_f[9] = 0.5
+			if (special == T) {
+				text(load_5_var[i, xf], load_5_var[i, yf], labels = t[i],
+					pos = pos_f[i], cex = 0.45, offset = off_f[i], col = "red")
+			}
+		}
+	}
+}
+```
 
 ## 1.3
 
@@ -491,7 +586,7 @@ Moreover, the covariance matrix turns out to be
 		`r sigma_5_var_reg[2, 1]` & `r sigma_5_var_reg[2, 2]`
 	\end{pmatrix}.
 \end{equation*}
-As we can see from the scatterplot, the correlation is really close to $0$. We should have excepted it since the factors scores are the estimated values of the common factors and in the theoretical model the covariance between any couple of common factors is $0$, which implies that also their correlation is $0$. In particular, the theoretical covariance matrix of the factors is equal to the identity matrix and our estimated covariance matrix is quite close to it: the estimated variance of the second factor is slightly smaller then what it should be, but is still acceptable taking into account that we are considering only $5$ common factors which explain only the $`r round(cum_var_5[5] * 100, 2)`\%$ of the total sample variance.
+As we can see from the scatterplot, the correlation is really close to $0$. We should have expected it since the factors scores are the estimated values of the common factors and in the theoretical model the covariance between any couple of common factors is $0$, which implies that also their correlation is $0$. In particular, the theoretical covariance matrix of the factors is equal to the identity matrix and our estimated covariance matrix is quite close to it: the estimated variance of the second factor is slightly smaller then what it should be, but is still acceptable taking into account that we are considering only $5$ common factors which explain only the $`r round(cum_var_5[5] * 100, 2)`\%$ of the total sample variance.
 
 Finally, in order to analyse better the distribution of our data we decided to display the ellipsoids containing the $95\%$ and the $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with mean the sample mean and covariance matrix the sample covariance matrix (with $n$ number of observations). We can see that the ellipsoids are in fact circles (nearly) which confirms that the first two common factors are jointly normally distributed.
 
@@ -517,9 +612,9 @@ plot(qchisq(ppoints(d), df = ncol(pas)), sort(d), pch = 16,
 abline(0, 1, col = "green")
 ```
 
-The Chi-squared Q-Q plot of the Mahalanobis distance shows that almos all the points lie on Q-Q line. Hence, we can say that the sum of the squares of our variables $(t_1, \dots, t_{24})$ is $\chi_{24}^2$ distributed and so our variables can be considered jointly distributed as a multivariate gaussian.
+The Chi-squared Q-Q plot of the Mahalanobis distance shows that almos all the points lie on Q-Q line. Hence, we can say that the sum of the squares of our variables $(t_1, \dots, t_{24})$ is $\chi_{24}^2$-distributed and so our variables can be considered jointly distributed as a multivariate gaussian.
 
-As we did for the Grant-White students we double-check our result for the Pasteur students exploiting the Mardia test.
+As we did for the Grant-White students we double-check our result for the Pasteur students by exploiting the Mardia test.
 
 \smallskip
 ```{r}
@@ -532,7 +627,7 @@ test_pas$multivariateNormality$result = tolower(test_pas$multivariateNormality$r
 test_pas$multivariateNormality
 ```
 
-As before the data initially fails the test but by removing the most extreme outlier (i.e. the $43$\textsuperscript{rd} student) we obtain:
+As before the data initially fail the test but by removing the most extreme outlier (i.e. the $43$\textsuperscript{rd} student) we obtain:
 
 <!-- 
 \vspace{-20pt}
@@ -572,7 +667,11 @@ faml_5_pas = factanal(pas, factors = 5, rotation = "varimax")
 load_5_pas = faml_5_pas$loadings[, ]
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(round(load_5_pas, 4))
+tmp = as.data.frame(round(load_5_pas[1:17, ], 4))
+tmp
+```
+```{r, echo = F, render = lemon_print}
+tmp = as.data.frame(round(load_5_pas[18:24, ], 4))
 tmp
 ```
 
@@ -581,25 +680,25 @@ In the analysis of the factor loadings we adopt the same strategy as before: we 
 	\item	
 		the first factor is determined by the same $5$ variables as before, namely $t_5, t_6, t_7, t_8$ and $t_9$. Therefore, it can be interpreted in the exact same way, which is \textit{verbal ability};
 	\item
-		as in the previous point, the second factor is influenced by the same $7$ variables as before, that are the ones from $t_1$ to $t_4$ togheter with $t_{20}$, $t_{22}$ and $t_{23}$. Hence, we can assign to the second factor the same label: \textit{logical and spatial ability};
+		as in point $1.2$, the variables from $t_1$ to $t_4$ togheter with $t_{20}$, $t_{22}$ and $t_{23}$ are mostly influenced by the second factor. Hence, we can assign to the second factor the same label: \textit{logical and spatial ability};
 	\item
-		the third factor is determined by the variables from $t_{14}$ to $t_{19}$. These same variables previously formed the fourth common factor, hence there was just an exchange of order between the factors. We interpret it as \textit{recognition and association ability};
+		the third factor is determined by the variables from $t_{14}$ to $t_{19}$. These same variables previously "formed" the fourth common factor, hence there was just an exchange of order between the factors. We interpret it as \textit{recognition and association ability};
 	\item
-		the variables from $t_{11}$ to $t_{13}$ form the fourth common factor. The tests associated to these variables are respectively \textit{code}, \textit{counting dots} and \textit{straight-curved capitals} which are related to quick visualization skills. We label it \textit{quick visualization/speed ability};
+		the variables from $t_{11}$ to $t_{13}$ "form" the fourth common factor. The tests associated to these variables are respectively \textit{code}, \textit{counting dots} and \textit{straight-curved capitals} which are related to quick visualization skills. We label it \textit{quick visualization/speed ability};
 	\item 
-		finally the last factor is influenced by the variables $t_{10}$, $t_{21}$ and $t_{24}$ which previously formed the third common factor together with the variable $t_{12}$. Despite the absence of $t_{12}$ the factor has not lost its meaning, therefore we interpret it as \textit{numerical/mathematical ability}.
+		finally the last factor is determined by the variables $t_{10}$, $t_{21}$ and $t_{24}$ which previously "formed" the third common factor together with the variable $t_{12}$. Despite the absence of $t_{12}$ the factor has not lost its meaning, therefore we interpret it as \textit{numerical/mathematical ability}.
 \end{enumerate}
 
 A necessary remark is that the new factors can be viewed as a permutation of the ones we have obtained for the Grant-White students data, but we need to specify that the variable $t_{12}$ moved from the third to the fifth factor (without following the permutation) and that, unlike before, we now menage to give an abstract meaning to all the common factors.
 
-For the sake of completeness, we report the permutation of the factors in compact form:
+For the sake of completeness, we report the permutation of the factors in a compact form:
 \[
 	\sigma \in S_5, \text{ such that } \sigma(4) = 3, \sigma(3) = 5, \sigma(5) = 4.
 \]
 
 ## 1.5
 
-We have already made the scatterplot of the first two factor scores from the rotated MLFA solution for the Grant-School in the point 1.3. We now follow the exact same procedure for the Pasteur school and than we make a comparison between the results. 
+We have already made the scatterplot of the first two factor scores from the rotated MLFA solution for the Grant-School in the point 1.3. We now follow the exact same procedure for the Pasteur school and than make a comparison between the results. 
 
 \smallskip
 ```{r}
@@ -628,22 +727,21 @@ c = -d * mu_5_pas_reg[1] + mu_5_pas_reg[2]
 abline(c, d, lwd = 1, lty = 2)
 ```
 
-As for the Grant-White students data it seems there is no particular correlation between the two factors. 
-The correlation between the factors is $`r round(cor(score_5_pas_reg[, 1], score_5_pas_reg[, 2]), 3)`$ and the covariance matrix is
+As for the Grant-White students data it seems there is no particular correlation between the two factors. In particular, the correlation between the factors is $`r round(cor(score_5_pas_reg[, 1], score_5_pas_reg[, 2]), 3)`$ and the covariance matrix is
 \begin{equation*}
 	\boldsymbol{\Sigma}_{\rm{fs}} = \begin{pmatrix}
 		`r sigma_5_pas_reg[1, 1]` & `r sigma_5_pas_reg[1, 2]` \\
 		`r sigma_5_pas_reg[2, 1]` & `r sigma_5_pas_reg[2, 2]`
 	\end{pmatrix}.
 \end{equation*}
-Again the factors appears to be jointly normally distributed: almost every point (except for $1$) falls inside the ellipsoid which is supposed to  contain $\frac{n - 0.5}{n}\%$ of the mass under a multivariate normal with the sample covariance matrix as covariance matrix and centre in the sample mean.
+Again the factors appear to be jointly normally distributed: almost every point (except for $1$) falls inside the ellipsoid which is supposed to  contain $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with the sample covariance matrix as covariance matrix and centre in the sample mean.
 
 Note also that this covariance matrix is closer to the identity matrix then the previous one, however the gap between the variances of the first two factors still holds.
 
-We now analyse the same scatterplots by grouping the data according to some of the initial variables of the dataset \texttt{psych} that we have not used in the factor analysis because they did not represent any psychological test, namely \textit{sex} and \textit{age}.
-Our aim is to see if we can extract any significant relationship between the groups and the results of the tests.
+We now analyse the same scatterplots by grouping the data according to some of the initial variables of the dataset \texttt{psych} that we have not used in the factor analysis as they did not represent any psychological test, namely \textit{sex} and \textit{age}.
+Our aim is to see if we can extract any significant relationship between the groups and the cognitive skills of the individuals componing them.
 
-We first group the students according to the variable sex.
+We first group the students according to the variable \textit{sex}.
 
 \smallskip
 ```{r}
@@ -662,15 +760,17 @@ mu_gw_sexm = colMeans(score_5_var_reg[sex_gw == "m", 1:2])
 mu_gw_sexf = colMeans(score_5_var_reg[sex_gw == "f", 1:2])
 ```
 
-In the following plots the blue points (\textcolor{blue}{$\blacksquare$}) refer to male students while the red ones (\textcolor{red}{$\blacksquare$}) to the female students. We also plot the respective mean points of the two groups with bigger dots (with the same colors). The ellipses cover the $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with means the sample means and covariance matrix the sample covariance matrix.
+In the following plots the blue points (\textcolor{blue}{$\blacksquare$}) refer to male students while the red ones (\textcolor{red}{$\blacksquare$}) to female students. We also plot the respective mean points of the two groups with bigger dots (with the same colors). The ellipses cover the $\frac{n - 0.5}{n}\%$ of the mass of a gaussian distribution with mean the sample mean and covariance matrix the sample covariance matrix.
 
-```{r, echo = F, fig.align = "center", fig.asp = 0.5}
-par(mfrow = c(1, 2), mar = c(2, 2, 3, 1), family = "serif", cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
+```{r, echo = F, fig.asp = 0.5}
+par(mfrow = c(1, 2), mar = c(3, 3, 3, 0), family = "serif", cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
 
 plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = (dim_pas[1] - 0.5) / dim_pas[1]),
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3.1, 3.1),
 	main = "Pasteur")
+title(ylab = "Logical/spatial ability", xlab = "Verbal ability",
+	line = 2)
 points(score_5_pas_reg[, 1], score_5_pas_reg[, 2], pch = 16, cex = 0.5, col = col_pa)
 b = -eig_pas_reg$vectors[1, 2] / eig_pas_reg$vectors[2, 2]
 a = -b * mu_5_pas_reg[1] + mu_5_pas_reg[2]
@@ -685,6 +785,8 @@ plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = (dim_gws[1] - 0
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3, 3),
 	main = "Grant-White")
+title(ylab = "Logical/spatial ability", xlab = "Verbal ability",
+	line = 2)
 points(score_5_var_reg[, 1], score_5_var_reg[, 2], pch = 16, cex = 0.5, col = col_gw)
 b = -eig_var_reg$vectors[1, 2] / eig_var_reg$vectors[2, 2]
 a = -b * mu_5_var_reg[1] + mu_5_var_reg[2]
@@ -696,9 +798,9 @@ points(mu_gw_sexm[1], mu_gw_sexm[2], pch = 16, cex = 1, col = "blue")
 points(mu_gw_sexf[1], mu_gw_sexf[2], pch = 16, cex = 1, col = "red")
 ```
 
-According to the scatterplots female and male students among both schools appears to share almost the same verbal skills, but in both cases male students seems to score higher in the second factor (\textit{logical/spatial ability}). 
+According to the scatterplots, female and male students of both schools appear to share almost the same verbal skills, but in both cases male students seems to score higher in the second factor (\textit{logical/spatial ability}). 
 
-Then we group the students by age, separing the younger ones (\textcolor{purple}{$\blacksquare$}) (with age $< 13$) from the olders (\textcolor{darkgreen}{$\blacksquare$}).
+Then we group the students by age, separing the younger ones (\textcolor{purple}{$\blacksquare$}) (with age $< 13$) from the older ones (\textcolor{darkgreen}{$\blacksquare$}).
 
 \smallskip
 ```{r}
@@ -718,12 +820,14 @@ mu_gw_age2 = colMeans(score_5_var_reg[age_gw >= 13, 1:2])
 ```
 
 ```{r, echo = F, fig.align = "center", fig.asp = 0.5}
-par(mfrow = c(1, 2), mar = c(2, 2, 3, 1), family = "serif", cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
+par(mfrow = c(1, 2), mar = c(3, 3, 3, 1), family = "serif", cex.axis = 0.75, cex.lab = 0.75, cex.names = 0.75)
 
 plot(ellipse(x = sigma_5_pas_reg, centre = mu_5_pas_reg, level = (dim_pas[1] - 0.5) / dim_pas[1]),
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3.1, 3.1),
 	main = "Pasteur")
+title(ylab = "Logical/spatial ability", xlab = "Verbal ability",
+	line = 2)
 points(score_5_pas_reg[, 1], score_5_pas_reg[, 2], pch = 16, cex = 0.5, col = col_pa)
 b = -eig_pas_reg$vectors[1, 2] / eig_pas_reg$vectors[2, 2]
 a = -b * mu_5_pas_reg[1] + mu_5_pas_reg[2]
@@ -738,6 +842,8 @@ plot(ellipse(x = sigma_5_var_reg, centre = mu_5_var_reg, level = (dim_gws[1] - 0
 	col = "black", type = "l", asp = 1,
 	xlim = c(-2.5, 2.5), ylim = c(-3, 3),
 	main = "Grant-White")
+title(ylab = "Logical/spatial ability", xlab = "Verbal ability",
+	line = 2)
 points(score_5_var_reg[, 1], score_5_var_reg[, 2], pch = 16, cex = 0.5, col = col_gw)
 b = -eig_var_reg$vectors[1, 2] / eig_var_reg$vectors[2, 2]
 a = -b * mu_5_var_reg[1] + mu_5_var_reg[2]
@@ -749,7 +855,7 @@ points(mu_gw_age1[1], mu_gw_age1[2], pch = 16, cex = 1, col = "purple")
 points(mu_gw_age2[1], mu_gw_age2[2], pch = 16, cex = 1, col = "darkgreen")
 ```
 
-For the Grant-White students we basically cannot see any particular difference between the distributions of the two groups: the mean points are very close. As for the Pasteur students we get that they score similarly on the second factor (\textit{logical/spatial ability}) while there is a little difference in the first common factor in favour of the younger students. Since we do not know any additional information about the students and about the exact structure on the psychological tests we are not able to say whether it does make sense or not.
+For the Grant-White students we basically cannot see any particular difference between the distributions of the two groups: the mean points are very close. As for the Pasteur students, we get that they score similarly on the second factor (\textit{logical/spatial ability}) while there is a little difference in the first common factor in favour of the younger students. Since we do not have any additional information about the students and about the exact structure of the psychological tests we are not able to say whether it does make sense or not.
 
 \newpage
 
@@ -798,7 +904,7 @@ The Linear Discriminant Analysis (LDA) technique relies on the assumption that e
 We look at the Q-Q plot of the squared Mahalanobis distances \textit{vs} a $\chi_{16}^2$ for each different class.
 
 \smallskip
-```{r, echo = F, fig.align = "center", out.width = "100%"}
+```{r, echo = F, fig.align = "center", out.width = "100%", fig.asp = 0.9}
 sub_digits = list()
 for (i in 1:10){
 	sub_digits[[i]] = pendigits[pendigits[, 17] == (i - 1), 1:16]
@@ -825,7 +931,6 @@ Let us first note that we removed the digit $4$ from our analysis. This is becau
 This definition still holds if $\boldsymbol{X} = (\boldsymbol{Y}, 0)$ with $\boldsymbol{Y}$ multivariate gaussian, indeed the idea is that a constant random variable $c$ can be considered a $\normal{c}{0}$. 
 Thus, for the digit $4$, we test the normality assumption by just removing the last variable (\texttt{y\_8}).
 
-\smallskip
 ```{r, echo = F, fig.align = "center", out.width = "60%"}
 par(family = "serif")
 sub_digits_5_var = sub_digits[[5]][, 1:15]
@@ -881,27 +986,13 @@ mat = format(mat, scientific = F)
 	\end{pmatrix}
 \]
 
-\smallskip
+\pagebreak
 
 As we can see, the covariance matrices seem pretty far from being similar: the entries of the matrix $M$ are very large, in particular the ones corresponding to the sixth row.
 
-The fact that our classes do not appear to be normally distributed and not to have similar covariance matrices does not compromise the applicability of the LDA, since these assumptions are only required for an optimal solution.
+The fact that our classes do not appear to be normally distributed and not to have similar covariance matrices does not compromise the applicability of the LDA, since these assumptions are only required for an optimal solution. Indeed under these assumptions the LDA classifier is the Bayes classifier, thus is optimal.
 
-We now apply the LDA procedure (already implemented in \texttt{R}). It identitifies recursively $9$ discriminant variables from the $10$ classes. 
-
-<!-- todo: adjust + add most distant centroids -->
-The linear discriminant classifier can be obtained from two alternative derivation. Both consider each group as sample from distributions with the same variance - thus we speak of \textit{pooled variance}. 
-The first derivation further assumes that, for all groups, data are distributed as multivariate gaussian, with different means (the \textit{centroids}) and pooled covariance matrix. Under this assumption, the LDA classifier is the bayes classifier and thus is optimal.
-If we now relax the assumption of gaussianity, the centroids and the pooled covariance matrix $\boldsymbol{\Sigma}_{X}$ do not fully identity the distribution within each group anymore. However, we can still recover the LDA classifier as solution to a different problem. Consider the matrix 
-\[
-	\boldsymbol{B}_{X} \coloneqq \frac{1}{K} \sum_{j = 1}^K (\mu_{X, j} - \mu_X) (\mu_{X, j} - \mu_X)^T,
-\]
-which we call between-class sum of cross product, or simply between class variance, as it can also be seen as the sample variance of the vector of centroids $\left(\mu_{x, j}\right)_{j = 1}^K$. We want to determine a linear combination of the original $p$ variables, such that observations coming from different groups are maximally distanced. Consider thus $\rm{LD1} \coloneqq a X$. Along this direction each group has respectively mean $\mu_{\rm{LD1}, j} = a \mu_{X, j}$ and variance $\boldsymbol{\Sigma}_{\rm{LD1}} = a^T \boldsymbol{\Sigma}_{X} a$. We therefore look for the direction $a$ that maximes the between class variance holding the within class variance constant:
-\[
-	a \coloneqq \argmax{\frac{\var{\left(\mu_{\rm{LD1}, j}\right)_{j = 1}^K}}{\var{\rm{LD1}}}} = \argmax{\frac{\boldsymbol{B}_{LD1}}{\boldsymbol{\Sigma}_{\rm{LD1}}}} = \argmax{\frac{a^T \boldsymbol{B}_{X} a}{a^T \boldsymbol{\Sigma}_{X} a}}.
-\] 
-We can simplify the problem by first sphering the data. It becomes equivalent to determining the direction that maximizes the operator norm of the the matrix $\boldsymbol{\Sigma}_{X}^{-\frac{1}{2}} \boldsymbol{B}_{X} \boldsymbol{\Sigma}_{X}^{-\frac{1}{2}}$, i.e. identifying the unit eigenvector associated to its largest eigenvalue.
-We call the variable LD1 first discriminant variable. Suppose now to iterate this problem looking for LD2 in the subspace of the span of the $p$ variables orthogonal to LD1. The solution will be the unit eigenvector associated with the second largest eigenvalues (counted with multiplicity). If we iterate this procedure, restricting at each step to the ortoghonal to the span of the previous linear discriminant variables, we can get $K - 1$ ortoghonal discriminant variables.
+We now apply the LDA procedure (already implemented in \texttt{R}). It identitifies recursively from the $10$ classes $9$ linear combinations of the original variables, the so-called discriminant variables, such that in the subspace generated by them the observations coming from different groups are maximally distanced. Indeed, the aim of LDA is to find a projection that maximises class separation while minimising the within class variance.
 
 \smallskip
 ```{r}
@@ -924,7 +1015,9 @@ for (i in 1:10){
 	covariances[[i]] = cov(pred$x[pendigits[, 17] == (i - 1), ])
 }
 ```
-\vspace{10pt}
+
+\pagebreak
+
 \begin{center}
 	\begin{tabular}{ c | c c c c c c c c c c }
 		\texttt{digit} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
@@ -970,6 +1063,8 @@ By doing so, we get the $10 \times 2$ matrix \texttt{centroids\_other}, which is
 We can now comment the scatterplot. By looking at it, we can say that although the centroids are separated from one another (more or less distant), there is a considerable overlap between the classes. In particular, the ones corresponding to the digits $3$ (\textcolor{`r paste(lookup[3 + 1])`}{$\blacksquare$}), $5$ (\textcolor{`r paste(lookup[5 + 1])`}{$\blacksquare$}), $1$ (\textcolor{`r paste(lookup[1 + 1])`}{$\blacksquare$}) and $9$ (\textcolor{`r paste(lookup[9 + 1])`}{$\blacksquare$}) seem to be the most difficult to discriminate as they mix with almost all the others.
 
 In order to have a better understanding of how much the classes overlap we add to the previous plot the ellipses covering the $95\%$ of the mass of a gaussian distribution with means the centroids and covariance matrix the sample covariance matrix, for each of the $10$ classes.
+
+\vspace{10pt}
 
 \begin{center}
 	\begin{tabular}{ c | c c c c c c c c c c }
@@ -1025,7 +1120,7 @@ In particular, the blank squares correspond to zeros.
 ```{r}
 conf_mat = confusion_matrix(targets = pendigits$digit, predictions = pred$class)
 ```
-```{r, echo = F, fig.align = "center", out.width = "150%"}
+```{r, echo = F, fig.align = "center", out.width = "90%"}
 plot_confusion_matrix(conf_mat$"Confusion Matrix"[[1]],
 	class_order = as.character(9:0), add_normalized =  F,
 	palette = "Green",
@@ -1083,7 +1178,7 @@ We obtain the following confusion matrix
 ```{r, }
 conf_mat_cv = confusion_matrix(targets = pendigits$digit, predictions = lda_cv$class)
 ```
-```{r, echo = F, fig.align = "center", out.width = "150%"}
+```{r, echo = F, fig.align = "center", out.width = "90%"}
 plot_confusion_matrix(conf_mat_cv$"Confusion Matrix"[[1]],
 	class_order = as.character(9:0), add_normalized =  F,
 	palette = "Blue",
@@ -1093,6 +1188,8 @@ plot_confusion_matrix(conf_mat_cv$"Confusion Matrix"[[1]],
 	font_col_percentages = font(size = 2, family = "serif")) +
 	theme(text = element_text(size = 11,  family = "serif"))
 ```
+
+\pagebreak
 
 and the following \textit{LOOCV error rate}
 
@@ -1206,7 +1303,7 @@ We implemented the following procedures by using the libraries \texttt{MASS}, \t
 	\item
 		\textit{Noised QDA} - since the actual \textit{Quadratic Discriminant Analysis} cannot be performed (there is a rank deficiency in the group corresponding to the digit $4$), we decided to add some noise to the values of the variable \texttt{y\_8} of the observations belonging to the class $4$. For the sake of completeness, we report below also the unsuccessful attempt of the QDA computation together with the \texttt{R} error message;
 	\item
-		\textit{RDA} - \textit{Regularized Discriminant Analysis}, i.e. a sort of a trade-off between LDA and QDA. We choose as parameters $\gamma = 0$ and $\lambda = 0.2$;
+		\textit{RDA} - \textit{Regularised Discriminant Analysis}, i.e. a sort of a trade-off between LDA and QDA. We choose as parameters $\gamma = 0$ and $\lambda = 0.2$;
 	\item
 		\textit{RF} - \textit{Random Forest}, i.e. a classification method that combines multiple decision trees to make predictions by aggregating the results. It exploits random sampling of data and features to create different trees and improves accuracy while mitigating overfitting.
 \end{enumerate}
@@ -1374,7 +1471,7 @@ error_mat[, "Noised_QDA"] = c(train_error, test_error, cv_error)
 
 \smallskip
 ```{r}
-# RDA (regularized discriminant analysis)
+# RDA (regularised discriminant analysis)
 
 train_error = 0
 test_error = 0
@@ -1428,17 +1525,18 @@ Before displaying the table containining the various error rates we report the p
 \vspace{-40pt}
 ```{r, echo = F, fig.align = "center", out.width = "90%"}
 par(family = "serif")
-plot(x = seq(1, max_k, 2), y = test_errors,
+plot(x = seq(1, max_k, 2), y = train_errors,
 	type = "b", pch = 16, col = "blue",
 	ylim = c(0, max(max(test_errors), max(train_errors)) * 1.1),
 	xlab = "N. neighbours", ylab = "Errors", lwd = 0.5)
-lines(x = seq(1, max_k, 2), y = train_errors,
+lines(x = seq(1, max_k, 2), y = cv_errors,
 	type = "b", pch = 16, col = "red", lwd = 0.5)
-legend("bottomright", legend = c("test_errors", "train_errors", "cv_errors"),
+legend("bottomright",
+	legend = c("train_errors", "cv_errors"),
 	col = c("blue", "red"), pch = rep(16, 3), rep(1, 3))
 ```
 
-By looking at the plot, we can see that both errors increase as the number of neighbours $K$ increases. In particular, for both errors the minimum is attained in $K = 1$. It is also remarkable that with $K = 3$ the \textit{44-fold CV error rate} is the same as the one corresponding to $K = 1$, although the \textit{training error rate} is of course larger (trivially because for $K = 1$ it is $0$). However, we still prefer $K = 3$ as optimal choice since the model gives a more robust and reliable prediction than the one with $K = 1$.
+By looking at the plot, we can see that both errors increase as the number of neighbours $K$ increases: the only exeption is given by $K = 3$. In particular, the \textit{training error rate} reaches the minumum in $K = 1$ (trivially because for $K = 1$ it is $0$), while for the \textit{44-fold CV error rate} the minumum is attained in $K = 3$. Despite the training \textit{training error rate} being larger we prefer $K = 3$ as optimal choice since the model gives a more robust and reliable prediction than the one with $K = 1$.
 
 We now display the table with the various error rates.
 
