@@ -1,136 +1,84 @@
-setwd("C:/Users/utente/Dropbox/PC/Documents/Master/Multivariate/Problem sets/problemset_2")
-library(MASS)
-library(cvms)
-library(dplyr)
-rm(list=ls())
-pendigits<-read.table("data/pendigits.txt", sep=",",head=F)
-names(pendigits)<-c(paste0(rep(c("x","y"),8),rep(1:8,each=2)),"digit")
-lookup<-c("darkgreen",  "brown", "lightblue",  "magenta", "purple", 
-                     "blue", "red", "lightgreen", "orange", "cyan")
-names(lookup)<-as.character(0:9)
-digit.col<-lookup[as.character(pendigits$digit)]
-prop.dig = as.vector(table(pendigits$digit)) / sum(as.vector(table(pendigits$digit)))
+###########################################
+#######   KNN classifier  #################
+###########################################
 
-##################### Point 1  #####################################################
-lda.fit <- lda(digit ~.,data = pendigits, prior = prop.dig)
-lda.fit$scaling
-pred <- predict(lda.fit)
-ftld <- as.matrix(pred$x)[,1:2] #creating a dataset with the first two linear discriminant variables
-plot(LD2~LD1, data=ftld, asp=1, pch=16,col=digit.col)
-# The most difficult to discriminate are brown = 1, blue = 5, and cyan = 9 
-conf_mat <- confusion_matrix(targets = pendigits$digit, predictions = pred$class)
-plot_confusion_matrix(conf_mat$`Confusion Matrix`[[1]], class_order = as.character(9:0),
-                      add_normalized = FALSE, palette = 'Green')
-# Indeed it is conspicuous that the worst performance are indeed in classifying ones and fives. 
-# Also nines are classified quite poorly. Surprisingly, also eights are classified quite badly.
-# In particular they are classified even worsly than nines. 
-
-lda.CV <- lda(digit ~.,data = pendigits, CV =T)
-conf_mat_cv <- confusion_matrix(targets = pendigits$digit, predictions = lda.CV$class)
-conf_mat$`Overall Accuracy` - conf_mat_cv$`Overall Accuracy`
-# Indeed accuracy is slightly higher in train missclassification error. But only by 0.1%, this is surprising
-
-plot_confusion_matrix(conf_mat$`Confusion Matrix`[[1]], class_order = as.character(9:0), add_normalized = FALSE, palette = 'Green')
-
-##############à digression: checking orthogonality of ld vars ##########
-ld = as.matrix(pendigits[,-17])%*% as.matrix(lda.fit$scaling)
-round(var(ld), 12)
-########################################################################
-
-################ Point 2 ##################################
-
-groupCV<-rep(1:44, each=250)
-groupCV<-groupCV[1:length(pendigits$digit)]
-
-start_time <- proc.time()
-pendigits$groupCV = groupCV
-cv = c()
-for(k in 1:10){
-    i <- 1
-    train <- filter(pendigits, groupCV != i)
-    test <- filter(pendigits, groupCV == i)
-    model <- lda(digit~.,train, prior = prop.dig)
-    pred <- predict(model,test, dimen = k)
-    data = cbind(test$digit,pred$class)
-    for(i in 2:44){
-        train <- filter(pendigits, groupCV != i)
-        test <- filter(pendigits, groupCV == i)
-        model <- lda(digit~.,train, prior = prop.dig)
-        pred <- predict(model,test, dimen = k)
-        data = rbind(data, cbind(test$digit,pred$class)) 
+set.seed(2023)
+m <- 9
+n <- ceiling(m/2)
+train_err_m <- matrix(rep(0, n*44), ncol = 44)
+test_err_m <-matrix(rep(0, n*44), ncol = 44)
+for(j in 1:44){
+    train <- pendigits[-which(group_cv ==j),]
+    test <- pendigits[-which(group_cv !=j),]
+    x_train <- select(train, -digit)
+    x_test <- select(test, -digit)
+    y_train <- train$digit
+    y_test <- test$digit
+    for(i in 1:n){
+        train_pred <- knn(x_train, x_train, y_train, 2*i-1)
+        train_err_m[i,j] <- 1 - mean(train$digit == train_pred)
+        test_pred <- knn(x_train, x_test, y_train, 2*i-1)
+        test_err_m[i,j] <- 1 - mean(test$digit == test_pred)
     }
-    cvk = 1 - mean(test$digit == pred$class)
-    cv = c(cv, cvk)
 }
-end_time <- proc.time()
-elapsed_time <- end_time - start_time
-print(elapsed_time)  
-plot(1:length(cv), cv, xlab = "Discriminant variables used", ylab = "CV test error rate", pch = 21)
-# The error is minimized with 8 variables. However these estimates potentially don't expolit all the information in the sample (loocv could be more accurate), and on top of that the sample information is limited. In synthesis as the margin of improvement of 8 is by a small amount, it might as well be preferable by parsimony principle (?) to only use 6 discriminant variables in order to avoid overfitting.
-# This procedure run in approximately 30 seconds. This means that loocv which fits 250 times more models would take approximately 2 hours, which is not prohibitive. I could launch it during a break.   
+train_err <- rowMeans(train_err_m)
+test_err <- rowMeans(test_err_m)
+train_err
+test_err
+plot(x = seq(1,m,2), y= train_err,type = "b", pch=16, col = "blue", xlab = "Number of nieghboors", ylab = "Error rate", lwd = 0.5, ylim = c(0, max(max(test_err),max(train_err))*1.1))
+lines(x = seq(1,m,2), y=test_err, lwd = 0.5,type = "b", pch=16, col = "red")
+# Plot them? Show them as dataframe?
 
-
-######################## LOOCV alternative. Don't launch it by mistake! #############
-
-# pendigits$groupCV <- NULL
-# n = nrow(pendigits)
-# cv = c()
-# for(k in 1:10){
-#     cvk = 0
-#     for(i in 1:n){
-#         train <- pendigits[-i,]
-#         test <- pendigits[i,]
-#         model <- lda(digit~.,train, prior = prop.dig)
-#         pred <- predict(model,test, dimen = k)
-#         cvk = cvk + as.integer(pred$class == test$digit)
-#     }
-#     cvk = 1 - cvk/n
-#     cv = c(cv, cvk)
-# }
-# cv
-# 
-# 0.5452147 0.3241448 0.2530932 0.2156114 0.1644833 0.1410116 0.1340975 0.1252729 0.1241812 0.1241812
-
-
-#########################################################################################
+## Now I would like to plot the knn boundaries in the first two linear discriminant basis
 
 
 
 
+#############################################
+#########   QDA classifier   ################
+#############################################
 
+# Imputating for as y8 (which is constantly 0) random sample from uniform[0,1]
+count_4 <- dim(filter(pendigits, digit == 4))[1]
+dig_4 <- which(pendigits$digit == 4)
+pendigits$y8[dig_4] <- runif(count_4)
+qda_base <- qda(digit~.,pendigits)
+pred <- predict(qda_base, pendigits)
+train_err <- 1 - mean(pred$class == pendigits$digit)
+paste0(round(mean(train_err),4)*100, '%')
 
-######################################################################
-# Little digression for personal study: we can get two equivalent derivations for LDS (apparently)
-# The first one is pretty straightforward. Consider the the posterio P(G = g|X =x) where priors are estimated by sample frequencies of classes
-# and X|G=g is normal with mean in the centroid of class g and pooled variance matrix equal for all g's. We will choose one over another if it has 
-# higher posterior probability, i.e. if the ratio against alternative is > 1, i.e. if log of odds is positive. Therefore we can use as discriminant functions
-# \delta_g the log of this posterior discounted of the additive constant that does not depend on g.
-
-# Another equivalent result is given by Fisher derivation. He also assumes that Var(X | G = g) is constant, however he does not assume specifically data to be
-# normally distributed. Groups have different means. (If data were normal, moreover, as variance is in common, such mean would completely identify the distribution)
-# Therefore in some sense such means (the centroids) identify the distribution (completely under normality, up to second order in general). We thus care about 
-# determining the correlation structure of such centroids, i.e. the matrix B. We want to determine a subspace (so a projection vector a), which discriminates maximally 
-# this "between variance". helding constant the "within variance". 
-
-#########################################################################
-
-
-# KNN
-set.seed(123)
-
-k <- 1
-vars <- select(pendigits, -digit)
-cl <- pendigits$class
-pred <- knn(train = vars, test = vars, cl = pendigits$digit, k)
-err <- 1 - mean(pendigits$digit == pred)
-err
-
-err = c()
+test_err <- rep(0, 44)
 for(i in 1:44){
-    train <- filter(pendigits, groupCV != i)
-    test <- filter(pendigits, groupCV == i)
-    pred <- knn(train = select(train, -digit), test = select(test, -digit), cl = train$digit, k)
-    erri <- 1 - mean(test$digit == pred)
-    err = c(err, erri)
+    train <- filter(pendigits, group_cv != i)
+    test <- filter(pendigits, group_cv == i)
+    model <- qda(digit~.,train)
+    pred <- predict(model, test)
+    test_err[i] <- 1 - mean(pred$class == test$digit)
 }
-paste0(round(mean(err)*100,2), "%")
+paste0(round(mean(test_err),4)*100, '%')
+
+#################################################
+#####   Regularized QDA   #######################
+#################################################
+
+# library(caret)
+# x <- select(pendigits, -digit)
+# y <- pendigits$digit
+# qda_reg <- train(x, y, method="qda")
+
+# Rem: alpha = 0 is LDA
+library(rda)
+x <- t(as.matrix(select(pendigits, -digit)))
+y <- pendigits$digit
+qda_reg <- rda(x, y, alpha = seq(0, 0.99, len = 5), delta = 0)
+names(qda_reg)
+
+#################################################
+######  SVM   ###################################
+#################################################
+
+library(e1071)
+model <- svm(digit ~ ., data = pendigits, kernel = "radial", cost = 1, gamma = 0.1)
+pred <- predict(model, newdata = select(pendigits,-digit))
+train_err <- 1 - mean(as.numeric(pendigits$digit) == round(pred))
+train_err

@@ -36,7 +36,7 @@ output:
     - \renewcommand{\epsilon}{\varepsilon}
     - \newcommand{\smallskipm}{\vspace{-12pt}}
     - \newcommand{\figurespace}{\vspace{-40pt}}
-    - \newcommand{\jointables}{\vspace{-24.80pt}} # todo: fix
+    - \newcommand{\jointables}{\vspace{-24.80pt}}
 ---
 
 ```{r setup, include = FALSE}
@@ -46,9 +46,9 @@ knitr::opts_chunk$set(message = F, warning = F)
 library(lemon)
 
 # set working directory
+setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
+# setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
 # setwd("c:/Users/utente/Dropbox/PC/Documents/GitHub/msa_problem_sets/problem_set_2")
-setwd("D:/Università/SDS/Multivariate statistical analysis/problemset_2/problemset_2")
-#setwd("C:/Users/franc/Documents/github/msa_problem_sets/problem_set_2")
 
 # libraries
 library(corrplot)
@@ -57,8 +57,12 @@ library(ellipse)
 library(MASS)
 library(cvms)
 library(ggplot2)
-# library(purrr)
+library(class)
+library(klaR)
+library(randomForest)
 ```
+
+<!-- todo: impaginazione -->
 
 # Exercise 1
 
@@ -402,9 +406,9 @@ In conclusion, both choices are acceptable, but in some sense inaccurate. The im
 
 ## 1.2
 
+<!-- todo: adjust -->
 We now want to give an interpretation to the common factors in the $m = 5$ solution. It is important to recall that factor loadings are identified up to a rotation. Thus, different rotations yield different factors which lead to different interpretations. A wise choice of the rotation can therefore ease the analysis significantly. For example, in the previous point,
 when $m = 5$ almost all variables load on the first factor higher than on the other four factors, revealing that the \textit{uniqueness condition} through which the model was fit yields a poor choice of the rotation as for the understanding the factors. It is preferable to perform instead the \texttt{Varimax} rotation. It identifies the rotation matrix $\boldsymbol{T}$, thus the rotated loadings $\hat{\boldsymbol{L}}^* = \hat{\boldsymbol{L}} \boldsymbol{T}$. This is optimal in the following sense:
-<!-- Remark: I forgot to correct the l_jk^2 by their respective communalities h_j.  -->
 \[
 	\max\left\{\frac{1}{m} \sum_{k = 1}^m \left[\frac{1}{p} \sum_{j = 1}^p \left(\tilde{l}^*_{jk}\right)^4 - \left(\frac{1}{p} \sum_{j = 1}^p \left(\tilde{l}^{*}_{jk}\right)^2 \right)^2\right]\right\},
 \]
@@ -583,7 +587,7 @@ In the analysis of the factor loadings we adopt the same strategy as before: we 
 	\item
 		the variables from $t_{11}$ to $t_{13}$ form the fourth common factor. The tests associated to these variables are respectively \textit{code}, \textit{counting dots} and \textit{straight-curved capitals} which are related to quick visualization skills. We label it \textit{quick visualization/speed ability};
 	\item 
-		finally the last factor is influenced by the variables $t_{10}$, $t_{21}$ and $t_{23}$ which previously formed the third common factor together with the variable $t_{12}$. Despite the absence of $t_{12}$ the factor has not lost its meaning, therefore we interpret it as \textit{numerical/mathematical ability}.
+		finally the last factor is influenced by the variables $t_{10}$, $t_{21}$ and $t_{24}$ which previously formed the third common factor together with the variable $t_{12}$. Despite the absence of $t_{12}$ the factor has not lost its meaning, therefore we interpret it as \textit{numerical/mathematical ability}.
 \end{enumerate}
 
 A necessary remark is that the new factors can be viewed as a permutation of the ones we have obtained for the Grant-White students data, but we need to specify that the variable $t_{12}$ moved from the third to the fifth factor (without following the permutation) and that, unlike before, we now menage to give an abstract meaning to all the common factors.
@@ -885,6 +889,7 @@ The fact that our classes do not appear to be normally distributed and not to ha
 
 We now apply the LDA procedure (already implemented in \texttt{R}). It identitifies recursively $9$ discriminant variables from the $10$ classes. 
 
+<!-- todo: adjust + add most distant centroids -->
 The linear discriminant classifier can be obtained from two alternative derivation. Both consider each group as sample from distributions with the same variance - thus we speak of \textit{pooled variance}. 
 The first derivation further assumes that, for all groups, data are distributed as multivariate gaussian, with different means (the \textit{centroids}) and pooled covariance matrix. Under this assumption, the LDA classifier is the bayes classifier and thus is optimal.
 If we now relax the assumption of gaussianity, the centroids and the pooled covariance matrix $\boldsymbol{\Sigma}_{X}$ do not fully identity the distribution within each group anymore. However, we can still recover the LDA classifier as solution to a different problem. Consider the matrix 
@@ -1003,7 +1008,7 @@ In particular:
 	\item
 	    the ellipses corresponding to the digits $6$ (\textcolor{`r paste(lookup[6 + 1])`}{$\blacksquare$}), $0$ (\textcolor{`r paste(lookup[0 + 1])`}{$\blacksquare$}) and $8$ (\textcolor{`r paste(lookup[8 + 1])`}{$\blacksquare$}), which are located on the extrems of the cloud, dispite being large, contain "only" two different centroids (actually the red one only touches the cyan one).
 \end{itemize}
-In conclusion, we can say that we expect there to be various missclassifications, particularly between those classes which overlap the most. On the contrary, we expect not to have any missclassification between the most distant classes, such as $(4, 8)$, $(2, 0)$ and $(6, 7)$. 
+In conclusion, we can say that we expect there to be various missclassifications, particularly between those classes which overlap the most. On the contrary, we expect not to have any missclassification between the most distant classes, such as $(4 \text{\textcolor{`r paste(lookup[4 + 1])`}{$\blacksquare$}}, 8 \text{\textcolor{`r paste(lookup[8 + 1])`}{$\blacksquare$}})$, $(2 \text{\textcolor{`r paste(lookup[2 + 1])`}{$\blacksquare$}}, 0 \text{\textcolor{`r paste(lookup[0 + 1])`}{$\blacksquare$}})$ and $(6 \text{\textcolor{`r paste(lookup[6 + 1])`}{$\blacksquare$}}, 7 \text{\textcolor{`r paste(lookup[7 + 1])`}{$\blacksquare$}})$. 
 
 ## 2.2
 
@@ -1111,9 +1116,9 @@ Moreover, the error rate given by this procedure is slightly larger then the one
 
 ## 2.4
 
-In reduced-rank linear discriminant analysis, it is possible to perform the nearest centroid classification in a subspace of dimension $L<\min\{K-1,p\}$ by using for the prediction only the first $L$ discriminant directions. When $L=\min\{K-1,p\}$ we call it full-rank linear discriminant analysis. In order to perform reduced-rank LDA, it is sufficient to specify the dimension of the space to be used  for the prediction when calling the \texttt{predict()} function.
+In reduced-rank linear discriminant analysis, it is possible to perform the nearest centroid classification in a subspace of dimension $L < \min{\{K - 1, p\}}$ by using for the prediction only the first $L$ discriminant directions. When $L = \min{\{K - 1, p\}}$ we call it full-rank linear discriminant analysis. In order to perform reduced-rank LDA, it is sufficient to specify the dimension of the space to be used  for the prediction when calling the \texttt{predict()} function.
 
-We are asked to implement the \textit{$44-$fold cross validation} for each reduced-rank LDA, including the full-rank LDA, by using the partition of the observations provided by the variable \texttt{group\_cv} in order to estimate the error rate. 
+We are asked to implement the \textit{$44$-fold cross validation} for each reduced-rank LDA, including the full-rank LDA, by using the partition of the observations provided by the variable \texttt{group\_cv} in order to estimate the error rate. 
 
 \smallskip
 ```{r}
@@ -1121,11 +1126,12 @@ group_cv = rep(1:44, each = 250)
 group_cv = group_cv[seq_along(pendigits$digit)]
 ```
 
-The \textit{$44-$fold cross validation} fits the model on $43$ out of $44$ subsets (the training set) and uses the remaining  subset as test set. This procedure is then repeated $44$ times so that each subset will be used as test set for the model. The function below implement the process and returns the corresponding \textit{CV error rate}.
+The \textit{$44$-fold cross validation} fits the model on $43$ out of $44$ subsets (the training set) and uses the remaining subset as test set. This procedure is then repeated $44$ times so that each subset will be used as test set for the model. The function below implements the process and returns the corresponding \textit{CV error rate} and what we called \texttt{test\_error}, that is the arithmetic mean of the test errors among the $44$ different folds.
 
 \smallskip
 ```{r}
 cv_44_fold = function(data, grouping, rank) {
+	test_error = 0
 	misclassified = 0
 	for (group in 1:44){
 		train_set = data[-which(grouping == group), ]
@@ -1133,10 +1139,12 @@ cv_44_fold = function(data, grouping, rank) {
 		model = lda(digit ~ ., data = train_set)
 		pred = predict(model, test_set, dimen = rank)
 		confusion_matrix = table(pred$class, test_set$digit)
+		test_error = test_error + 1 - (sum(diag(confusion_matrix)) / dim(test_set)[1])
 		misclassified = misclassified + dim(test_set)[1] - sum(diag(confusion_matrix))
 	}
 	cv_error = misclassified / dim(data)[1]
-	return(cv_error)
+	test_error = test_error / 44
+	return(c(test_error, cv_error))
 }
 ```
 
@@ -1145,23 +1153,27 @@ We can now call the function and print the results. Note that we decided to comp
 \smallskip
 ```{r}
 train_errors = 0
+test_errors = 0
 cv_errors = 0
 for (rank in 1:9){
 	pred_train = predict(lda_fit, dimen = rank)
 	confusion_matrix_train = table(pred_train$class, pendigits$digit)
 	train_errors[rank] = 1 - sum(diag(confusion_matrix_train) / dim(pendigits)[1])
 
-	cv_errors[rank] = cv_44_fold(pendigits, group_cv, rank)
+	error = cv_44_fold(pendigits, group_cv, rank)
+	test_errors[rank] = error[1]
+	cv_errors[rank] = error[2]
 }
 ```
 ```{r, echo = F, render = lemon_print}
-tmp = as.data.frame(round(matrix(c(train_errors, cv_errors), nrow = 2, byrow = T), 4))
-rownames(tmp) = c("train_errors", "cv_errors")
+tmp = as.data.frame(round(matrix(c(train_errors, test_errors, cv_errors),
+	nrow = 3, byrow = T), 5))
+rownames(tmp) = c("train_errors", "test_errors", "cv_errors")
 colnames(tmp) = paste0("rank_", 1:9)
 tmp
 ```
 
-Note only that the training error rate we get for the full-rank LDA is the same as the one we obtained in point $2.2$.
+Note that the training error rate we get for the full-rank LDA is the same as the one we obtained in point $2.2$. Moreover, the difference between the test errors and the CV errors is negligible (the order of magnitude is $10^{-5}$).
 
 We can now plot the error curves against the number of discriminant variables.
 
@@ -1170,15 +1182,270 @@ We can now plot the error curves against the number of discriminant variables.
 par(family = "serif")
 plot(seq(1:9), train_errors, type = "b", pch = 16, col = "blue",
 	xlab = "Rank", ylab = "Error", lwd = 0.5)
-lines(seq(1:9), cv_errors, type = "b", pch = 16, col = "red")
-legend("topright", legend = c("train_errors", "cv_errors"),
-	col = c("blue", "red"), pch = c(16, 16), lty = c(1, 1))
+lines(seq(1:9), cv_errors, type = "b", pch = 16, cex = 1.1, col = "red", lwd = 0.5)
+lines(seq(1:9), test_errors, type = "b", pch = 16, col = "green", lwd = 0.5)
+legend("topright", legend = c("train_errors", "test_errors", "cv_errors"),
+	col = c("blue", "green", "red"), pch = rep(16, 3), rep(1, 3))
 ```
 
-Surprisingly the \textit{training error rate} and the \textit{$44$-fold CV error rate} are almost identical: the first one is always lower than the second one (in accordance with the theory), but the discrepancy between them is at most `r round(max(cv_errors - train_errors), 4)`. Note also that in both cases as the number $L$ of discriminant directions increases, the corresponding error value decreases. Therefore, the full-rank LDA classifier should provide the best classifications, that is, when considering $L = 9$ discriminant directions, the projected centroids achieve the maximum spread relative to the within-class variance.
+Surprisingly the \textit{training error rate} is almost identical to the other two error rates: the first one is always lower than the others, in accordance with the theory. Note that the discrepancy between the \textit{training error rate} and the \textit{CV error rate} is at most `r round(max(cv_errors - train_errors), 4)` (of course we obtain a similar value with the \textit{test error rate}).
+Note also that in each case as the number $L$ of discriminant directions increases, the corresponding error value decreases. Therefore, the full-rank LDA classifier should provide the best classifications, that is, when considering $L = 9$ discriminant directions, the projected centroids achieve the maximum spread relative to the within-class variance.
 
-If we were interested in having a dimensionality reduction we could decide to keep only $L = 6$ dimensions, since the difference between dimension $6$ and $9$ is approximately `r round(max(c(cv_errors[6] - cv_errors[9], train_errors[6] - train_errors[9])), 4)` in both \textit{training error rate} and \textit{CV error rate}. This leads to a reasonable dimensionality-reduction.
+If we were interested in having a dimensionality reduction we could decide to keep only $L = 6$ dimensions, since the difference between dimension $6$ and $9$ is approximately `r round(max(c(cv_errors[6] - cv_errors[9], train_errors[6] - train_errors[9], test_errors[6] - test_errors[9])), 4)` in both \textit{training error rate} and \textit{CV error rate}. This leads to a reasonable dimensionality reduction.
 
 Clearly, due to the high dimensionality it is not possible to have a graphical representation of observations and centroids. To this aim, $L = 2$ discriminant directions should be used, as previously done.
 
 ## 2.5 (optional)
+
+We now use several classification methods in order to try to improve the estimate of the CV error rate found in the previous point with LDA.
+
+We implemented the following procedures by using the libraries \texttt{MASS}, \texttt{klaR} and \texttt{randomForest}:
+\begin{enumerate}
+	\item
+		\textit{KNN} - \textit{K-nearest neighbours} for different values of the parameter $K$;
+	\item
+		\textit{Noised QDA} - since the actual \textit{Quadratic Discriminant Analysis} cannot be performed (there is a rank deficiency in the group corresponding to the digit $4$), we decided to add some noise to the values of the variable \texttt{y\_8} of the observations belonging to the class $4$. For the sake of completeness, we report below also the unsuccessful attempt of the QDA computation together with the \texttt{R} error message;
+	\item
+		\textit{RDA} - \textit{Regularized Discriminant Analysis}, i.e. a sort of a trade-off between LDA and QDA. We choose as parameters $\gamma = 0$ and $\lambda = 0.2$;
+	\item
+		\textit{RF} - \textit{Random Forest}, i.e. a classification method that combines multiple decision trees to make predictions by aggregating the results. It exploits random sampling of data and features to create different trees and improves accuracy while mitigating overfitting.
+\end{enumerate}
+
+The function \texttt{cv\_44\_fold\_mod()} reported below computes both the \textit{44-fold CV error rate} and the \textit{test error rate} (recall that it is the arithmetic mean of the test errors among the $44$ different folds; we previously called it \texttt{test\_error}). The function takes as input the following variables:
+\begin{itemize}
+	\item
+		\texttt{data} - the dataset of interest;
+	\item
+		\texttt{grouping} - the grouping variable, in our case \texttt{group\_cv};
+	\item
+		\texttt{mod} - it is a string that indicates the classification method we want to perform;
+	\item
+		\texttt{k} - additional variable containing the parameters optionally requested by some of the models.
+\end{itemize}
+
+\smallskip
+```{r}
+cv_44_fold_mod = function(data, grouping, mod, k) {
+	test_error = 0
+	misclassified = 0
+	for (group in 1:44){
+		train_set = data[-which(grouping == group), ]
+		test_set = data[which(grouping == group), ]
+		if (mod == "lda") {
+			model = lda(digit ~ ., data = train_set)
+			pred = predict(model, test_set)
+			confusion_matrix = table(pred$class, test_set$digit)
+		}
+		if (mod == "knn") {
+			pred = knn(train_set[, -17], test_set[, -17], train_set[, 17], 2 * k - 1)
+			confusion_matrix = table(pred, test_set$digit)
+		}
+		if (mod == "qda") {
+			model = qda(digit ~ ., data = train_set)
+			pred = predict(model, test_set)
+			confusion_matrix = table(pred$class, test_set$digit)
+		}
+		if (mod == "rda") {
+			model = rda(digit ~ ., data = train_set, gamma = k[1], lambda = k[2])
+			pred = predict(model, test_set)
+			confusion_matrix = table(pred$class, test_set$digit)
+		}
+		if (mod == "rf") {
+			model = randomForest(digit ~ ., data = train_set,
+				ntree = k)
+			pred = predict(model, newdata = test_set, type = "class")
+			confusion_matrix = table(pred, test_set$digit)
+		}
+		test_error = test_error + 1 - (sum(diag(confusion_matrix)) / dim(test_set)[1])
+		misclassified = misclassified + dim(test_set)[1] - sum(diag(confusion_matrix))
+	}
+	cv_error = misclassified / dim(data)[1]
+	test_error = test_error / 44
+	return(c(test_error, cv_error))
+}
+```
+
+First of all we set a randomization seed in order to make our computations reproducible. 
+
+\smallskip
+```{r}
+set.seed(2023)
+```
+
+We report below the calls to the \texttt{cv\_44\_fold\_mod()} function for each method introduced at the beginning of the paragraph. Note that we also compute the \textit{training error rate}.
+
+```{r, echo = F}
+error_mat = matrix(rep(0, 15), nrow = 3)
+rownames(error_mat) = c("train_error", "test_error", "cv_error")
+colnames(error_mat) = c("LDA", "3NN", "Noised_QDA", "RDA", "RF")
+error_mat = as.data.frame(error_mat)
+```
+
+\smallskip
+```{r}
+# LDA (linear discriminant analysis)
+
+train_error = 0
+test_error = 0
+cv_error = 0
+
+pred_train = predict(lda_fit)
+confusion_matrix_train = table(pred_train$class, pendigits$digit)
+train_error = 1 - sum(diag(confusion_matrix_train) / dim(pendigits)[1])
+
+error = cv_44_fold_mod(pendigits, group_cv, "lda", 0)
+test_error = error[1]
+cv_error = error[2]
+```
+```{r, echo = F}
+error_mat[, "LDA"] = c(train_error, test_error, cv_error)
+```
+
+\smallskip
+```{r}
+# KNN (K-nearest neighbour) for K = 1, ..., 25, K odd
+
+max_k = 25
+num_k = ceiling(max_k / 2)
+
+train_errors = 0
+test_errors = 0
+cv_errors = 0
+
+for (k in 1:num_k){
+	pred_train = knn(pendigits[, -17], pendigits[, -17], pendigits[, 17], 2 * k - 1)
+	confusion_matrix_train = table(pred_train, pendigits$digit)
+	train_errors[k] = 1 - sum(diag(confusion_matrix_train) / dim(pendigits)[1])
+
+	error = cv_44_fold_mod(pendigits, group_cv, "knn", k)
+	test_errors[k] = error[1]
+	cv_errors[k] = error[2]
+}
+```
+```{r, echo = F}
+error_mat[, "3NN"] = c(train_errors[2], test_errors[2], cv_errors[2])
+```
+
+\smallskip
+```{r, eval = F}
+# QDA (quadratic discriminant analysis)
+
+train_error = 0
+test_error = 0
+cv_error = 0
+
+qda_fit = qda(digit ~ ., data = pendigits)
+pred_train = predict(qda_fit, pendigits)
+confusion_matrix_train = table(pred_train$class, pendigits$digit)
+train_error = 1 - sum(diag(confusion_matrix_train) / dim(pendigits)[1])
+
+error = cv_44_fold_mod(pendigits, group_cv, "qda", 0)
+test_error = error[1]
+cv_error = error[2]
+
+# > Error in qda.default(x, grouping, ...) : rank deficiency in group 4
+```
+
+\smallskip
+```{r}
+# Noised QDA
+
+train_error = 0
+test_error = 0
+cv_error = 0
+
+# adding noise to the dataset
+pendigits_p = pendigits
+count_4 = length(which(pendigits_p$digit == 4))
+pendigits_p$y8[which(pendigits_p$digit == 4)] = runif(count_4, min = 0, max = 0.1)
+
+qda_fit = qda(digit ~ ., data = pendigits_p)
+pred_train = predict(qda_fit, pendigits_p)
+confusion_matrix_train = table(pred_train$class, pendigits_p$digit)
+train_error = 1 - sum(diag(confusion_matrix_train) / dim(pendigits_p)[1])
+
+error = cv_44_fold_mod(pendigits_p, group_cv, "qda", 0)
+test_error = error[1]
+cv_error = error[2]
+```
+```{r, echo = F}
+error_mat[, "Noised_QDA"] = c(train_error, test_error, cv_error)
+```
+
+\smallskip
+```{r}
+# RDA (regularized discriminant analysis)
+
+train_error = 0
+test_error = 0
+cv_error = 0
+
+gamma = 0
+lambda = 0.2
+k = c(gamma, lambda)
+
+rda_fit = rda(digit ~ ., data = pendigits, gamma = k[1], lambda = k[2])
+pred_train = predict(rda_fit, pendigits)
+confusion_matrix_train = table(pred_train$class, pendigits$digit)
+train_error = 1 - sum(diag(confusion_matrix_train) / dim(pendigits)[1])
+
+error = cv_44_fold_mod(pendigits, group_cv, "rda", k)
+test_error = error[1]
+cv_error = error[2]
+```
+```{r, echo = F}
+error_mat[, "RDA"] = c(train_error, test_error, cv_error)
+```
+
+\smallskip
+```{r}
+# RF (random forest)
+
+train_error = 0
+test_error = 0
+cv_error = 0
+
+pendigits_fac = pendigits
+pendigits_fac$digit = as.factor(pendigits_fac$digit)
+
+num_tree = 500
+
+rf_fit = randomForest(digit ~ ., data = pendigits_fac,
+	ntree = num_tree)
+confusion_matrix_train = table(rf_fit$predicted, pendigits_fac$digit)
+train_error = 1 - sum(diag(confusion_matrix_train) / dim(pendigits_fac)[1])
+
+error = cv_44_fold_mod(pendigits_fac, group_cv, "rf", num_tree)
+test_error = error[1]
+cv_error = error[2]
+```
+```{r, echo = F}
+error_mat[, "RF"] = c(train_error, test_error, cv_error)
+```
+
+Before displaying the table containining the various error rates we report the plot that helped us decide the best $K$ parameter for the KNN classification method.
+
+\vspace{-40pt}
+```{r, echo = F, fig.align = "center", out.width = "90%"}
+par(family = "serif")
+plot(x = seq(1, max_k, 2), y = test_errors,
+	type = "b", pch = 16, col = "blue",
+	ylim = c(0, max(max(test_errors), max(train_errors)) * 1.1),
+	xlab = "N. neighbours", ylab = "Errors", lwd = 0.5)
+lines(x = seq(1, max_k, 2), y = train_errors,
+	type = "b", pch = 16, col = "red", lwd = 0.5)
+legend("bottomright", legend = c("test_errors", "train_errors", "cv_errors"),
+	col = c("blue", "red"), pch = rep(16, 3), rep(1, 3))
+```
+
+By looking at the plot, we can see that both errors increase as the number of neighbours $K$ increases. In particular, for both errors the minimum is attained in $K = 1$. It is also remarkable that with $K = 3$ the \textit{44-fold CV error rate} is the same as the one corresponding to $K = 1$, although the \textit{training error rate} is of course larger (trivially because for $K = 1$ it is $0$). However, we still prefer $K = 3$ as optimal choice since the model gives a more robust and reliable prediction than the one with $K = 1$.
+
+We now display the table with the various error rates.
+
+```{r, echo = F, render = lemon_print}
+error_mat
+```
+
+The error rates achieved are all lower than the ones we found in point $2.4$ (also reported for completeness in the table above). In descending order of performance (with respect to the \textit{44-fold CV error rate}), the models are \textit{3NN}, \textit{RF}, \textit{Noised QDA}, \textit{RDA} and \textit{LDA}.
+
+Finally, it is remarkable that \textit{44-fold CV error rate} obtained with the \textit{3NN} is nearly two orders of magnitude lower than the value obtained with LDA.
